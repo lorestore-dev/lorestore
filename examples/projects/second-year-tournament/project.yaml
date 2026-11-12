@@ -1,0 +1,21 @@
+spec_version: "0.1"
+id: second-year-tournament
+name: "The Second-Year Tournament"
+workflow: novel
+gates: milestones
+seed: "The Triwizard Tournament comes to Hogwarts in Harry's second year, before he has ever heard of Sirius Black."
+parameters:
+  pov: third-limited
+  tense: past
+  target_length: 120000
+
+world:
+  id: harry-potter
+  version: 2.1.0
+
+setting:
+  type: established
+  fidelity: flexible
+  canon_point: "PS:17"
+  active_profile: book-purist
+  temporal_model: linear

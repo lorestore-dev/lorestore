@@ -1,0 +1,394 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "project.yaml",
+  "description": "Project configuration. See spec/10-formats.md §10.1.",
+  "type": "object",
+  "required": [
+    "spec_version",
+    "id",
+    "name",
+    "workflow",
+    "gates",
+    "setting"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "spec_version": {
+      "type": "string",
+      "const": "0.1"
+    },
+    "id": {
+      "$ref": "#/$defs/id"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workflow": {
+      "enum": [
+        "novel",
+        "short-story",
+        "serial"
+      ]
+    },
+    "gates": {
+      "enum": [
+        "none",
+        "milestones",
+        "all"
+      ]
+    },
+    "seed": {
+      "type": "string"
+    },
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "pov": {
+          "type": "string"
+        },
+        "tense": {
+          "type": "string"
+        },
+        "target_length": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "world": {
+      "$ref": "#/$defs/packageRef"
+    },
+    "universe": {
+      "$ref": "#/$defs/packageRef"
+    },
+    "setting": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "original",
+            "established"
+          ]
+        },
+        "fidelity": {
+          "enum": [
+            "strict",
+            "flexible",
+            "au"
+          ]
+        },
+        "canon_point": {
+          "$ref": "#/$defs/canonPoint"
+        },
+        "canon_points": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/id"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/canonPoint"
+          },
+          "minProperties": 1
+        },
+        "canon_mode": {
+          "enum": [
+            "retelling",
+            "branch"
+          ],
+          "default": "retelling",
+          "description": "Whether canon after the divergence point still happens. See spec/06-divergence.md §6.6."
+        },
+        "divergence_point": {
+          "$ref": "#/$defs/canonPoint"
+        },
+        "divergence_points": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/id"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/canonPoint"
+          },
+          "minProperties": 1
+        },
+        "active_profile": {
+          "$ref": "#/$defs/id"
+        },
+        "active_profiles": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/id"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "temporal_model": {
+          "enum": [
+            "linear",
+            "frames"
+          ],
+          "default": "linear"
+        }
+      }
+    },
+    "modules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "litrpg": {
+          "type": "boolean",
+          "default": false
+        },
+        "languages": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "serial": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Serial workflow only. See spec/13-workflows.md §13.3.",
+      "properties": {
+        "released": {
+          "enum": [
+            "locked",
+            "revisable"
+          ],
+          "default": "locked"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "description": "At most one of world / universe.",
+      "not": {
+        "required": [
+          "world",
+          "universe"
+        ]
+      }
+    },
+    {
+      "description": "A world project uses canon_point / active_profile, never the per-world maps.",
+      "if": {
+        "required": [
+          "world"
+        ]
+      },
+      "then": {
+        "properties": {
+          "setting": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "canon_points"
+                  ]
+                },
+                {
+                  "required": [
+                    "active_profiles"
+                  ]
+                },
+                {
+                  "required": [
+                    "divergence_points"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "A universe project uses canon_points / active_profiles, never the single-world keys.",
+      "if": {
+        "required": [
+          "universe"
+        ]
+      },
+      "then": {
+        "properties": {
+          "setting": {
+            "required": [
+              "canon_points"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "canon_point"
+                  ]
+                },
+                {
+                  "required": [
+                    "active_profile"
+                  ]
+                },
+                {
+                  "required": [
+                    "divergence_point"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "Fidelity applies only to established settings.",
+      "if": {
+        "properties": {
+          "setting": {
+            "properties": {
+              "type": {
+                "const": "original"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "setting": {
+            "not": {
+              "required": [
+                "fidelity"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "The serial block is valid only for the serial workflow.",
+      "if": {
+        "required": [
+          "serial"
+        ]
+      },
+      "then": {
+        "properties": {
+          "workflow": {
+            "const": "serial"
+          }
+        }
+      }
+    },
+    {
+      "description": "A branch needs its divergence point(s).",
+      "if": {
+        "properties": {
+          "setting": {
+            "properties": {
+              "canon_mode": {
+                "const": "branch"
+              }
+            },
+            "required": [
+              "canon_mode"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "setting": {
+            "anyOf": [
+              {
+                "required": [
+                  "divergence_point"
+                ]
+              },
+              {
+                "required": [
+                  "divergence_points"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "canon_mode and divergence points apply only to established settings.",
+      "if": {
+        "properties": {
+          "setting": {
+            "properties": {
+              "type": {
+                "const": "original"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "setting": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "canon_mode"
+                  ]
+                },
+                {
+                  "required": [
+                    "divergence_point"
+                  ]
+                },
+                {
+                  "required": [
+                    "divergence_points"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
+    },
+    "canonPoint": {
+      "type": "string",
+      "description": "work{:index}[+HH:MM:SS[.fraction]] — see spec/04-temporal.md §4.2. Validity against the ruler (levels, counts, segments, timed level) is checked by the host, not the schema.",
+      "pattern": "^[A-Za-z][A-Za-z0-9-]*(:[1-9]\\d*)*(\\+\\d{2,}:[0-5]\\d:[0-5]\\d(\\.\\d+)?)?$"
+    },
+    "packageRef": {
+      "type": "object",
+      "required": [
+        "id",
+        "version"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "version": {
+          "$ref": "#/$defs/semver"
+        }
+      }
+    }
+  }
+}

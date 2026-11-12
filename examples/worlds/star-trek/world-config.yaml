@@ -1,0 +1,16 @@
+spec_version: "0.1"
+id: star-trek
+name: "Star Trek"
+version: 1.4.0
+status: open-for-extraction
+
+canon_basis:
+  primary: canon
+  also_canon: []
+  excluded: [tas]
+
+canon_profiles:
+  canon-only: { order: [canon] }
+  enhanced:   { order: [canon, fanon-trek], resolution: recency }
+
+active_profile: canon-only

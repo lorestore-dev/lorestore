@@ -1,0 +1,25 @@
+spec_version: "0.1"
+id: two-witnesses
+name: "Two Witnesses"
+workflow: novel
+gates: milestones
+seed: "Cedric survives the graveyard, and Harry is no longer the only witness to Voldemort's return."
+parameters:
+  pov: third-limited
+  tense: past
+  target_length: 90000
+
+world:
+  id: harry-potter
+  version: 2.1.0
+
+setting:
+  type: established
+  fidelity: flexible
+  canon_point: "GoF:37"
+  active_profile: enhanced
+  temporal_model: linear
+
+modules:
+  litrpg: false
+  languages: false

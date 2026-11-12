@@ -1,0 +1,19 @@
+spec_version: "0.1"
+id: blind-harry
+name: "By Sound and Feel"
+workflow: novel
+gates: milestones
+seed: "The curse that rebounds at Godric's Hollow takes Harry's sight. Year one, retold."
+
+world:
+  id: harry-potter
+  version: 2.1.0
+
+setting:
+  type: established
+  fidelity: flexible
+  canon_point: "PS:1"
+  canon_mode: retelling
+  divergence_point: "PS"
+  active_profile: book-purist
+  temporal_model: linear

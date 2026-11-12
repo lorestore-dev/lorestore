@@ -1,0 +1,25 @@
+spec_version: "0.1"
+id: the-long-way-back
+name: "The Long Way Back"
+workflow: serial                # released installments are locked (the default)
+gates: milestones
+seed: "One Enterprise-C officer stays behind in 2366 when her ship returns to die at Narendra III."
+parameters:
+  pov: third-limited
+  tense: past
+  target_length: 85000
+
+world:
+  id: star-trek
+  version: 1.4.0
+
+setting:
+  type: established
+  fidelity: au
+  canon_point: "TNG:3:15"
+  active_profile: canon-only
+  temporal_model: frames
+
+modules:
+  litrpg: false
+  languages: false
