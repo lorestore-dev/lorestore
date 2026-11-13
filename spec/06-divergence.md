@@ -307,7 +307,7 @@ logged divergence.
 `setting.fidelity` in `project.yaml` tunes how the canon-keeper treats emergent
 divergences:
 
-| Value      | Behavior                                                                    |
+| Value      | Behavior                                                                     |
 | ---------- | ---------------------------------------------------------------------------- |
 | `strict`   | Presume emergent divergences are mistakes; recommend fixing.                 |
 | `flexible` | Allow minor forks; guard load-bearing canon.                                 |
