@@ -10,8 +10,8 @@ capabilities it assumes are: read a text file, send text to a language model, sa
 reply to a file.
 
 This specification is written for anyone implementing the system: in particular the
-team building the **Integrated Writing Environment (IWE)**, which hosts the files,
-orchestrates the agents, and enforces the contracts defined here.
+teams building **Integrated Writing Environments (IWEs)**, which host the files,
+orchestrate the agents, and enforce the contracts defined here.
 
 ## 1.2 Scope
 

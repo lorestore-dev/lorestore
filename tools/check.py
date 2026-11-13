@@ -74,9 +74,9 @@ class World:
             self.works[r["Work"]] = (levels, None if not tl else 0 if tl == "work" else levels.index(tl) + 1)
         self.segments = {}; self.counts = {}
         for r in table(ruler, "## Order"):
-            path = self.split(r["Segment"]); self.segments[path] = int(r["Order"]); self.counts[path] = r["Units"]
+            path = self.split(r["Segment"]); self.segments[path] = int(r["Order"]); self.counts[path] = r["Children"]
         if "## Counts" in ruler.read_text():
-            for r in table(ruler, "## Counts"): self.counts[self.split(r["Node"])] = r["Units"]
+            for r in table(ruler, "## Counts"): self.counts[self.split(r["Node"])] = r["Children"]
         segs = list(self.segments)
         assert not any(a != b and a == b[:len(a)] for a in segs for b in segs), "overlapping segments"
     def reordered(self, project):
@@ -353,5 +353,53 @@ for t in table(EX/"projects/the-long-way-back/bible/timelines.md", "## Legs"):
     for pt in (t["Departs"], t["Arrives"]): ST.key(pt.split("@")[0])
     ST.key(t["Personal cutoff"])
 check("V frames points valid", True, True)
+
+# --- time-travel mechanisms (§9.1, §10.25) and branches (§10.16) ------------------
+def entries(path):
+    out, cur = {}, None
+    for l in path.read_text().splitlines():
+        m = re.match(r"### ([a-z0-9-]+) — ", l)
+        if m: cur = out.setdefault(m.group(1), {}); continue
+        m = re.match(r"- ([a-z-]+): (.*?)\s*(#.*)?$", l)
+        if cur is not None and m: cur[m.group(1)] = m.group(2)
+    return out
+MODELS = {"dilation", "fixed", "loop", "mutable", "branching", "feedback"}
+mech = entries(EX/"worlds/star-trek/time-travel.md")
+check("M star-trek mechanisms", sorted(mech), ["temporal-rift"])
+check("M models and free will valid", all(e.get("model") in MODELS and e.get("free-will", "everyone") in {"everyone", "traveler", "none"} for e in mech.values()), True)
+check("M spec example model valid", entries(ROOT/"spec/10-formats.md")["time-turner"]["model"], "fixed")
+check("M time-travel.md indexed", "time-travel.md" in {r["Path"] for r in table(EX/"worlds/star-trek/index.md", "## Files")}, True)
+TLB = EX/"projects/the-long-way-back"
+legs = table(TLB/"bible/timelines.md", "## Legs")
+check("M every leg names a known mechanism", all(t["Mechanism"] in mech for t in legs), True)
+br = {b["Branch"]: b for b in table(TLB/"bible/branches.md", "## Branches")}
+check("M branch statuses valid", all(b["Status"] in {"live", "overwritten", "abandoned"} for b in br.values()), True)
+check("M branch parents and mechanisms known", all((b["Splits from"] in br and b["Mechanism"] in set(mech) | {"—"}) or (n == "main" and not b["Splits from"]) for n, b in br.items()), True)
+check("M mutable rift overwrote alt-war, main live", (br["alt-war"]["Status"], br["main"]["Status"]), ("overwritten", "live"))
+used = {t["Arrives"].split("@")[1] for t in legs} | {t["Departs"].split("@")[1] for t in legs}
+check("M every branch a leg uses is registered", used <= set(br), True)
+
+# --- registered columns (§10.0, §10.3) -------------------------------------------
+REQUIRED = {("timelines.md", "## Legs"): ["Traveler", "Leg", "Mechanism", "Departs", "Arrives", "Personal cutoff", "Chapter"],
+            ("branches.md", "## Branches"): ["Branch", "Splits from", "At", "Cause", "Mechanism", "Status"]}
+idx = TLB/"bible/index.md"   # ## Columns is optional (§10.3)
+reg = {(c["File"], c["Table"], c["Column"]) for c in table(idx, "## Columns")} if "## Columns" in idx.read_text() else set()
+for (f, h), req in REQUIRED.items():
+    hdr = list(table(TLB/"bible"/f, h)[0]) if table(TLB/"bible"/f, h) else req
+    check(f"C required columns in order {f} {h}", hdr[:len(req)], req)
+    check(f"C added columns registered {f} {h}", {(f, h, c) for c in hdr[len(req):]} <= reg, True)
+check("C registry does not repeat a required column", any(c in REQUIRED.get((f, h), []) for f, h, c in reg), False)
+
+# --- serial buffer (§13.3, §10.19) -------------------------------------------------
+def front(p): return yaml.safe_load(p.read_text().split("---")[1])
+chs = sorted((front(p) for p in (TLB/"manuscript").glob("chapter-*.md")), key=lambda d: d["chapter"])
+st = [c["status"] for c in chs]
+check("S chapter statuses valid", all(s in {"drafted", "line-edited", "final", "released"} for s in st), True)
+check("S released chapters are an unbroken run from chapter 1", st[:st.count("released")] == ["released"] * st.count("released"), True)
+check("S every released chapter has a release date", all(("released" in c) == (c["status"] == "released") for c in chs), True)
+check("S buffer depth", sum(s != "released" for s in st), 2)
+def can_release(n): return n == 1 or st[n - 2] == "released"
+check("S may release chapter 3 (next in order)", can_release(3), True)
+check("S may not release chapter 4 before 3", can_release(4), False)
 print("\nFAILURES:", fails)
 sys.exit(1 if fails else 0)

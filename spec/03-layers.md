@@ -77,6 +77,7 @@ not used in that setting.
 | `lang/<language>.md`         | world  | Dictionary for one constructed language                                                            | merger                         | worldbuilder           |
 | `magic/<catalog>.md`         | world  | Catalogs (spells, potions, creatures, artifacts, games): theory vs. practice, definition level     | merger                         | worldbuilder           |
 | `game-system.md`             | world  | LitRPG: the System's rules (§9.2)                                                                  | merger                         | worldbuilder           |
+| `time-travel.md`             | world  | Frames: time-travel mechanisms, each with its model, reach, and limits (§9.1)                      | merger                         | worldbuilder           |
 | `plot-architecture.md`       | world  | Canon setups and payoffs, prophecies, foreshadowing, running mysteries                             | merger                         | — (the outline's ledger serves) |
 | `knowledge.md`               | world  | Who knows what, dated: secrets and reveals                                                         | merger                         | architect              |
 | `relationships.md`           | world  | Pairwise relationship state histories                                                              | merger                         | character-designer     |
@@ -130,8 +131,19 @@ not used in that setting.
 Worlds differ in which files they use. Harry Potter has `magic/spells.md`,
 `magic/potions.md`, and `magic/creatures.md`. Star Trek has `technology.md` (warp drive,
 transporters, replicators) and `species.md` (Vulcans, Klingons, the Borg). Neither has
-the other's. A world MAY
-add world-layer files not listed above. Every such file MUST be registered in
+the other's.
+
+Where a world has both peoples and animals, it SHOULD keep them apart by **sapience**.
+`species.md` holds sapient peoples: beings with their own society, culture, or language,
+which other files (`society.md`, `languages.md`, `relationships.md`) can refer to.
+Non-sapient fauna goes in a creatures catalog (`magic/creatures.md`, or `creatures.md` in
+a world without magic), which uses the catalog format (§10.11). Harry Potter draws the
+same line in its own canon, between "beings" and "beasts". House-elves, giants, and
+merpeople go in `species.md`; hippogriffs and nifflers go in the creatures catalog. A
+world whose canon blurs the line records its choice in `index.md`, under the file's
+purpose.
+
+A world MAY add world-layer files not listed above. Every such file MUST be registered in
 `index.md` with its layer and purpose, and SHOULD use the structured formats of §10 so
 that hosts can parse it. Agents discover files through `index.md` (read it first, then
 retrieve only what the step needs).

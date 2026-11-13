@@ -14,12 +14,12 @@ Scenes are uncounted: the scene level is the extraction's own breakdown.
 | DH   | Deathly Hallows      | chapter › scene |             | Epilogue not counted |
 
 ## Order
-| Order | Segment | Title                | Units | Notes |
-| ----- | ------- | -------------------- | ----- | ----- |
-| 1     | PS      | Philosopher's Stone  | 17    |       |
-| 2     | CoS     | Chamber of Secrets   | 18    |       |
-| 3     | PoA     | Prisoner of Azkaban  | 22    |       |
-| 4     | GoF     | Goblet of Fire       | 37    |       |
-| 5     | OotP    | Order of the Phoenix | 38    |       |
-| 6     | HBP     | Half-Blood Prince    | 30    |       |
-| 7     | DH      | Deathly Hallows      | 36    |       |
+| Order | Segment | Title                | Children | Notes |
+| ----- | ------- | -------------------- | -------- | ----- |
+| 1     | PS      | Philosopher's Stone  | 17       |       |
+| 2     | CoS     | Chamber of Secrets   | 18       |       |
+| 3     | PoA     | Prisoner of Azkaban  | 22       |       |
+| 4     | GoF     | Goblet of Fire       | 37       |       |
+| 5     | OotP    | Order of the Phoenix | 38       |       |
+| 6     | HBP     | Half-Blood Prince    | 30       |       |
+| 7     | DH      | Deathly Hallows      | 36       |       |

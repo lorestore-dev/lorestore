@@ -97,13 +97,25 @@ canon (source tier `crossover`, always active in the universe). The ledger appli
 
 ## 7.5 Frames: two cutoffs at once
 
-With the frames module (§9.1), a scene declares a **world point** `<canon-point>@<branch>`
-and its **travelers**, each with a **personal cutoff** recorded in `timelines.md`.
-Resolve in two passes:
+Everything above assumes that every character in a scene lives at the same moment, so
+one cutoff serves them all. Time travel breaks that assumption. A character who has come
+back from the future is physically present at the scene's moment, but **remembers**
+events that, for everyone else in the scene, have not happened yet. The same holds for
+anyone who crosses between timelines. Each such character has their own **frame of
+reference**: the point in history their knowledge is bounded by. The frames module
+(§9.1) records these frames, and the snapshot resolves a scene against more than one
+cutoff at once.
+
+A scene declares a **world point** `<canon-point>@<branch>`, which is the frame of the
+scene and of everyone native to it. It also declares its **travelers**: characters in
+the scene who are not native to its moment. Each traveler carries a **personal cutoff**,
+recorded in `timelines.md`, which is their own frame. Resolve in two passes:
 
 1. **World pass:** every native and the setting resolve at the world point.
 2. **Traveler pass:** each traveler's *knowledge and memory* resolve at their personal
-   cutoff. Their *physical presence* follows the scene.
+   cutoff. Their *physical presence* follows the scene. Any ripples whose chapter has
+   been reached (`feedback` mechanisms, §9.1) then apply to the traveler, before the
+   ledger.
 
 The composite: **natives are bounded by world time; travelers by their own personal
 time.**

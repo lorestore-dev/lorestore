@@ -56,8 +56,10 @@ deciding what happens next when the happy path forks.
     conflicts** are never the showrunner's call, and nor is **hidden canon**. Always
     surface them to the author, with the canon-keeper's options or the drafter's
     marker, and wait.
-  - **Serials** (§13.3): never schedule a revision of a released installment when releases
-    are locked. Route the fix forward to an upcoming installment or the next arc. When a
+  - **Serials** (§13.3): revise buffered (unreleased) chapters as in `novel`; never
+    release an installment, which is always the author's call; report the buffer's
+    depth. Never schedule a revision of a released installment when releases are
+    locked. Route the fix forward to an upcoming installment or the next arc. When a
     consequence invalidates a released installment, absorb it forward or surface it to
     the author. Only the author may accept an inconsistency. Route an *intended* divergence to the
     worldbuilder (curator) to log, and an *accepted* paradox to the chronicler to record.
@@ -77,8 +79,8 @@ deciding what happens next when the happy path forks.
     touches, record what is true (appearance, possessions, relationships, knowledge,
     office, status) and whether it is new, a change, or a confirmation.
   - Date every fact at the finest point the source supports (chapter or scene; episode,
-    scene, and timecode for video), observing the whole-node rule (§4.2). Number scenes
-    using the world's scene breakdown.
+    scene, and timecode for video), observing the whole-node rule (§4.2). Break and
+    number scenes as §4.2 defines them.
   - Record `True from` whenever the unit reveals backstory: when a fact became true
     before the point that reveals it (§4.4).
   - Name every character through the roster. File facts under a **reveal alias's**
@@ -267,8 +269,9 @@ snapshot, and the reviewers can rely on them.
   `bible/timelines.md` or `bible/branches.md` (frames); `revisions.md` (serials with
   revisable releases, §10.23).
 - **Duties:** append the chapter's story-time events; append game-state changes with
-  their causes; append traveler legs and personal cutoffs; register new branches; record
-  paradox decisions with their rationale; log each revision of a released installment,
+  their causes; append traveler legs, with the mechanism each used, and personal
+  cutoffs; register new branches and update branch statuses as the mechanism's model
+  dictates (§9.1); append ripples; record paradox decisions with their rationale; log each revision of a released installment,
   with a reader note.
 - **Guardrails:** records only what the manuscript states; invents nothing; when
   re-run for a revised chapter, replaces that chapter's rows rather than appending
@@ -296,8 +299,8 @@ Runs only when `setting.type: established`. It diagnoses; it never rewrites.
 - **Reads:** the chapter under review; `bible/canon.md`; `bible/divergences.md`;
   `bible/canon-track.md`; snapshots for the cast; `bible/canon-timeline.md`; `bible/sources.md`; the relevant
   `quotations.md` rows; `references/` where there is no world package; `project.yaml`
-  (cutoffs, profiles, fidelity); `bible/bridge.md` (universes); `timelines.md` and
-  `branches.md` (frames).
+  (cutoffs, profiles, fidelity); `bible/bridge.md` (universes); `timelines.md`,
+  `branches.md`, and the `time-travel.md` entries the chapter's legs use (frames).
 - **Writes:** `reviews/canon.md`, with a `## Findings` table (§10.20).
 - **Duties:** classify every problem using the classes in §6.9, applying the fidelity
   setting (§6.10). Check rules, characterization, geography, and the canon timeline

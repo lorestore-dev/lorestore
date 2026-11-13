@@ -96,10 +96,31 @@ Self-contained short stories that need setting add worldbuilder steps after step
 
 ## 13.3 `serial`
 
-For stories **released in installments as they are written**: web serials, fanfics
-posted chapter by chapter, episodic fiction. Unlike `novel`, there is no whole-book
-revision before readers see the work: each installment is released when its gate is
-approved, and the story is planned and reviewed arc by arc.
+For stories **released in installments**: web serials, fanfics posted chapter by
+chapter, episodic fiction. Unlike `novel`, there is no whole-book revision before
+readers see the work. The story is planned and reviewed arc by arc, and installments
+reach readers one at a time.
+
+### Drafting ahead
+
+Writing and releasing are separate. An installment is **ready** when its step-14 gate is
+approved (`status: line-edited`, §10.19), and **released** only when the author
+releases it. The chapters that are ready or drafted but not yet released form the
+**buffer**.
+
+- The buffer has no size limit. An author may keep months of installments in hand, or
+  bring a body of work written before the project used LoreStore and release it over
+  time.
+- Unreleased chapters are revisable exactly as in `novel`. Review findings, new
+  divergences, and their consequences are fixed **in the buffer** wherever they land
+  there. Only released chapters fall under the rules below.
+- Releasing is always the **author's** decision, under every gate policy: it puts the
+  installment in front of readers, which cannot be undone. Under `gates: none`, the
+  showrunner prepares installments but never releases one.
+- Installments are released in order. The host MUST refuse to release a chapter while
+  an earlier chapter is unreleased, and SHOULD refuse to release one that is not ready.
+- The showrunner reports the depth of the buffer in its log, and flags any open
+  consequence or pending decide item touching a chapter the author is about to release.
 
 ### Released installments
 
@@ -110,7 +131,7 @@ approved, and the story is planned and reviewed arc by arc.
 | `locked` *(the default)* | Never change. The host MUST refuse any write to a chapter whose status is `released`.                   |
 | `revisable`              | May be revised. Every change is re-released and recorded in `revisions.md` (§10.23), so readers can be told. |
 
-Under `locked`, anything that would normally revise an earlier chapter is handled
+Under `locked`, anything that would normally revise a released chapter is handled
 **going forward** instead:
 
 - **A consequence that invalidates a released installment** (§6.5, rule 3) becomes a
@@ -152,9 +173,10 @@ first arc.
 | R1   | `release`         | `manuscript/chapter-<NN>.md`   |           |          |
 
 Steps 10–14 are the same as in `novel`, with the same numbers, so the
-established-world and frames overlays apply unchanged. The gate at step 14 is the
-**release decision**. When it is approved, **R1** (the `release` skill, §11.10) marks
-the chapter `status: released`.
+established-world and frames overlays apply unchanged. Approving the gate at step 14
+makes the installment ready. **R1** (the `release` skill, §11.10) runs when the author
+releases it, which may be immediately or months later, and marks the chapter
+`status: released`. Drafting the next installment does not wait for R1.
 
 ### Phase 4 — Arc review (after each arc)
 
@@ -165,11 +187,16 @@ the chapter `status: released`.
 | V3   | beta-reader    | `reviews/beta-reader.md`  | milestone |
 | V4   | showrunner     | `showrunner-log.md`       |           |
 
-The reviewers read the arc just released, plus earlier arcs where they need context.
-**V4** turns the priorities into work for the next arc: notes for A1, and fix-forward
-items for upcoming installments. Under `revisable`, it may also schedule revisions of
-released installments. Each one re-runs the owning agent, then R1, then a chronicler
-step on `revisions.md`.
+Phase 4 runs when an arc's last installment is ready, whether or not the arc has been
+released. The reviewers read that arc, plus earlier arcs where they need context.
+**V4** turns the priorities into work:
+
+- revisions of **unreleased** chapters in the arc or the buffer, scheduled as in
+  `novel`;
+- notes for A1, and fix-forward items for upcoming installments, for anything that
+  touches a **released** chapter;
+- under `revisable`, revisions of released installments. Each one re-runs the owning
+  agent, then R1, then a chronicler step on `revisions.md`.
 
 There is no finishing phase: an installment is final when it is released.
 
@@ -221,9 +248,11 @@ curator, adds the canon-keeper to review, and runs the living-canon loop (§6.11
 
 Applies when `setting.temporal_model: frames`.
 
+- The rules of time travel come from `time-travel.md` (§9.1). In a self-contained
+  project, the worldbuilder writes it at step 3, alongside the rest of the world.
 - Step 12 (chronicler) also maintains `timelines.md` and `branches.md`.
 - The drafter marks every scene's world point and travelers (§10.19).
-- The canon-keeper runs its frame and paradox checks. In a project that is not
+- The canon-keeper runs its frame, mechanism, and paradox checks (§9.1). In a project that is not
   established-world, the overlay inserts the canon-keeper after step 13 for those checks
   only.
 - An accepted paradox is recorded by a chronicler step on `branches.md`, scheduled by

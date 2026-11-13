@@ -28,30 +28,31 @@ whole work (a novel, a film) or any node inside one (a season), so series can be
 interleaved with each other and with films:
 
 ```
-| Order | Segment | Title                        | Units | Notes                       |
-| ----- | ------- | ---------------------------- | ----- | --------------------------- |
-| 1     | TOS:1   | The Original Series, season 1 | 29   | Episodes in broadcast order |
-| 2     | TOS:2   | The Original Series, season 2 | 26   |                             |
-| 3     | TOS:3   | The Original Series, season 3 | 24   |                             |
-| 4     | TMP     | Star Trek: The Motion Picture |      | Released 1979               |
-| 5     | TNG:1   | The Next Generation, season 1 | —    | Not divided                 |
-| 6     | TNG:2   | The Next Generation, season 2 | 22   |                             |
+| Order | Segment | Title                         | Children | Notes                       |
+| ----- | ------- | ----------------------------- | -------- | --------------------------- |
+| 1     | TOS:1   | The Original Series, season 1 | 29       | Episodes in broadcast order |
+| 2     | TOS:2   | The Original Series, season 2 | 26       |                             |
+| 3     | TOS:3   | The Original Series, season 3 | 24       |                             |
+| 4     | TMP     | Star Trek: The Motion Picture |          | Released 1979               |
+| 5     | TNG:1   | The Next Generation, season 1 | —        | Not divided                 |
+| 6     | TNG:2   | The Next Generation, season 2 | 22       |                             |
 ```
 
 **Counts** (optional) gives the number of children of nodes below the segments, for
 example how many scenes the world's extraction divides an episode into:
 
 ```
-| Node    | Units |
-| ------- | ----- |
-| TOS:3:2 | 14    |
+| Node    | Children |
+| ------- | -------- |
+| TOS:3:2 | 14       |
 ```
 
-`Units` is the number of children a node divides into at the next level:
+`Children`, in both tables, is the number of children a node divides into at the next
+level (the episodes of a season, the scenes of an episode):
 
-| `Units`     | Meaning                                                                         |
+| `Children`  | Meaning                                                                         |
 | ----------- | ------------------------------------------------------------------------------- |
-| an integer  | **Counted**: children `1 … Units` exist.                                        |
+| an integer  | **Counted**: children `1 … Children` exist.                                     |
 | empty       | **Uncounted**: the node is divided, but any positive index is valid.            |
 | `—`         | **Undivided**: no point below this node is valid.                               |
 
@@ -65,9 +66,47 @@ Segment rules:
 
 The order is an **editorial choice**, made once per world. Broadcast or release order is
 usually best, because it matches what someone following the source could know at each
-point. Where series overlap (*Deep Space Nine* premiered during the sixth season of *The
-Next Generation*), season-level segments give a good approximation, and episode-level
-segments give an exact one. In-universe chronology belongs to story time, not the ruler.
+point. In-universe chronology belongs to story time, not the ruler.
+
+Where series overlap, their segments interleave. *Deep Space Nine* premiered midway
+through the sixth season of *The Next Generation*. **Season-level** segments give an
+approximation:
+
+```
+| Order | Segment | Title                         | Children | Notes                          |
+| ----- | ------- | ----------------------------- | -------- | ------------------------------ |
+| 9     | TNG:6   | The Next Generation, season 6 | 26       |                                |
+| 10    | DS9:1   | Deep Space Nine, season 1     | 19       | "Emissary" counted as one      |
+| 11    | TNG:7   | The Next Generation, season 7 | 25       | "All Good Things…" as one      |
+| 12    | DS9:2   | Deep Space Nine, season 2     | 26       |                                |
+```
+
+This places all of TNG season 6 before DS9's premiere, so a project set late in TNG
+season 6 cannot see DS9 episodes that had already aired. **Episode-level** segments give
+the exact broadcast order. Each episode in the overlap becomes its own segment, because
+a segment is a single node and cannot be a run of episodes. Seasons outside the overlap
+stay whole:
+
+```
+| Order | Segment  | Title                       | Children | Notes                      |
+| ----- | -------- | --------------------------- | -------- | -------------------------- |
+| 9     | TNG:6:1  | "Time's Arrow, Part II"     |          | TNG:6 is split by episode  |
+| …     | …        | …                           |          |                            |
+| 19    | TNG:6:11 | "Chain of Command, Part II" |          | Aired 19 Dec 1992          |
+| 20    | DS9:1:1  | "Emissary"                  |          | Aired 3 Jan 1993           |
+| 21    | DS9:1:2  | "Past Prologue"             |          | Aired 10 Jan 1993          |
+| 22    | DS9:1:3  | "A Man Alone"               |          | Aired 17 Jan 1993          |
+| 23    | TNG:6:12 | "Ship in a Bottle"          |          | Aired 23 Jan 1993          |
+| …     | …        | …                           |          | Merged by first air date   |
+```
+
+Episode numbering is itself an editorial choice. Sources disagree on whether a
+feature-length premiere or finale is one episode or two, so the world records its
+choice (here, in `Notes`) and numbers consistently from then on.
+
+Splitting is local. A world can start with season-level segments and later split only
+the seasons where precision matters. Splitting a segment reorders the ruler, so it is a
+major version bump (§2.8).
 
 ## 4.2 Canon points
 
@@ -98,9 +137,23 @@ the timed level. Fractional seconds are allowed. Frame numbers are not used, bec
 frame rates vary between releases.
 
 **Scenes** are rarely numbered by the source itself, so the scene level is the world's
-own breakdown, made during extraction. A new scene starts at a change of location or a
-break in continuous time. The extraction pipeline MUST number scenes consistently within
-a world, and MAY record the counts in the Counts table.
+own breakdown, made during extraction. A **scene** is a stretch of continuous action. A
+new scene starts at a dramatic shift in any of:
+
+- **location**: the action cuts to somewhere else;
+- **time**: a jump forward or back, rather than continuous time;
+- **circumstance**: the situation the characters are in changes, even when place and
+  time run on unbroken.
+
+Following a character continuously from one room to another is one scene. Cross-cutting
+between places that are linked within one exchange is also one scene. In Star Trek, for
+example, an away team on a planet and the bridge talking by communicator form one scene
+for as long as the exchange lasts. When the link ends, the circumstance has changed and a
+new scene starts. In prose, the author's section breaks are the default scene breaks; a
+section that contains a dramatic shift is split there.
+
+The extraction pipeline MUST number scenes consistently within a world, and MAY record
+the counts in the Counts table.
 
 A point is **valid** if:
 

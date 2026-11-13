@@ -95,7 +95,8 @@ section is a **retrieval spec, not a "load everything" list**:
 - Prefer a **snapshot** (§7) to raw state histories.
 - Prefer the rows that apply (the open consequences touching this chapter) to the whole
   ledger.
-- Read `bible/index.md` first to learn which files exist.
+- Read `bible/index.md` first to learn which files exist, and what any added columns
+  in them mean (§10.3).
 
 Two ways to retrieve, both file-only:
 

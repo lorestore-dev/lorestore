@@ -17,7 +17,7 @@ examples/
     ├── second-year-tournament/  # Harry Potter with canon rearranged: the Tournament in year two
     ├── no-horcruxes/            # a branch: Voldemort dies in year one, later canon never happens
     ├── blind-harry/             # a retelling: Harry is blind, canon still unfolds around him
-    ├── the-long-way-back/       # Star Trek, established, frames module (time travel)
+    ├── the-long-way-back/       # Star Trek, established, a serial with a buffer, frames (time travel)
     └── hogwarts-at-warp/        # the crossover: one cutoff and one profile per world
 ```
 
@@ -213,6 +213,26 @@ D2 reveals it:
 - `severus-snape.loyalty` is absent at `chapter-05`;
 - it is `loves Lily Potter, and protects Harry for her sake` from `chapter-20`.
 
+## Frames and serials
+
+Project `the-long-way-back` is a serial set in Star Trek, using the frames module.
+
+**23. A mechanism and its model.** The Star Trek world declares one mechanism,
+`temporal-rift`, with model `mutable` (§9.1, §10.25). Both of Mira's legs name it. Under
+`mutable`, the Enterprise-C's absence replaces history, so `alt-war` splits from `main`
+at `TNG:1`. When the ship goes back, `main` is restored and `alt-war` is `overwritten`.
+Mira's memories of `alt-war` belong to her own frame, so they are not a frame violation,
+and no paradox is recorded.
+
+**24. The buffer.** Chapters 1 and 2 are `released`, chapter 3 is ready
+(`line-edited`), and chapter 4 is `drafted`, so the buffer is two chapters deep. The
+author may release chapter 3. Releasing chapter 4 first MUST be refused (§13.3).
+Chapters 3 and 4 may be revised freely; chapters 1 and 2 are locked.
+
+**25. A registered column.** `timelines.md`'s `## Legs` table adds a `Notes` column
+after the required ones. The story-side `index.md` registers it under `## Columns`, so
+no warning is raised (§10.0, §10.3).
+
 ## Validation cases
 
 A conforming host MUST report each of these if introduced:
@@ -230,3 +250,9 @@ A conforming host MUST report each of these if introduced:
 - adding a `no-horcruxes` track row with cutoff `CoS:1` (past a branch's divergence point, §6.6);
 - giving Snape's `loyalty` row a `True from` of `DH:34`, later than its `As of` (`DH:33`) (§4.4);
 - deleting D2 from `no-horcruxes` while its Hidden canon row still says `reveal-early` (§10.8).
+- releasing `the-long-way-back`'s chapter 4 while chapter 3 is unreleased (§13.3);
+- changing the `temporal-rift` model to anything outside §10.25's list, or naming an unknown mechanism in a leg (§10.16);
+- a world point on a branch that `branches.md` does not register (§10.16).
+
+A conforming host SHOULD warn if `the-long-way-back`'s `## Columns` row for `Notes` is
+deleted (an unregistered column, §10.0).

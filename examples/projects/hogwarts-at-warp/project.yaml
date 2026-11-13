@@ -7,7 +7,7 @@ seed: "A Hogwarts sixth-year stows away on the Enterprise-D, and her wand is the
 
 universe:
   id: wizards-and-warp
-  version: 1.0.0
+  version: 1.1.0
 
 setting:
   type: established

@@ -3,6 +3,60 @@
 This log records the design decisions behind the spec, most recent first. Each entry
 says what was unclear or contradictory, what was decided, and where the rule now lives.
 
+## 0.1: review round 9
+
+**D61. Time travel declares its mechanisms.** The frames module handled a fixed loop
+(the Time-Turner) and a branch (Yesterday's Enterprise), but had no way to say which
+kind of time travel a story uses, and so no way to check a trip against its rules. A new
+world-layer file, `time-travel.md`, declares one entry per mechanism. Each entry has a
+**model**: `dilation`, `fixed`, `loop`, `mutable`, `branching`, or `feedback`. Models
+are told apart by two questions: was the traveler already there the first time, and
+whose actions can change history? Each entry also gives its free will, what it carries,
+and its limits. The model decides the checks: a closure check for `fixed`, overwritten
+or abandoned branches for `mutable` and `loop`, ripples for `feedback`. Legs and
+branches name their mechanism, and branches gain a `Status`. A self-contained project
+writes its own `time-travel.md`. The `the-long-way-back` example's paradox X1 is
+removed, because remembering an overwritten branch is now part of a traveler's own
+frame. → §9.1, §10.16, §10.25, §3.3, §6.9, §7.5, §12.11, §12.13, §13.5
+
+**D60. Added columns are registered.** Tables could already carry extra columns, but
+agents had no way to learn what they meant. `index.md` gains an optional `## Columns`
+table (file, table, column, meaning, values). Agents read it with the index. The file's
+writer fills registered columns, so the one-writer rule is untouched, and a host warns
+about columns that are not registered. → §10.0, §10.3, §11.6, §14.2
+
+**D59. Serials can draft ahead.** The step-14 gate was also the release decision, so a
+serial could not hold a buffer of finished chapters. Writing and releasing are now
+separate: step 14 makes an installment ready, and the author releases it, in order,
+whenever they choose. The buffer has no size limit, which covers authors who stay
+months ahead and authors bringing in work written before they used LoreStore.
+Unreleased chapters are revisable as in `novel`; only released ones are fixed forward.
+Releasing is always the author's call, even under `gates: none`, because it cannot be
+undone. → §13.3, §10.19, §10.24, §12.2, §14.2
+
+**D58. Sapient peoples and fauna are kept apart.** It was unclear whether `species.md`
+held only sapient peoples or every kind of creature, since Star Trek's species and Harry
+Potter's creatures overlap. A world SHOULD put sapient peoples in `species.md` and
+non-sapient fauna in a creatures catalog, and record any borderline choice in
+`index.md`. → §3.4
+
+**D57. Scenes are defined.** "A change of location or a break in continuous time" did
+not cover a scene that ends because its situation changes, nor cross-cutting within one
+exchange. A new scene now starts at a dramatic shift in location, time, or circumstance.
+Cross-cutting between linked places is one scene, and in prose, section breaks are the
+default scene breaks. → §4.2, §12.3
+
+**D56. Interleaving overlapping series is shown.** §4.1 said episode-level segments give
+an exact order for overlapping series, but never showed how. It now works through
+*Deep Space Nine* premiering during *The Next Generation*'s sixth season, at season and
+at episode level, and notes that splitting a segment is a major version bump. → §4.1
+
+**D55. `Units` is renamed `Children`.** A column named `Units` under a table named
+`Counts`, alongside the separate idea of a "source unit" in extraction, was confusing.
+The column says how many children a node has, so it is now called that, in both the
+Order and Counts tables. Supersedes the column name in D41. → §4.1, §10.4,
+`tools/check.py`
+
 ## 0.1: naming
 
 **D54. The project is named LoreStore.** "World System" was already taken. LoreStore

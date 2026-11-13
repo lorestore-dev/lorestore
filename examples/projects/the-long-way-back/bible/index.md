@@ -10,3 +10,8 @@
 | branches.md               | story | World-lines and paradox ledger          |
 | characters/_roster.md     | union | Original characters                     |
 | characters/mira-oduya.md  | story | Character sheet                         |
+
+## Columns
+| File         | Table   | Column | Meaning                                          | Values    |
+| ------------ | ------- | ------ | ------------------------------------------------ | --------- |
+| timelines.md | ## Legs | Notes  | Why the leg is dated as it is, for human readers | free text |

@@ -20,15 +20,18 @@ match `^[a-z0-9]+(-[a-z0-9]+)*$`. The id is the directory name.
 ## 2.2 The tiers: worlds, universes, projects
 
 ```
+┌────────────────────────────┐          ┌──────────────────────────────────┐
+│ WORLD     worlds/<id>/     │◄─────────│ UNIVERSE  universes/<id>/        │
+│ reusable, READ-ONLY canon  │ members  │ one or more worlds, plus a       │
+│ package                    │          │ bridge that reconciles them      │
+└────────────────────────────┘          └──────────────────────────────────┘
+               ▲                                          ▲
+               │ world: <id>                              │ universe: <id>
+               └────────────────────┬─────────────────────┘
+                                    │ at most one; neither = self-contained
 ┌──────────────────────────────────────────────────────────────────────────┐
-│  UNIVERSE  universes/<id>/   worlds + a bridge that reconciles them      │
-│   ┌──────────────────────────────────────────────────────────────────┐   │
-│   │  WORLD    worlds/<id>/      reusable, READ-ONLY canon package     │   │
-│   └──────────────────────────────────────────────────────────────────┘   │
-│   ┌──────────────────────────────────────────────────────────────────┐   │
-│   │  PROJECT  projects/<id>/    one story: its story layer, prose,    │   │
-│   │                             reviews, and divergence ledger        │   │
-│   └──────────────────────────────────────────────────────────────────┘   │
+│ PROJECT   projects/<id>/   one story: its story layer, prose,            │
+│                            reviews, and divergence ledger                │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -59,7 +62,9 @@ worlds/<world-id>/
 ```
 
 A world package contains **only** world-layer files (§3). It never contains source
-texts, extraction records, manuscripts, or anything story-specific.
+texts, extraction records, manuscripts, or anything story-specific. The one place source
+wording appears is `quotations.md`, which holds short, important lines (Hagrid's
+*"Yer a wizard, Harry"*, PS ch.4) with precise citations (§5.6), never passages.
 
 ## 2.4 Extraction workspace
 

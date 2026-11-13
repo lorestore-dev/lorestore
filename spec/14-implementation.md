@@ -78,6 +78,11 @@ is defined.
 | A row's `True from` is later than its `As of`, or not a valid canon point        | §4.4      |
 | A Hidden canon decision of `reveal-early` with no divergence, or `other` with no note | §10.8 |
 | A write to a released installment in a serial whose releases are locked          | §13.3     |
+| A serial chapter is released while an earlier chapter is unreleased              | §13.3     |
+| A `time-travel.md` entry has no `model`, or an unknown model or free-will value  | §10.25    |
+| A traveler leg names a mechanism missing from `time-travel.md`                   | §10.16    |
+| A world point names a branch missing from `branches.md`, or a branch has an unknown status | §10.16 |
+| A `## Columns` row repeats a required column of its table                        | §10.3     |
 | A consequence is `accepted` without a `Note`, or outside a locked serial         | §10.8     |
 | Two concurrent steps write the same file                                         | §11.5     |
 | An agent writes a file that §3.3 does not list it as writing                     | §3.3      |
@@ -85,8 +90,10 @@ is defined.
 
 A host SHOULD also warn when a profile's order inverts tier order (§5.2) and when a
 materialized snapshot is stale (§7.6), when a canon track's cutoffs go backwards
-(§6.7), and when timecodes in one episode or film
-contradict its scene order (§4.2).
+(§6.7), when timecodes in one episode or film
+contradict its scene order (§4.2), when a table has an added column that `index.md`
+does not register (§10.0), and when the author releases a serial chapter that is not
+ready (§13.3).
 
 ## 14.3 The contracts, summarized
 

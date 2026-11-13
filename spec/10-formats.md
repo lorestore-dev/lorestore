@@ -14,6 +14,13 @@ below are what tools rely on.
   required header cells, which MUST appear in the order given, spelled exactly as
   given. A file MAY add columns **after** the required ones. Parsers MUST ignore columns
   they do not know.
+  - An added column SHOULD be registered in the `## Columns` table of `index.md`
+    (§10.3), which says what it means and what values it takes. A host SHOULD warn
+    about an added column that is not registered.
+  - An agent that reads a table also reads the registry rows for it, and treats each
+    registered column as part of the table's meaning. The file's writer (§3.3) fills
+    registered columns as part of its normal step; registering a column never adds a
+    second writer.
   - Escape a literal `|` inside a cell as `\|`.
   - An empty cell means "not given". The token `—` (em dash) means "explicitly none".
   - Multiple values in one cell are separated by `; `.
@@ -133,6 +140,24 @@ in every profile within the universe.
 Every world-layer file in the package, and every story-layer file in the project, MUST
 be listed.
 
+An optional `## Columns` table registers the columns an author has added to tables
+(§10.0):
+
+```markdown
+## Columns
+| File         | Table   | Column | Meaning                                          | Values    |
+| ------------ | ------- | ------ | ------------------------------------------------ | --------- |
+| timelines.md | ## Legs | Notes  | Why the leg is dated as it is, for human readers | free text |
+```
+
+- `File` is a path on the same side as the index. A project registers columns only in
+  its own story-layer files, and a world only in its own files. Like `## Files`, the
+  table is read as a union (§2.7).
+- `Table` is the `##` heading the table sits under.
+- `Values` is `free text`, a cell type from §10.0 (`slug`, `point`, `chapter`, …), or an
+  enumeration written `a | b | c` (escaped as `a \| b \| c` inside the cell).
+- A column name MUST NOT repeat a required column of its table.
+
 ## 10.4 `canon-timeline.md` (the ruler)
 
 ```markdown
@@ -143,14 +168,14 @@ be listed.
 | TOS  | The Original Series | season › episode › scene | episode     |       |
 
 ## Order
-| Order | Segment | Title               | Units | Notes |
-| ----- | ------- | ------------------- | ----- | ----- |
-| 1     | PS      | Philosopher's Stone | 17    |       |
+| Order | Segment | Title               | Children | Notes |
+| ----- | ------- | ------------------- | -------- | ----- |
+| 1     | PS      | Philosopher's Stone | 17       |       |
 
 ## Counts
-| Node    | Units |
-| ------- | ----- |
-| TOS:3:2 | 14    |
+| Node    | Children |
+| ------- | -------- |
+| TOS:3:2 | 14       |
 ```
 
 - `Work`: unique. Matches `^[A-Za-z][A-Za-z0-9-]*$`; case is preserved, for familiar
@@ -161,7 +186,7 @@ be listed.
   a film), or empty (not timed).
 - `Order`: a positive integer, unique, with no gaps.
 - `Segment` and `Node`: a path, `work{:index}`, with no timecode.
-- `Units`: an integer, empty, or `—` (§4.1).
+- `Children`: an integer, empty, or `—` (§4.1).
 - `## Counts` is optional. A node in it must lie inside a segment.
 
 ## 10.5 State histories
@@ -441,21 +466,32 @@ days later"). `Entities` lists the slugs involved.
 
 ```markdown
 ## Legs
-| Traveler | Leg | Departs | Arrives | Personal cutoff | Chapter |
+| Traveler | Leg | Mechanism | Departs | Arrives | Personal cutoff | Chapter |
+
+## Ripples
+| Traveler | Attribute | Value | Caused at | Chapter |
 ```
 
-`Departs` and `Arrives` are world points (`<point>@<branch>`). `Personal cutoff` is the
-latest point the traveler has lived through, which bounds what they know.
+`Mechanism` is the id of an entry in `time-travel.md` (§10.25). `Departs`, `Arrives`, and
+`Caused at` are world points (`<point>@<branch>`). `Personal cutoff` is the latest point
+the traveler has lived through, which bounds what they know. A ripple applies from its
+`Chapter` onwards. `## Ripples` is required only when a leg uses a `feedback` mechanism.
 
 ```markdown
 ## Branches
-| Branch | Splits from | At | Cause |
+| Branch | Splits from | At | Cause | Mechanism | Status |
 
 ## Paradoxes
 | ID | Description | Decision | Rationale | Chapter |
 ```
 
-`Decision` is `fixed` or `accepted`. The default branch is `main`.
+- The default branch is `main`, which has no `Splits from`, `At`, or `Mechanism`.
+- `Mechanism` is the `time-travel.md` entry that created the branch, or `—` for a
+  branch that no mechanism created (a parallel universe the story reaches some other
+  way).
+- `Status` is `live`, `overwritten` (a `mutable` or `feedback` branch has replaced it,
+  or it has been restored over), or `abandoned` (an earlier iteration of a `loop`).
+- `Decision` is `fixed` or `accepted`.
 
 ## 10.17 `canon.md` (adherence contract)
 
@@ -483,6 +519,10 @@ status: drafted       # drafted | line-edited | final | released (serial only)
 released: 2026-11-03  # serial only: set by the release skill
 ---
 ```
+
+- In a serial, `line-edited` means **ready**: approved at step 14 and waiting in the
+  buffer until the author releases it (§13.3). Released chapters form an unbroken run
+  from chapter 1: no chapter is `released` while an earlier one is not.
 
 - **Frames projects** open each scene with a marker:
   `<!-- scene: at=PoA:21@main travelers=harry-potter,hermione-granger -->`
@@ -616,5 +656,35 @@ The outline groups installments into arcs, one heading per arc:
 ```
 
 An arc's installments are the chapters in its table. The architect appends a new arc at
-each planning step (A1, §13.3). Arcs already released are not rewritten.
+each planning step (A1, §13.3). Beats for released chapters are not rewritten; beats for
+chapters still in the buffer may be.
 
+
+## 10.25 `time-travel.md` (frames)
+
+One entry block per mechanism (§9.1), with the catalog fields of §10.11 plus the
+module's own:
+
+```markdown
+### time-turner — Time-Turner
+- model: fixed                   # dilation | fixed | loop | mutable | branching | feedback
+- direction: back                # back | forward | both
+- reach: one hour per turn of the hourglass
+- carries: body; memory; anything held
+- free-will: none                # everyone (default) | traveler | none
+- immune: —                      # loop only: what does not reset
+- effect: carries the wearer, and anyone inside the chain, back in time
+- cost: —
+- limit: travelers must not be seen by their past selves
+- as-of: PoA:21
+- source: books
+- citation: PoA ch.21
+```
+
+- `model` is required. Every other field may be empty, and `free-will` defaults to
+  `everyone`.
+- `immune` lists what survives a `loop`'s reset beyond the traveler's own memory: slugs,
+  catalog ids, or a short description (`faint déjà vu`).
+- `limit` is checked by judgment (§9.1); state it as a rule the canon-keeper can apply.
+- A mechanism whose rules change over time adds a `## State history` table, as a catalog
+  does (§10.11).

@@ -295,8 +295,8 @@ resolution type, which a host MUST surface distinctly (§14):
 | **Temporal leak**             | Uses a fact whose as-of is later than the chapter's cutoff.                                     | **Fix**.                                                           |
 | **Source leak**               | Uses a fact found only in a source outside the active profile, or in an excluded source.        | **Fix**.                                                           |
 | **Crossover leak**            | Uses bridge-only canon in a project not set in that universe.                                   | **Fix**.                                                           |
-| **Frame violation**           | A character knows something outside their own frame (§9.1).                                     | **Fix**.                                                           |
-| **Paradox**                   | A causal contradiction between frames (§9.1).                                                   | **Decide**: fix, or accept and record in `branches.md`.            |
+| **Frame violation**           | A character knows something outside their own frame, or a trip breaks its mechanism's rules (§9.1). | **Fix**.                                                       |
+| **Paradox**                   | A causal contradiction between frames, including a failed closure check (§9.1).                 | **Decide**: fix, or accept and record in `branches.md`.            |
 
 Faithfulness and leak checks run against the **composite**: source canon, read along the
 canon track, overridden by the ledger. A story is never flagged for obeying its own
