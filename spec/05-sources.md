@@ -71,7 +71,7 @@ canon_basis:
 ```
 
 Excluded sources are still registered, so that a detail unique to them can be
-recognised and flagged as a **source leak**. An excluded id MUST NOT appear in any
+recognized and flagged as a **source leak**. An excluded id MUST NOT appear in any
 profile.
 
 For example, Harry Potter excludes the films (`excluded: [films]`), so a detail found

@@ -241,7 +241,7 @@ column, after `Citation`, records when a fact became **true** in-world:
   sorts at the very start of canon.
 - **`As of` still governs visibility.** The snapshot resolves a row only once its
   `As of` is reached. `True from` does not reveal anything early. It lets the system
-  recognise a **hidden truth**: a fact that is already true at the cutoff but not yet
+  recognize a **hidden truth**: a fact that is already true at the cutoff but not yet
   revealed (§7.2, §6.12).
 - Extractors SHOULD record `True from` whenever a source reveals backstory, even if no
   current project needs it. It is cheap to record and impossible to reconstruct later.

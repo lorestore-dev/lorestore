@@ -86,11 +86,11 @@ Record any decision that changes a rule in [DECISIONS.md](DECISIONS.md), with th
 reasoning. Bump `spec_version` in the schemas and the spec when a change breaks
 existing files.
 
-## Licence
+## License
 
 Copyright 2026 Sam Wederell. Licensed under the [Apache License, Version 2.0](LICENSE).
 You may use, modify, and distribute this specification, its schemas, and its examples,
-including in commercial implementations, provided you keep the licence and the
+including in commercial implementations, provided you keep the license and the
 copyright and attribution notices.
 
 ## Third-party works

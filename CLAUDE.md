@@ -20,7 +20,7 @@ spec, not an implementation.
 - After changing a rule, schema, or example, run the checker; it must report
   `FAILURES: 0`:
   `pip install -r tools/requirements.txt && python tools/check.py`
-- If a change adds behaviour to the data model, add checks for it to `tools/check.py` and
+- If a change adds behavior to the data model, add checks for it to `tools/check.py` and
   the expected result to `examples/README.md`.
 - Check that every `§` reference still resolves to a heading after renumbering.
 - Example facts are recorded in our own words with citations; never copy source text.

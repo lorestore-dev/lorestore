@@ -8,7 +8,7 @@ says what was unclear or contradictory, what was decided, and where the rule now
 **D54. The project is named LoreStore.** "World System" was already taken. LoreStore
 names what the spec defines (a store of dated, sourced canon) and works as a noun ("the
 Harry Potter lorestore"). Use "LoreStore" in prose, and lowercase `lorestore` for
-package, CLI, and directory names. The GitHub organisation is `lorestore-dev`
+package, CLI, and directory names. The GitHub organization is `lorestore-dev`
 (`lorestore` was taken), and the spec repository is `lorestore-dev/lorestore`.
 Historical references to `world-system.md` below name the original source document
 and are unchanged. → README, §1.1
@@ -43,7 +43,7 @@ Example: Snape's love for Lily (`As of DH:33`, `True from PS`) is revealed early
 
 **D51. Branch or retelling: `setting.canon_mode`.** A project says whether canon after
 its divergence point still happens:
-- **`retelling`** (the default, and the previous behaviour): later canon is the default
+- **`retelling`** (the default, and the previous behavior): later canon is the default
   script along the canon track. Later canon events that a divergence makes impossible
   or changes are **divergence conflicts**. The canon-keeper finds them ahead of time
   (new audit step E2a) and sets out options: keep, adapt, remove, substitute. The
@@ -181,7 +181,7 @@ survive and the story kills him. Canon is the reverse (he is killed in the grave
 GoF ch.32), so the example now has the story save him. → §6.4
 
 **D40. Apache License 2.0 (resolves Q7).** Chosen for a spec meant to be implemented: it is
-permissive, it covers prose, schemas, and future code with one licence, and its patent grant
+permissive, it covers prose, schemas, and future code with one license, and its patent grant
 protects implementers (the OpenAPI specification uses it for the same reasons). The README
 records the copyright and attributes the Harry Potter and Star Trek properties to their
 owners; there is no separate NOTICE file. → `LICENSE`, README
