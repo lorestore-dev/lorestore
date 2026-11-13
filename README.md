@@ -35,9 +35,38 @@ Integrated Writing Environment) should also read chapters 10, 11, and 14.
 spec/        the specification, one chapter per file
 schemas/     JSON Schemas for project.yaml, world-config.yaml, universe.yaml
 examples/    a small conforming workspace, with expected snapshot results
+tools/       the conformance checker for the examples
 DECISIONS.md design decisions taken, and the questions still open
 LICENSE      Apache License 2.0
 ```
+
+## Conformance checker
+
+[tools/check.py](tools/check.py) checks that the spec, the schemas, and the examples
+agree. It validates every example manifest against the JSON schemas, then runs a
+reference implementation of the snapshot algorithm (§7) and compares each result with
+the expected answers in [examples/README.md](examples/README.md). It covers canon-point
+parsing and ordering (§4.2), the canon track and project order (§6.7–6.8), branch and
+retelling modes (§6.6), and hidden truths (§4.4, §6.12).
+
+```
+pip install -r tools/requirements.txt
+python tools/check.py
+```
+
+It prints one line per check and a failure count, and exits non-zero if any check fails.
+Run it after changing a rule, a schema, or an example.
+
+**Limitations:**
+
+- It checks the bundled examples only. Paths and expected values are hard-coded, so it is
+  not a validator for workspaces of your own.
+- It is a reference for the data model only. It does not test the agent contract, the
+  agents, or the workflows (chapters 11–13).
+- It parses only the tables it needs, not every format in chapter 10.
+- It does not check markdown links or `§` references.
+- A passing run means the examples are consistent with the checker's reading of the
+  spec. Where the two disagree, the spec is the authority.
 
 ## Conventions
 
