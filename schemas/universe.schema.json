@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "universe.yaml",
+  "description": "Universe manifest. See spec/08-crossovers.md §8.1.",
+  "type": "object",
+  "required": [
+    "spec_version",
+    "id",
+    "name",
+    "version",
+    "worlds",
+    "bridge"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "spec_version": {
+      "type": "string",
+      "const": "0.1"
+    },
+    "id": {
+      "$ref": "#/$defs/id"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$",
+      "description": "Bumped like a world package (spec §2.8) whenever the manifest or bridge changes."
+    },
+    "worlds": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "version"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
+          },
+          "offset": {
+            "type": "string",
+            "pattern": "^[+-]\\d+[ymd]$",
+            "default": "+0y"
+          }
+        }
+      }
+    },
+    "bridge": {
+      "type": "string",
+      "const": "bridge.md"
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    }
+  }
+}

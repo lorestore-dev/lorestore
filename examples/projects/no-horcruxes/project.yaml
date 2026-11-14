@@ -1,0 +1,19 @@
+spec_version: "0.1"
+id: no-horcruxes
+name: "No Horcruxes"
+workflow: novel
+gates: milestones
+seed: "There are no Horcruxes. When Quirrell dies at the end of first year, Voldemort dies with him. What does the wizarding world do with a peace it didn't expect?"
+
+world:
+  id: harry-potter
+  version: 2.1.0
+
+setting:
+  type: established
+  fidelity: flexible
+  canon_point: "PS:17"
+  canon_mode: branch
+  divergence_point: "PS:17"
+  active_profile: book-purist
+  temporal_model: linear

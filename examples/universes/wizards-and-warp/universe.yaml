@@ -1,0 +1,8 @@
+spec_version: "0.1"
+id: wizards-and-warp
+name: "Wizards and Warp"
+version: 1.0.0
+worlds:
+  - { id: harry-potter, version: 2.1.0, offset: "+373y" }
+  - { id: star-trek,    version: 1.4.0, offset: "+0y" }
+bridge: bridge.md

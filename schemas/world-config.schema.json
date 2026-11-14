@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "world-config.yaml",
+  "description": "World package configuration. See spec/10-formats.md §10.2. Cross-file rules (profiles name registered sources; excluded sources appear in no profile; active_profile names a defined profile) are host validations, spec/14-implementation.md §14.2.",
+  "type": "object",
+  "required": ["spec_version", "id", "name", "version", "status", "canon_basis", "canon_profiles", "active_profile"],
+  "additionalProperties": false,
+  "properties": {
+    "spec_version": { "type": "string", "const": "0.1" },
+    "id": { "$ref": "#/$defs/id" },
+    "name": { "type": "string", "minLength": 1 },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
+    },
+    "status": { "enum": ["open-for-extraction", "locked"] },
+    "canon_basis": {
+      "type": "object",
+      "required": ["primary"],
+      "additionalProperties": false,
+      "properties": {
+        "primary": { "$ref": "#/$defs/id" },
+        "also_canon": { "type": "array", "items": { "$ref": "#/$defs/id" }, "uniqueItems": true },
+        "excluded": { "type": "array", "items": { "$ref": "#/$defs/id" }, "uniqueItems": true }
+      }
+    },
+    "canon_profiles": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/id" },
+      "additionalProperties": {
+        "type": "object",
+        "required": ["order"],
+        "additionalProperties": false,
+        "properties": {
+          "order": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "$ref": "#/$defs/id" }
+          },
+          "resolution": {
+            "enum": ["precedence", "recency"],
+            "default": "precedence",
+            "description": "How conflicts between active sources resolve. See spec/05-sources.md §5.4."
+          }
+        }
+      }
+    },
+    "active_profile": { "$ref": "#/$defs/id" }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" }
+  }
+}
