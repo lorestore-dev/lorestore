@@ -141,7 +141,7 @@ its own:
 worlds/<fandom>/<package>/
 ├── package.yaml            # identity, kind, version, status, relies-on (§10.2)
 ├── index.md                # endpoint registry (§10.3)
-├── canon-timeline.md       # base: the ruler (§4). Official: works it inserts (§4.10). Adaptation: what it adapts (§4.9)
+├── canon-timeline.md       # base: the ruler (§4). Official, fanfic: works it inserts (§4.10). Adaptation: what it adapts (§4.9)
 ├── sources.md              # source registry (§5)
 ├── glossary.md
 ├── …                       # the rest of the world layer (§3.3)
@@ -151,7 +151,8 @@ worlds/<fandom>/<package>/
 ```
 
 Only a base has a ruler. Every other package dates its rows on its base's ruler. An
-`official` package with works of its own MAY insert them into that ruler (§4.10).
+`official` or `fanfic` package with works of its own MAY insert them into that ruler
+(§4.10).
 
 **The base holds what is not in dispute.** Official material whose canon status fans or
 the rights holders dispute goes in an `official` package, so that the package never has

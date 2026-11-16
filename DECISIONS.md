@@ -3,6 +3,17 @@
 This log records the design decisions behind the spec, most recent first. Each entry
 says what was unclear or contradictory, what was decided, and where the rule now lives.
 
+## 0.3: reference agents
+
+**D105. Fan works insert their own works.** Only `official` packages could insert into
+the base's ruler, so a fan work set after the books end, or between them, had no points
+of its own: every row it gave fell on the base's last point, and two values of one
+attribute there were a tie (§4.4). A `fanfic` package may now insert its works, exactly
+as an official one does. An adaptation still may not, because it retells the base's own
+works and dates even its added scenes on their paths (§4.9); fanon and theories have no
+works. The example fan work inserts `FIC` after `DH`. → §2.3, §4.2, §4.10, §6.8, §10.4,
+§13.6, §14.2
+
 ## 0.2: layered packages
 
 **D104. Book 1's story-dated rows are anchored, not time-filtered.** §4.12 dated a

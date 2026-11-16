@@ -162,7 +162,7 @@ the counts in the Counts table.
 A point is **valid** if:
 
 1. its work is on the stack's ruler: in the Works table of the base, or of an official
-   package in the stack that inserts it (§4.10); or, in a series begun by a
+   or fanfic package in the stack that inserts it (§4.10); or, in a series begun by a
    self-contained book, the work of a project layer, or a work that a project layer or
    the project itself inserts (§4.12);
 2. it has no more indices than the work has levels;
@@ -406,12 +406,15 @@ PS:6:2+00:41:10      book scene PS:6:2, 41 minutes 10 seconds into the film that
 `PS:6:2+00:50:00`, because the book path decides. Without the films package, all four
 points are invalid except `PS:6:2`.
 
-## 4.10 Official works: inserted segments
+## 4.10 Inserted works
 
-An `official` package (§2.3) MAY have works of its own: episodes, novels, or films that
-retell nothing in the base but sit beside it in canon time. They need places on the
-ruler, but the ruler belongs to the base, which MUST NOT change to suit a package that
-some projects leave out. So the package **inserts** segments into the base's ruler.
+An `official` or `fanfic` package (§2.3) MAY have works of its own that retell nothing
+in the base but sit beside it in canon time: an official animated series or line of
+novels, or a fan work set between the base's works or after them. They need places on
+the ruler, but the ruler belongs to the base, which MUST NOT change to suit a package
+that some projects leave out. So the package **inserts** segments into the base's
+ruler. No other kind inserts: an adaptation retells the base's own works, so its
+material is dated on their paths (§4.9), and fanon and theories have no works.
 
 The package's `canon-timeline.md` (§10.4) lists its works in a `## Works` table, as a
 base does, and its segments in an `## Insert` table, each placed **after** a segment of
@@ -434,6 +437,12 @@ the base or an earlier inserted one:
 - **Placement is an editorial choice**, like the base's own order (§4.1): here, the
   animated series is placed in the last part of the five-year mission, before *The
   Motion Picture*.
+- **A fan work inserts only what the base cannot hold.** Most fan works retell or
+  depart from canon inside the base's works, and date their rows on the base's points.
+  A fan work set after the base ends, or in a stretch between its works, has no points
+  of its own there: without an insert, all its rows would fall on one point and tie
+  (§4.4). It inserts its own work instead, such as one set after *Deathly Hallows*
+  (`After: DH`), so that its chapters order its rows.
 - Inserted work ids MUST NOT repeat a work already on the ruler: the base's, or one that
   another package, a project layer, or the project inserts. Two packages inserting after
   the same segment are placed in stack order, the lower layer first.

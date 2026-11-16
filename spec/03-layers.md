@@ -12,7 +12,7 @@ project context the host MUST refuse any write that resolves into `worlds/`,
 
 **W2. Only the extraction pipeline writes a package.** The pipeline consists of the
 steps of the extraction workflow (§13.6), run in package context: the worldbuilder (a
-base's ruler, an adaptation's map, or an official package's inserts), the
+base's ruler, an adaptation's map, or an official package's or a fan work's inserts), the
 character-designer (seeding the roster), the merger (every other state-bearing file),
 the theorist (`theories.md`, in a `theories` package), and the `indexer` skill
 (`index.md`). Humans write `package.yaml` and `sources.md`. A package never writes to
@@ -73,7 +73,7 @@ any project file (§13.10).
 | ---------------------------- | ------ | -------------------------------------------------------------------------------------------------- | ------------------------------ | ---------------------- |
 | `package.yaml`               | config | Identity, kind, version, status, relies-on (§10.2)                                                 | human                          | — (`project.yaml`)     |
 | `index.md`                   | union  | Endpoint registry: which files exist, what each holds, each file's layer (§10.3)                   | `indexer` skill                | `indexer` skill        |
-| `canon-timeline.md`          | world  | Base: the ruler (§4). Official, or a later book of a series: works it inserts (§4.10, §4.12). Adaptation: its works and the base nodes each adapts (§4.9) | worldbuilder (step F0)         | worldbuilder (self-contained, optional, §4.7; a later book's inserts, §4.12) |
+| `canon-timeline.md`          | world  | Base: the ruler (§4). Official, fanfic, or a later book of a series: works it inserts (§4.10, §4.12). Adaptation: its works and the base nodes each adapts (§4.9) | worldbuilder (step F0)         | worldbuilder (self-contained, optional, §4.7; a later book's inserts, §4.12) |
 | `sources.md`                 | world  | Source registry (§5)                                                                               | human                          | human (self-contained only) |
 | `glossary.md`                | union  | Canonical names and terms; the anti-drift file                                                     | merger                         | worldbuilder           |
 | `world.md`                   | world  | Setting, era, rules and systems (each with cost and limit), as a state history                     | merger                         | worldbuilder           |

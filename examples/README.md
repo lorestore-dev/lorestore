@@ -13,7 +13,7 @@ examples/
 │   │   ├── fanon/               # community conventions, as extension sheets
 │   │   ├── theories/            # a fan theory, as numbered claims
 │   │   └── fanfic/
-│   │       └── example/         # a placeholder fan work
+│   │       └── example/         # a placeholder fan work, with its own work inserted after the books
 │   └── star-trek/
 │       ├── base/                # the base: series, seasons, episodes, a film; technology.md,
 │       │                        #   species.md; character versions; an undivided season
@@ -40,7 +40,7 @@ stacks, from the base up:
 | Name     | Layers                                                                      | Resolution |
 | -------- | --------------------------------------------------------------------------- | ---------- |
 | canon    | `harry-potter@3.0.0`                                                         | precedence |
-| fan      | `harry-potter@3.0.0`, `harry-potter/fanon@1.0.0`, `harry-potter/fanfic/example@1.0.0` | precedence |
+| fan      | `harry-potter@3.0.0`, `harry-potter/fanon@1.0.0`, `harry-potter/fanfic/example@1.1.0` | precedence |
 | fan, recency | the same layers                                                         | recency    |
 | fan, fill    | the same layers                                                         | fill       |
 | trek     | `star-trek@2.0.0`                                                            | precedence |
@@ -93,6 +93,17 @@ Before `PoA:17` the quotation has not been said.
 the fanon package supplies it, through an extension sheet. In every fan stack,
 including fill, `house` = `Slytherin`: canon is silent, so fanon fills the gap. In
 every stack, `year` is absent at `OotP:30` and `Harry's year` at `OotP:31`.
+
+**4a. A fan work after the books.** The placeholder fan work is set after *Deathly
+Hallows*, so it inserts its own work, `FIC`, after `DH` (§4.10), and dates its two
+`harry-potter.role` rows `FIC:3` (`Auror`) and `FIC:20` (`head of the Auror Office`).
+In the fan stack:
+- `FIC:20` is valid, and sorts after every point of `DH`; `FIC:25` is invalid (24
+  chapters), and in the canon stack every `FIC` point is invalid;
+- `role` = `Gryffindor Seeker` at `DH:36`, `Auror` at `FIC:10`, and `head of the Auror
+  Office` at `FIC:20`;
+- dated on `DH:36` instead, the two rows would tie (§4.4), and the package would be
+  invalid.
 
 **5. The ledger.** Project `two-witnesses` (cutoff `GoF:37`, fan stack, recency), entity
 `cedric-diggory`:

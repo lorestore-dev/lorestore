@@ -58,7 +58,7 @@ bad = pyaml("hogwarts-at-warp"); bad["setting"]["cutoff"] = "HBP:7"
 check("schema rejects cutoff beside a universe layer", schema("project").is_valid(bad), False)
 bad = pyaml("two-witnesses"); bad["setting"]["cutoffs"] = {"harry-potter": "GoF:37"}
 check("schema rejects cutoffs without a universe layer", schema("project").is_valid(bad), False)
-for ref, ok in [("harry-potter@3.0.0", True), ("harry-potter/fanfic/example@1.0.0", True), ("universe:wizards-and-warp@2.0.0", True),
+for ref, ok in [("harry-potter@3.0.0", True), ("harry-potter/fanfic/example@1.1.0", True), ("universe:wizards-and-warp@2.0.0", True),
                 ("project:two-witnesses@chapter-02", True), ("harry-potter", False), ("project:two-witnesses@1.0.0", False),
                 ("harry-potter/a/b/c@1.0.0", False), ("fanon-hp@latest", False)]:
     d = pyaml("blind-harry"); d["layers"] = [ref]
@@ -172,7 +172,7 @@ class Ruler:
             path = self.split(r["Segment"]); self.segments[path] = int(r["Order"]); self.counts[path] = r["Children"]
         if has(ruler, "## Counts"):
             for r in table(ruler, "## Counts"): self.counts[self.split(r["Node"])] = r["Children"]
-        for o in officials:                       # inserted works (§4.10)
+        for o in officials:                       # inserted works: official and fanfic packages (§4.10)
             f = o.dir/"canon-timeline.md"
             if has(f, "## Insert"): insert_segments(self, f, o.id)
         self.check_segments()
@@ -295,12 +295,13 @@ class Stack:
             for q in Stack.of(p).ledgers() + [(p, pin)]:
                 if q not in out: out.append(q)
         return out
-    def ruler(self, base=None):
-        if not self.bases: return self.series_ruler().reordered(self.order())
+    def ruler(self, base=None, ordered=True):
+        """The stack's ruler, with its inserts (§4.10, §4.12), in the project order unless `ordered` is false."""
+        if not self.bases: r = self.series_ruler(); return r.reordered(self.order()) if ordered else r
         b = self.bases[base] if base else next(iter(self.bases.values()))
         r = Ruler(b, [p for _, p in self.packages if p.kind == "adaptation" and p.base == b.id],
-                  [p for _, p in self.packages if p.kind == "official" and p.base == b.id])
-        return r.reordered(self.order())
+                  [p for _, p in self.packages if p.kind in ("official", "fanfic") and p.base == b.id])
+        return r.reordered(self.order()) if ordered else r
     def order(self):
         """The project order, else the highest project layer's (§6.14)."""
         own = pyaml(self.project)["setting"].get("order") if self.project else None
@@ -528,7 +529,7 @@ def hidden(stack, entity, cutoff, base=None):
             and ruler.cmp(r["True from"], cutoff) <= 0 < ruler.cmp(r["As of"], cutoff)}
 
 PURIST  = Stack(["harry-potter@3.0.0"])
-ENRICH  = Stack(["harry-potter@3.0.0", "harry-potter/fanon@1.0.0", "harry-potter/fanfic/example@1.0.0"])
+ENRICH  = Stack(["harry-potter@3.0.0", "harry-potter/fanon@1.0.0", "harry-potter/fanfic/example@1.1.0"])
 ENHANCE = Stack(ENRICH.refs, "recency")
 FILL    = Stack(ENRICH.refs, "fill")
 TREK    = Stack(["star-trek@2.0.0"])
@@ -668,7 +669,7 @@ check("T cedric ch40 with D3", (snap_r("cedric-diggory", "status", "chapter-40")
 check("T cedric house kept via confirmation row", snap_r("cedric-diggory", "house", "chapter-10"), "Hufflepuff")
 
 def inversions(stack):
-    ruler, w = Ruler(next(iter(stack.bases.values()))), stack.ruler()    # ruler order, project order
+    ruler, w = stack.ruler(ordered=False), stack.ruler()    # ruler order, project order
     out = set(); groups = {}
     for _, p in stack.packages:
         for r in p.all_rows(): groups.setdefault((r["_entity"], r["Attribute"]), []).append(r)
@@ -687,7 +688,7 @@ check("T every inversion covered by a divergence", inv - covered, set())
 check("T no inversions in two-witnesses (canon order)", inversions(TW), set())
 def inversion_candidates(stack):
     """§6.8: for each pair of segments the project order swaps, every entity with rows in both."""
-    base, w = Ruler(next(iter(stack.bases.values()))), stack.ruler()
+    base, w = stack.ruler(ordered=False), stack.ruler()
     segs = sorted(base.segments, key=base.segments.get)
     def seg(pt):
         p = Ruler.split(pt.split("+")[0]); return next((s for s in segs if p[:len(s)] == s), None)
@@ -804,6 +805,16 @@ check("E no package in the examples holds tied rows", [p for f in PKG_FILES for 
 HPB = Package("harry-potter")
 check("E the first printing registered as primary would tie", package_ties(HPB, dict(HPB.sources, **{"gof-first-printing": "primary"})),
       [("harry-potter", "graveyard-echoes", "GoF:34", "primary"), ("q2", "Line", "GoF:34", "primary"), ("q2", "Speaker", "GoF:34", "primary")])
+# --- fan works insert their own works (§4.10) ---------------------------------------
+FW = ENRICH.ruler(); FIC = Package("harry-potter/fanfic/example")
+check("FI a fan work's inserted work is valid only with it in the stack", (isvalid(FW, "FIC:20"), isvalid(HP, "FIC:20"), isvalid(FW, "FIC:25")), (True, False, False))
+check("FI the fan work sorts after the books", (FW.cmp("DH:36", "FIC"), FW.cmp("FIC:3", "FIC:20")), (-1, -1))
+check("FI its post-canon rows are ordered by its chapters", [g(ENRICH, "harry-potter", c, "role") for c in ("DH:36", "FIC:10", "FIC:20")],
+      ["Gryffindor Seeker", "Auror", "head of the Auror Office"])
+check("FI dated on one point instead, the same rows would tie (§4.4)",
+      bool(package_ties(type("P", (), {"sources": FIC.sources, "dir": FIC.dir, "all_rows": lambda s: [dict(r, **{"As of": "DH:36"}) for r in FIC.all_rows() if r["Attribute"] == "role"]})())), True)
+INSERTS = {f.parent for f in (EX/"worlds").rglob("canon-timeline.md") if has(f, "## Insert")}
+check("FI only official and fanfic packages insert", sorted({load(d/"package.yaml")["kind"] for d in INSERTS}), ["fanfic", "official"])
 check("E only base, official, and adaptation packages may register errata", sorted(k for k, v in KIND_TIERS.items() if "erratum" in v), ["adaptation", "base", "official"])
 def errata(stack, entity, cutoff, base=None):
     """The stack's erratum rows for an entity, at or before the cutoff: {attribute: {values}}."""

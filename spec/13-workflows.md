@@ -331,10 +331,10 @@ with one writer per output file.
 - Before F0, a human creates `package.yaml` (with its `kind`, its `relies-on`
   pins, and `status: open-for-extraction`) and registers the package's own sources in
   `sources.md`, with tiers its kind allows (§2.3).
-- **F0** runs for a base, and for an adaptation, where it writes the `## Works` and
-  `## Adapts` tables (§4.9), and for an official package with works of its own, where
-  it writes the `## Works` and `## Insert` tables (§4.10). Other packages use their
-  base's ruler, and skip it.
+- **F0** runs for a base, and for an adaptation, where it writes the `## Works` and `##
+  Adapts` tables (§4.9), and for an official or fanfic package with works of its own,
+  where it writes the `## Works` and `## Insert` tables (§4.10). Other packages use
+  their base's ruler, and skip it.
 - **F0b** seeds the package's own roster: for a package other than a base, only the
   entities that are new in it.
 - In a package other than a base, extractors and mergers read the packages it relies

@@ -8,7 +8,7 @@ seed: "The year after the graveyard. The Ministry has two witnesses to discredit
 layers:                         # from the base up
   - harry-potter@3.0.0
   - harry-potter/fanon@1.0.0
-  - harry-potter/fanfic/example@1.0.0
+  - harry-potter/fanfic/example@1.1.0
   - project:two-witnesses@chapter-02   # book 1, read through chapter 2
 resolution: recency
 

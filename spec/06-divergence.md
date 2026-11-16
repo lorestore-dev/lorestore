@@ -294,22 +294,22 @@ setting:
 Rules:
 
 1. **A permutation of the segments.** The project order MUST list every one of the
-   segments of the stack's ruler exactly once: the base's, and any that official
-   packages in the stack insert (§4.10); or, in a series begun by a self-contained book,
-   each project layer's work and every segment the project layers and the project
-   itself insert (§4.12). Leaving canon out is a removal, logged as a divergence,
-   not an omission from the order. Moving something smaller than a segment requires the
-   base's ruler to have finer segments.
+   segments of the stack's ruler exactly once: the base's, and any that official or
+   fanfic packages in the stack insert (§4.10); or, in a series begun by a
+   self-contained book, each project layer's work and every segment the project layers
+   and the project itself insert (§4.12). Leaving canon out is a removal, logged as a
+   divergence, not an omission from the order. Moving something smaller than a segment
+   requires the base's ruler to have finer segments.
 
-   **When the stack changes.** Adding or removing an official package that inserts
-   segments, a base version that splits one (§4.1), or a project layer or a project
+   **When the stack changes.** Adding or removing a package that inserts segments, a
+   base version that splits one (§4.1), or a project layer or a project
    `canon-timeline.md` that inserts or removes one (§4.12), leaves the order no longer a
    permutation. The host MUST NOT run any step until the order is fixed, and proposes
-   one: each new segment placed in the project order right after the segment it
-   follows on the new ruler, in ruler order, and each segment the ruler no longer has
-   dropped. The author accepts the proposal or edits it, in `setting.order`, and the
-   order audit then runs again (§13.4, E1a). A later book that inherits its order
-   (§6.14) and changes its stack sets its own.
+   one: each new segment placed in the project order right after the segment it follows
+   on the new ruler, in ruler order, and each segment the ruler no longer has dropped.
+   The author accepts the proposal or edits it, in `setting.order`, and the order audit
+   then runs again (§13.4, E1a). A later book that inherits its order (§6.14) and
+   changes its stack sets its own.
 2. **The project order replaces the ruler's order** for every comparison in this
    project: cutoffs, the time filter, and recency (§4.2, §7). Under the order above,
    `GoF:20` sorts before `PoA:17`, so at a mid-Tournament cutoff Harry and Sirius are

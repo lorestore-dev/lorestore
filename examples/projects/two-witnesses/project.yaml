@@ -12,7 +12,7 @@ parameters:
 layers:                         # from the base up
   - harry-potter@3.0.0
   - harry-potter/fanon@1.0.0
-  - harry-potter/fanfic/example@1.0.0
+  - harry-potter/fanfic/example@1.1.0
 resolution: recency             # the latest row wins, from any layer
 
 setting:

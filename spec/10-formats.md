@@ -61,7 +61,7 @@ parameters:
 layers:                         # from the base up; absent or empty = self-contained
   - harry-potter@3.0.0
   - harry-potter/fanon@1.0.0
-  - harry-potter/fanfic/example@1.0.0
+  - harry-potter/fanfic/example@1.1.0
 resolution: recency             # precedence (default) | recency | fill
 
 setting:
@@ -217,8 +217,9 @@ has a `## Works` table listing its own works, each with `Timed level: work`, and
   share a node only if each covers it at a finer level (a chapter split between two
   films is mapped scene by scene).
 
-An **official** package that inserts works (§4.10) has a `## Works` table for its own
-works, in the base's format, and an `## Insert` table in place of `## Order`:
+An **official** or **fanfic** package that inserts works (§4.10) has a `## Works` table
+for its own works, in the base's format, and an `## Insert` table in place of `##
+Order`:
 
 ```markdown
 ## Insert

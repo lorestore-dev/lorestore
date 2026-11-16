@@ -84,6 +84,7 @@ is defined.
 | A package's version differs from the stack's pin                                  | §2.8      |
 | An adaptation timecode on a point that no adaptation in the stack covers           | §4.9      |
 | An `## Insert` row placed after an unknown segment, or an inserted work that repeats a work already on the ruler | §4.10, §4.12 |
+| An `## Insert` table in a package that is not an `official` or `fanfic` package    | §4.10     |
 | A point on a project layer's work past its pinned chapter                         | §4.12     |
 | Two rows of one package share entity, attribute, tier, and point with different values (state rows or quotation columns) | §4.4 |
 | A divergence has no consequence row                                              | §6.4      |
