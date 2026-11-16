@@ -5,7 +5,7 @@ reference implementation of layer stacks (§2.2), the snapshot algorithm (§7), 
 points and adaptation timecodes (§4.2, §4.9), sync points and the project order
 (§6.7-6.8), branch and retelling modes (§6.6), hidden truths (§4.4, §6.12), theory
 conflicts (§6.13), in-world dates and world history (§4.13), the travel, mysteries,
-and lineage modules (§9.4-9.6), image prompts (§10.29), and chapter statuses (§10.18), comparing each result
+and lineage modules (§9.4-9.6), image prompts (§10.29), viewpoints (§7.7), and chapter statuses (§10.18), comparing each result
 with the
 expected answers in examples/README.md.
 
@@ -1748,6 +1748,97 @@ for label, change, want in [("an unknown kind", {"kind": "poster"}, ["kind"]), (
     front = lambda p, c=change: dict(_front(p), **c)
     check(f"P prompt error: {label}", prompt_errors("two-witnesses", bad), want)
 front = _front
+
+# --- viewpoints (§7.7, §10.23, §10.18) -----------------------------------------------
+MODES = ("none", "chapter", "scene")
+def chapter_plan(project):
+    """{chapter: (mode, [(scene, viewpoint, told from)])} from the outline, overrides applied (§10.23)."""
+    params = pyaml(project).get("parameters", {}); default = params.get("viewpoints", "none")
+    out = {}
+    for r in table(EX/"projects"/project/"bible/outline.md", "## Chapters"):
+        c = r["Chapter"]
+        if c not in out: out[c] = [r.get("Viewpoints") or default, []]
+        elif r.get("Viewpoints"): raise ValueError(f"{c}: Viewpoints off its first row")
+        out[c][1].append((r.get("Scene", ""), r.get("Viewpoint", ""), r.get("Told from", "")))
+    return {c: tuple(v) for c, v in out.items()}
+def outline_errors(project, plan=None, roster=None):
+    params = pyaml(project).get("parameters", {}); out = []
+    try: plan = plan or chapter_plan(project)
+    except ValueError as e: return [str(e)]
+    roster = roster or {r["Slug"] for r in table(EX/"projects"/project/"bible/characters/_roster.md", "## Characters")}
+    told_ok = lambda c, t: t == "end" or (chapter_ok(t) and chap(t) >= chap(c))
+    if params.get("told_from") and params["told_from"] != "end" and not chapter_ok(params["told_from"]): out.append("parameters.told_from")
+    for c, (mode, rows) in plan.items():
+        if mode not in MODES: out.append(f"{c}: unknown mode {mode}"); continue
+        if mode == "chapter" and (len(rows) != 1 or rows[0][1] in ("", "—") or rows[0][0]): out.append(f"{c}: chapter mode needs one row and one viewpoint")
+        if mode == "scene" and ([s for s, _, _ in rows] != [str(i) for i in range(1, len(rows) + 1)] or any(v == "" for _, v, _ in rows)): out.append(f"{c}: scenes")
+        if mode == "none" and any(v for _, v, _ in rows): out.append(f"{c}: a viewpoint in a none chapter")
+        for _, v, t in rows:
+            if v not in ("", "—") and v not in roster: out.append(f"{c}: {v} not in the roster")
+            if t and t != "—" and (v in ("", "—") or not told_ok(c, t)): out.append(f"{c}: bad Told from {t}")
+    return out
+def knowledge_point(project, chapter, told):
+    """The chapter whose knowledge a viewpoint narrates with (§7.7); None for the end."""
+    told = told or pyaml(project).get("parameters", {}).get("told_from") or "—"
+    return chapter if told == "—" else None if told == "end" else told
+def knows(project, who, point):
+    """The secrets a character knows at a knowledge point, from the project's knowledge.md (§7.3, §4.11)."""
+    rows = table(EX/"projects"/project/"bible/knowledge.md", "## Knowledge")
+    return sorted(r["Secret"] for r in rows if r["Character"] == who and r["State"] == "knows"
+                  and (not r.get("From chapter") or point is None or chap(r["From chapter"]) <= chap(point)))
+def may_tell(project, chapter, who, told=""):
+    """What the narration may state: the viewpoint's knowledge, less the mysteries not yet revealed (§7.7, §9.5)."""
+    unrevealed = {r["Mystery"] for r in table(EX/"projects"/project/"bible/mysteries.md", "## Mysteries") if chapter_cmp(chapter, r["Revealed at"]) < 0}
+    return [s for s in knows(project, who, knowledge_point(project, chapter, told)) if s not in unrevealed]
+def drafted_viewpoints(text, default):
+    """(mode, [(viewpoint, told from)]) recorded in a chapter: its front matter, or its scene markers (§10.18)."""
+    fm = yaml.safe_load(text.split("---")[1]); mode = fm.get("viewpoints", default)
+    if mode != "scene": return mode, [(fm.get("viewpoint", ""), fm.get("told-from", ""))] if mode == "chapter" else []
+    marks = [dict(kv.split("=", 1) for kv in m.split()) for m in re.findall(r"<!-- scene: (.*?) -->", text)]
+    return mode, [(m.get("viewpoint", ""), m.get("told-from", "")) for m in marks]
+def viewpoint_warnings(project, chapter, text):
+    default = pyaml(project).get("parameters", {}).get("viewpoints", "none")
+    mode, rows = chapter_plan(project)[chapter]
+    planned = (mode, [(v, t) for _, v, t in rows] if mode != "none" else [])
+    return [] if drafted_viewpoints(text, default) == planned else [chapter]
+
+LRP = chapter_plan("lantern-road")
+check("V the project's mode, and the outline's overrides", {c: m for c, (m, _) in LRP.items()},
+      {"chapter-01": "chapter", "chapter-02": "none", "chapter-03": "chapter", "chapter-05": "chapter", "chapter-06": "scene", "chapter-07": "chapter", "chapter-11": "chapter"})
+check("V chapter 6: two scenes, two viewpoints", [v for _, v, _ in LRP["chapter-06"][1]], ["ines-varga", "tomas-hale"])
+check("V lantern-road's outline is valid", outline_errors("lantern-road"), [])
+check("V the knowledge point: told from the end, in the moment, or the project default",
+      (knowledge_point("lantern-road", "chapter-03", ""), knowledge_point("lantern-road", "chapter-03", "—"), knowledge_point("lantern-road", "chapter-03", "chapter-07")), (None, "chapter-03", "chapter-07"))
+check("V told from the end, Ines knows the answer in chapter 3", knows("lantern-road", "ines-varga", knowledge_point("lantern-road", "chapter-03", "")), ["lamps-going-out"])
+check("V in the moment, she does not", knows("lantern-road", "ines-varga", knowledge_point("lantern-road", "chapter-03", "—")), [])
+check("V told from chapter 7, still not: she learns it in chapter 11", knows("lantern-road", "ines-varga", "chapter-07"), [])
+check("V told from never moves a reveal: chapter 3 may not tell it", may_tell("lantern-road", "chapter-03", "ines-varga"), [])
+check("V chapter 11 may", may_tell("lantern-road", "chapter-11", "ines-varga"), ["lamps-going-out"])
+check("V the innkeeper knows all along, and his scene may not tell it", (knows("lantern-road", "tomas-hale", "chapter-06"), may_tell("lantern-road", "chapter-06", "tomas-hale", "—")), (["lamps-going-out"], []))
+def bad_plan(**changes):
+    p = dict(LRP)
+    for c, v in changes.items(): p[c] = v
+    return outline_errors("lantern-road", plan=p)
+for label, plan, want in [
+        ("an unknown mode", {"chapter-02": ("all", [])}, 1),
+        ("a chapter-mode chapter with no viewpoint", {"chapter-03": ("chapter", [("", "", "")])}, 1),
+        ("a chapter-mode chapter with two rows", {"chapter-03": ("chapter", [("", "ines-varga", ""), ("", "ines-varga", "")])}, 1),
+        ("a scene without a viewpoint", {"chapter-06": ("scene", [("1", "ines-varga", ""), ("2", "", "")])}, 1),
+        ("scenes not numbered from 1", {"chapter-06": ("scene", [("2", "ines-varga", ""), ("3", "tomas-hale", "—")])}, 1),
+        ("a viewpoint in a none chapter", {"chapter-02": ("none", [("", "ines-varga", "")])}, 1),
+        ("a viewpoint not in the roster", {"chapter-03": ("chapter", [("", "harry-potter", "")])}, 1),
+        ("told from an earlier chapter", {"chapter-05": ("chapter", [("", "ines-varga", "chapter-03")])}, 1),
+        ("told from where no one narrates", {"chapter-06": ("scene", [("1", "ines-varga", ""), ("2", "—", "end")])}, 1)]:
+    check(f"V outline error: {label}", len(bad_plan(**plan)), want)
+check("V a scene with no viewpoint character (—) is valid", bad_plan(**{"chapter-06": ("scene", [("1", "ines-varga", ""), ("2", "—", "")])}), [])
+d = pyaml("lantern-road")
+for k, v, ok in [("viewpoints", "scene", True), ("viewpoints", "all", False), ("told_from", "chapter-12", True), ("told_from", "later", False)]:
+    d2 = copy.deepcopy(d); d2["parameters"][k] = v; check(f"V schema: {k} {v!r}", schema("project").is_valid(d2), ok)
+DRAFT6 = "---\nchapter: 6\nstatus: drafted\nviewpoints: scene\n---\n<!-- scene: viewpoint=ines-varga -->\n...\n<!-- scene: viewpoint=tomas-hale told-from=— -->\n...\n"
+check("V chapter 6 as drafted matches its outline", viewpoint_warnings("lantern-road", "chapter-06", DRAFT6), [])
+check("V a drafted viewpoint that differs from the outline warns", viewpoint_warnings("lantern-road", "chapter-06", DRAFT6.replace("viewpoint=tomas-hale", "viewpoint=ines-varga")), ["chapter-06"])
+check("V chapter 2 drafted with no viewpoint matches", viewpoint_warnings("lantern-road", "chapter-02", "---\nchapter: 2\nstatus: drafted\nviewpoints: none\n---\n"), [])
+check("V a frames marker carries the viewpoint too", drafted_viewpoints("---\nchapter: 1\nviewpoints: scene\n---\n<!-- scene: at=PoA:21@main travelers=harry-potter viewpoint=harry-potter -->\n", "none"), ("scene", [("harry-potter", "")]))
 
 # --- serial buffer and early access (§13.3, §13.9, §10.18) ---------------------------
 STATUS = ["drafted", "line-edited", "final", "early-access", "released"]

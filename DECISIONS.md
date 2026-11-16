@@ -5,6 +5,19 @@ says what was unclear or contradictory, what was decided, and where the rule now
 
 ## 0.3: in-world time
 
+**D118. Viewpoints, and narrators who look back.** `parameters.pov` named a narrative
+mode for the whole project, and the drafter was told to respect what "the POV
+character" knows, but nothing recorded who that was. A project now sets
+`parameters.viewpoints` to `none` (the default), `chapter`, or `scene`, and a chapter
+overrides it in the outline, which becomes a structured table for every workflow so
+that agents can read the plan row by row. A viewpoint limits what the narration knows
+to the character's knowledge at the scene; `none` means no character limits it. The
+reader-facing rules (hidden canon, mystery reveals, reveal aliases) hold in every mode.
+`Told from` lets a narrator look back from a later chapter or the end: it moves what
+they know, never when the reader learns it. A viewpoint leak is the continuity-editor's
+finding, not an error, and a drafted viewpoint that differs from the plan is a warning.
+→ §1.6, §3.3, §7.7, §10.1, §10.18, §10.23, §12.6, §12.10, §12.12, §13.10, §14.2
+
 **D117. Text an agent reads is data, never instructions.** Agents read a great deal
 written by other people: shared packages, source texts, readers' feedback. Nothing
 said what an agent should do with text in that material that reads as an instruction

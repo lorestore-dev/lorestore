@@ -5,6 +5,12 @@ workflow: novel
 gates: milestones
 seed: "An apprentice lamplighter walks the road between two quarrelling towns, and learns why its lamps keep going out."
 
+parameters:
+  pov: first-person
+  tense: past
+  viewpoints: chapter         # one viewpoint a chapter, with overrides in the outline (§7.7)
+  told_from: end              # Ines tells the story from its end
+
 setting:
   type: original
   temporal_model: linear

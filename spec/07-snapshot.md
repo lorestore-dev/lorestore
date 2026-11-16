@@ -219,3 +219,84 @@ The file MUST begin with a header recording every input: the stack (each layer w
 version or pinned chapter), the resolution mode, the project order (and where it is
 inherited from), the cutoff and the sync point it came from, the world point (frames),
 the position, and the revision of each ledger, seam decisions included.
+
+## 7.7 Viewpoints
+
+Whose eyes a scene is seen through decides what its narration can know. A project MAY
+record a **viewpoint character** for each chapter or scene, so that the drafter writes
+to that character's knowledge and the continuity-editor can check it.
+
+**Modes.** `parameters.viewpoints` in `project.yaml` (§10.1) sets the project's mode.
+A chapter's row in the outline (§10.23) MAY override it for that chapter.
+
+| Mode              | Means                                                                                   |
+| ----------------- | --------------------------------------------------------------------------------------- |
+| `none` (default)  | The narration has no viewpoint character, so no character's knowledge limits it. The reader-facing rules below still apply |
+| `chapter`         | The chapter has one viewpoint character                                                 |
+| `scene`           | Each scene has its own viewpoint character, or none (`—`)                               |
+
+A book told from one character's eyes, chapter by chapter, is set to `chapter`. Its
+chapter 14, which cuts between two characters, overrides to `scene`. Its prologue,
+which shows a crime from outside and enters no one's head, overrides to `none`.
+
+**What a viewpoint limits.** In a scene with a viewpoint character, the narration MAY
+state only what that character knows at the scene's **knowledge point**:
+
+- their snapshot (§7.2) at the knowledge point, including their own rows in
+  `knowledge.md` (§7.3): the secrets they know, and how they know them;
+- identities they have learned: a reveal alias (§10.9) is narrated by its true identity
+  only from the point the viewpoint character knows it;
+- what happens in front of them in the scene, as they perceive it.
+
+Anything else reaches the narration only as the character perceives or guesses it. The
+knowledge point is the scene's own position: its chapter, at that chapter's cutoff. A
+`Told from` moves it later (below).
+
+**The reader-facing rules** apply in every mode, whoever narrates, and whatever they
+know: no hidden canon (§6.12), no mystery answered before its `Revealed at` (§9.5), and
+no reveal alias named before its `Revealed at` (§10.9). A viewpoint limits what the
+narrator knows; these rules limit what the reader is told. Every scene obeys both.
+
+### Told from
+
+A narrator looking back on events ("I did not know it then, but…") knows more than they
+did at the time. **`Told from`** says when the narrator is telling the story: a chapter
+id, or `end` for the story's last chapter. It MUST be at or after the chapter of the
+scene it applies to.
+
+1. **It moves the knowledge point, and nothing else.** The narrator knows what the
+   viewpoint character knows at the `Told from` chapter, at that chapter's cutoff,
+   instead of what they knew at the scene.
+2. **It never moves a reveal.** The reader-facing rules are judged at the scene's own
+   chapter. A narrator who already knows a mystery's answer still MUST NOT state it, or
+   anything that gives it away, before the mystery's `Revealed at`, and the same holds
+   for reveal aliases and hidden canon. The narrator MAY say that they learned something
+   later, without saying what.
+3. **It is set in two places.** `parameters.told_from` gives a default for the whole
+   project. An outline row's `Told from` overrides it for that chapter or scene, and `—`
+   there means "in the moment": the scene's own position. With neither, the knowledge
+   point is the scene's own position.
+4. **It applies only to a viewpoint character.** A scene with no viewpoint character
+   has no knowledge point to move, so `Told from` is empty there.
+
+**Example.** In `lantern-road` (§10.23), Ines narrates the whole book from its end
+(`told_from: end`). She learns in chapter 11 who has been putting out the road's lamps.
+
+- In chapter 3 she finds the lamps by the inn dark. She knows the answer as she tells
+  it, so she MAY write that she would understand those dead lamps only months later.
+  She MUST NOT write who did it, or how: the mystery is revealed in chapter 11.
+- In the same chapter she MAY describe the burned-dry wicks, the clue planted there,
+  exactly as she saw them then.
+- Told in the moment (`—`), the same scene would let her know only what she knew in
+  chapter 3: she could not even hint that an answer was coming.
+- In chapter 6, scene 2 is the innkeeper's, told in the moment. He knows the answer all
+  along, and the narration still MUST NOT state it. It can show him alone in the cellar
+  with the oil casks, as the outline plans, without saying what he does there.
+
+**Checks.** The continuity-editor raises a **viewpoint leak** when narration states
+something its viewpoint character does not know at the knowledge point (§12.12). It is
+a finding for the author, because dramatic irony and unreliable narrators can be
+deliberate. Breaking a reader-facing rule is not a viewpoint leak: it is the leak it
+always was (§6.9). A host SHOULD warn when a chapter, as drafted, records a different
+mode or viewpoint from its outline row (§10.18), since the drafter may have had a
+reason and the author decides which to keep.

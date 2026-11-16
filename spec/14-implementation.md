@@ -134,6 +134,8 @@ is defined.
 | A renumbering moves a released or early-access chapter, or a chapter at or before another project's pin, or leaves a chapter id unrewritten | §13.10 |
 | A change to an early-access chapter, or a revisable released one, with no `revisions.md` row or no reader note | §10.22 |
 | A feedback file's `chapter` does not match its folder                            | §10.25    |
+| An outline row with an unknown `Viewpoints` mode, or one not on its chapter's first row; a chapter in `chapter` mode without exactly one row and one viewpoint; a scene in `scene` mode without a viewpoint or `—`, or scenes not numbered from 1; a viewpoint in a `none` chapter; a viewpoint that is not a slug in the stack's roster | §10.23 |
+| A `Told from` (in the outline, `parameters.told_from`, or a chapter) that is not a chapter id or `end`, is before its chapter, or is given where there is no viewpoint character | §7.7, §10.23 |
 | A prompt file with an unknown `kind`, a subject that is not in the roster or `places.md`, an invalid `cutoff`, `position`, or `date`, or no `## Gaps` or `## Sources` | §10.29 |
 | A `time-travel.md` entry has no `model`, or an unknown model or free-will value  | §10.24    |
 | A traveler leg names a mechanism missing from `time-travel.md`                   | §10.16    |
@@ -151,7 +153,8 @@ stale (§7.6), when a project's sync points go backwards
 (§7.5), when a story event's date falls outside the lifetime of an entity it lists, or
 before its chapter's cutoff date (§4.13), when timecodes in one episode or film
 contradict its scene order (§4.2), when a table has an added column that `index.md`
-does not register (§10.0), when a journey is faster than the routes allow (§9.4), when
+does not register (§10.0), when a chapter as drafted records a different viewpoint mode
+or viewpoint from its outline row (§7.7), when a journey is faster than the routes allow (§9.4), when
 a mystery is unfair (§9.5), when a parent is under 12 at a birth, a child is born more
 than a year after a parent's death, or a title is held outside its holder's lifetime
 (§9.6), and when the author releases a serial chapter that is not

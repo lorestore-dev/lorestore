@@ -75,6 +75,8 @@ parameters:
   pov: third-limited
   tense: past
   target_length: 90000          # words
+  viewpoints: chapter           # none (default) | chapter | scene (§7.7)
+  told_from: end                # optional: a chapter id or end, for a narrator looking back (§7.7)
 
 layers:                         # from the base up; absent or empty = self-contained
   - harry-potter@3.2.1
@@ -753,10 +755,26 @@ released: 2026-11-03    # serial only: set by the release skill
 - `early-access` and `released` record the date of each step. A released chapter keeps
   its `early-access` date if it had one.
 
+**Viewpoints** (§7.7). In a project that records viewpoints, the front matter records
+them as drafted, beside the outline's plan:
+
+```yaml
+viewpoints: scene         # only where the chapter overrides parameters.viewpoints
+viewpoint: ines-varga     # in chapter mode: the chapter's viewpoint character
+told-from: end            # only where it differs from parameters.told_from; — for in the moment
+```
+
+In `scene` mode, `viewpoint` and `told-from` move from the front matter to each scene's
+marker (below).
+
 Markers in the prose:
 
-- **Frames projects** open each scene with a marker:
-  `<!-- scene: at=PoA:21@main travelers=harry-potter,hermione-granger -->`
+- **Scene markers.** Each scene of a chapter in `scene` mode, and every scene of a
+  frames project, opens with a marker of `key=value` pairs: `viewpoint` and, where it
+  differs from the project's, `told-from` (viewpoints, §7.7); `at` and `travelers`
+  (frames, §9.1). For example,
+  `<!-- scene: viewpoint=tomas-hale told-from=— -->`, or
+  `<!-- scene: at=PoA:21@main travelers=harry-potter,hermione-granger viewpoint=harry-potter -->`
 - **Missing canon** is marked where the drafter needed it:
   `<!-- TODO: needs bible: <what is missing> -->`
 - **Hidden canon** is marked where a beat touches a hidden truth (§6.12):
@@ -933,9 +951,26 @@ released installment of a serial with `serial.released: revisable`.
   required for every row, whatever `serial.released` says, because these readers have
   already seen the earlier text.
 
-## 10.23 `outline.md` in a serial
+## 10.23 `outline.md`
 
-The outline groups installments into arcs, one heading per arc:
+The outline is the story's plan: its acts and chapters in prose, the setup and payoff
+ledger, and a table of chapters, which agents read row by row. Free prose MAY surround
+the table.
+
+In a **novel** or a **short story**, the table sits under `## Chapters`:
+
+```markdown
+## Chapters
+| Chapter    | Beat                                         | Scene | Viewpoints | Viewpoint  | Told from |
+| ---------- | -------------------------------------------- | ----- | ---------- | ---------- | --------- |
+| chapter-01 | Ines lights her first lamp in Highcairn      |       |            | ines-varga |           |
+| chapter-02 | A lamp gutters out on the empty road, unseen |       | none       |            |           |
+| chapter-06 | The inn on a busy night                      | 1     | scene      | ines-varga |           |
+| chapter-06 | The innkeeper alone with the oil casks       | 2     |            | tomas-hale | —         |
+```
+
+In a **serial**, the outline groups installments into arcs, one heading per arc, each
+with the same table:
 
 ```markdown
 ## Arc 1 — <title>
@@ -947,6 +982,22 @@ The outline groups installments into arcs, one heading per arc:
 An arc's installments are the chapters in its table. The architect appends a new arc at
 each planning step (A1, §13.3). Beats for released chapters are not rewritten; beats for
 chapters still in the buffer may be.
+
+- `Chapter` and `Beat` are required. The other four columns record viewpoints (§7.7).
+  They follow `Beat`, in the order shown, and are needed only where the project's mode
+  or a chapter's override is not `none`.
+- Rows are in chapter order. A chapter has one row, or, in `scene` mode, one row per
+  scene.
+- `Scene`: the scene's number within its chapter, from 1. Empty unless the chapter is in
+  `scene` mode.
+- `Viewpoints`: the chapter's override of `parameters.viewpoints`, `none`, `chapter`, or
+  `scene`, on the chapter's first row only. Empty when the chapter follows the project.
+- `Viewpoint`: the slug of the viewpoint character (§10.9): on the one row of a chapter
+  in `chapter` mode, and on each row of a chapter in `scene` mode, where `—` means that
+  scene has no viewpoint character. Empty in a chapter in `none` mode.
+- `Told from`: a chapter id or `end`, at or after the row's chapter, for a narrator
+  looking back; `—` for "in the moment"; empty to take `parameters.told_from` (§7.7).
+  Always empty where `Viewpoint` is empty or `—`.
 
 ## 10.24 `time-travel.md` (frames)
 

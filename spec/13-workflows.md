@@ -484,7 +484,9 @@ step.
     sync points, the ledger's `First occurs`, `Until`, `Absorbed in`, and
     `Decided in`, story-dated rows' `From chapter`, and the chapters of `outline.md`,
     `timeline.md`, `game-state.md`, `timelines.md`, `branches.md`, and
-    `revisions.md`, and the `Planted at` and `Revealed at` cells of `mysteries.md`;
+    `revisions.md`, the `Planted at` and `Revealed at` cells of `mysteries.md`, the
+    outline's `Told from` cells, the chapters' and scene markers' `told-from`, and
+    `parameters.told_from`;
   - the folders and `chapter` fields of human feedback (§10.25).
 
   It does not rewrite `reviews/` or `showrunner-log.md`, which are advisory history; the

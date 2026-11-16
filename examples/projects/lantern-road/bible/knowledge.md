@@ -8,4 +8,5 @@
 ## Knowledge
 | Character  | Secret          | State | As of | Source  | Citation | From chapter |
 | ---------- | --------------- | ----- | ----- | ------- | -------- | ------------ |
+| tomas-hale | lamps-going-out | knows |       | project | premise  |              |
 | ines-varga | lamps-going-out | knows |       | project | ch.11    | chapter-11   |

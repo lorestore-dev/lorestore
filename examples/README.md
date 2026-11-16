@@ -32,7 +32,8 @@ examples/
     ├── three-brothers/          # a short story adopting a fan theory
     ├── the-long-way-back/       # Star Trek, established, a serial with a buffer and early access, frames
     ├── lantern-road/            # a self-contained book, with a story-dated row and its own calendar;
-    │                            #   routes and journey times, a mystery, and a map prompt
+    │                            #   routes and journey times, a mystery, a map prompt, and
+    │                            #   viewpoints, told from the end
     ├── lantern-road-before/     # its split-frame follow-up: before and after book 1, on the series ruler
     └── hogwarts-at-warp/        # the crossover: two bases and the universe layer, a cutoff per base
 ```
@@ -543,6 +544,28 @@ and Lowmere to the south, from `places.md`, and the two halves of the road the s
 length, from the routes. Both prompts list what the bible does not give under
 `## Gaps`.
 
+## Viewpoints
+
+**V1. Modes and overrides.** `lantern-road` records a viewpoint per chapter
+(`viewpoints: chapter`, §7.7). Its outline (§10.23) overrides chapter 2 to `none` (a
+lamp going out on an empty road, seen by no one) and chapter 6 to `scene`: scene 1 is
+Ines's, scene 2 the innkeeper's (`tomas-hale`). Every other chapter is Ines's.
+
+**V2. Told from the end.** Ines tells the story from its end (`told_from: end`). Her
+knowledge point in chapter 3 is the end, so she knows `lamps-going-out`, which she
+learns in chapter 11. In the moment (`Told from: —`) she would not, and told from
+chapter 7 she still would not. Either way, chapter 3 may not tell the reader the
+answer: the mystery is revealed in chapter 11 (§9.5), and `Told from` never moves a
+reveal. Chapter 11 may.
+
+**V3. A viewpoint who knows.** The innkeeper knows the answer all along, and his scene
+in chapter 6 is told in the moment. His narration still may not state it before
+chapter 11.
+
+**V4. Drafted against planned.** Chapter 6 drafted with the scene markers
+`viewpoint=ines-varga` and `viewpoint=tomas-hale told-from=—` matches its outline. With
+Ines in both scenes, the host warns (§7.7).
+
 ## Validation cases
 
 A conforming host MUST report each of these if introduced:
@@ -594,7 +617,9 @@ A conforming host MUST report each of these if introduced:
 - a `parents` value that is not in the roster, or two characters each the other's parent, or one descended from herself, with no acceptance (`ancestry-cycle`, §9.6);
 - a character born in 2051 whose parent is born in 2070, with no acceptance (`born-before-parent`, §9.6);
 - `modules.romance`, or `lineage: "yes"`, in `project.yaml` (rejected by the schema);
-- a prompt of kind `poster`, cut off at `GoF:38`, or with a subject `neville-longbottom`, who is not in the stack's roster (§10.29).
+- a prompt of kind `poster`, cut off at `GoF:38`, or with a subject `neville-longbottom`, who is not in the stack's roster (§10.29);
+- in `lantern-road`'s outline: a mode `all`; chapter 3 with no viewpoint, or with two rows; a scene of chapter 6 with no viewpoint, or its scenes numbered from 2; a viewpoint in chapter 2; `harry-potter` as a viewpoint (not in the roster); chapter 5 told from `chapter-03`; or a `Told from` on a scene whose viewpoint is `—` (§10.23, §7.7);
+- `viewpoints: all` or `told_from: later` in `project.yaml` (rejected by the schema).
 
 A conforming host SHOULD warn if `the-long-way-back`'s `## Columns` row for `Notes` is
 deleted (an unregistered column, §10.0), if a `timeline.md` event dated `1975` lists

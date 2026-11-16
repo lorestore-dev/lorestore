@@ -186,6 +186,10 @@ story sits in canon, but not prose.
   - Interrogate the seed into a logline; find the **central dramatic question**.
   - Break the story into acts, chapters, and scenes. Each scene is **goal, conflict,
     turn**; a scene with no turn is description, so cut or merge it.
+  - **Viewpoints** (§7.7): where the project or a chapter records them, give each
+    chapter or scene its viewpoint character in the outline's table (§10.23), and its
+    `Told from` where the narrator looks back. Choose the viewpoint that serves the
+    scene's turn, and set a chapter's override where its shape changes.
   - Track setups and payoffs in the outline's ledger so nothing is planted and
     forgotten.
   - **Mysteries** (§9.5): plan each mystery's clues and red herrings with the outline,
@@ -277,7 +281,9 @@ Three modes. The workflow step selects one.
 ## 12.10 `drafter`: the only prose generator
 
 - **Reads:**
-  - this chapter's beat from `bible/outline.md`;
+  - this chapter's rows from `bible/outline.md`: its beats, and its viewpoints (§7.7);
+  - for each viewpoint character, their snapshot at the scene's knowledge point (§7.7),
+    with their `knowledge.md` rows;
   - `bible/style.md`;
   - the **snapshot** (§7) of each entity in the chapter's cast, and of each relationship
     between them, at this chapter's cutoff (from the sync points) and position (from
@@ -299,6 +305,11 @@ Three modes. The workflow step selects one.
   - Render each scene as **goal, rising conflict, turn**; enter late, leave early.
   - Keep POV and tense discipline; plant and pay off per the outline's ledger; use
     glossary spellings.
+  - **Viewpoints** (§7.7): narrate each scene within its viewpoint character's knowledge
+    at its knowledge point, and never past the reader-facing rules, however much a
+    narrator who is told from later knows. Record the chapter's viewpoints, as drafted,
+    in its front matter and scene markers (§10.18). A viewpoint that differs from the
+    outline is the author's to keep or undo (§7.7).
   - **Respect the snapshot:** use only canon true at the chapter's cutoff, from the
     stack's layers, as amended by the ledgers.
   - **Don't add to canon entities silently.** A new physical detail, possession, or
@@ -362,7 +373,9 @@ snapshot, and the reviewers can rely on them.
 - **Duties:** flag **manuscript vs. bible**, **manuscript vs. manuscript**, and
   **drift** (spelling or terminology); for LitRPG, check the game-state invariants
   (§9.2); rank by severity (a reader-breaking contradiction outranks a minor slip, which
-  outranks cosmetic drift). In a world with a calendar, raise the date warnings of
+  outranks cosmetic drift). Where viewpoints are recorded, flag each **viewpoint
+  leak** (§7.7): narration that states what its viewpoint character does not know at the
+  scene's knowledge point. In a world with a calendar, raise the date warnings of
   §4.13: events outside a participant's lifetime, ages that the dates rule out, and
   story events dated before the cutoff's date. Raise the module warnings too: journeys
   faster than the routes allow (travel, §9.4), unfair mysteries (§9.5), and parents,

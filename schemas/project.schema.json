@@ -53,6 +53,16 @@
         "target_length": {
           "type": "integer",
           "minimum": 1
+        },
+        "viewpoints": {
+          "enum": ["none", "chapter", "scene"],
+          "default": "none",
+          "description": "How viewpoint characters are recorded; a chapter may override it in the outline. See spec/07-snapshot.md §7.7."
+        },
+        "told_from": {
+          "type": "string",
+          "pattern": "^(chapter-[0-9]{2,}|end)$",
+          "description": "Default point a narrator looking back tells the story from. See spec/07-snapshot.md §7.7."
         }
       }
     },

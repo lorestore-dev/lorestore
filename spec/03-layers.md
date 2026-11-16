@@ -103,7 +103,7 @@ any project file (§13.10).
 | File (under `bible/`)                       | Holds                                                                                | Writer             |
 | ------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------ |
 | `premise.md`                                | Logline, central dramatic question, promised experience                              | architect          |
-| `outline.md`                                | Acts, chapters, scene beats, and the setup/payoff ledger                             | architect          |
+| `outline.md`                                | Acts, chapters, scene beats with their viewpoints, and the setup/payoff ledger (§10.23) | architect       |
 | `style.md`                                  | The voice contract and the text-and-speech formatting table                          | line-editor        |
 | `divergences.md`                            | Established worlds: the divergence ledger and its consequences (§6.4)                | worldbuilder (curator mode) |
 | `sync-points.md`                            | Established worlds: the cutoff for each chapter (§6.7)                               | architect          |
