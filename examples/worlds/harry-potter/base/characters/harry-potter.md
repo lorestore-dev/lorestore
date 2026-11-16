@@ -10,6 +10,9 @@ origin: canon
 | --------- | ----------------------------------------- | ------ | -------------- | ------------------------------------------ |
 | glasses   | round                                     | PS:2   | books          | PS ch.2                                    |
 | born      | 1980-07-31                                | CoS:8  | books          | PS ch.4 (the day); CoS ch.8 (the year, from Nick's 500th deathday) |
+| parents   | james-potter; lily-potter                 | PS:1   | books          | PS ch.1                                    |
+| guardians | petunia-dursley; vernon-dursley           | PS:1   | books          | PS ch.1, left with his aunt and uncle      |
+| guardians | (unset)                                   | DH:7   | books          | DH ch.7, he comes of age                   |
 | residence | cupboard under the stairs, 4 Privet Drive | PS:2   | books          | PS ch.2                                    |
 | residence | Dudley's second bedroom                   | PS:3   | books          | PS ch.3                                    |
 | house     | Gryffindor                                | PS:7   | books          | PS ch.7                                    |

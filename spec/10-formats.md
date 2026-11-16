@@ -42,6 +42,7 @@ this chapter requires front matter, its keys are listed.
 | citation    | free text that locates the evidence, for example `PS ch.6` or `TNG "Q Who"` |
 | chapter     | a manuscript chapter id, `chapter-<NN>`                                     |
 | date        | an in-world date in the stack's calendar, such as `1991-07-31`, `..1991`, or `~1975` (§4.13) |
+| duration    | a length of in-world time, such as `3d`, `4d..6d`, or `~8h` (§9.4)          |
 
 ## 10.1 `project.yaml`
 
@@ -60,9 +61,9 @@ parameters:
   target_length: 90000          # words
 
 layers:                         # from the base up; absent or empty = self-contained
-  - harry-potter@3.1.0
-  - harry-potter/fanon@1.0.1
-  - harry-potter/fanfic/example@1.2.0
+  - harry-potter@3.2.0
+  - harry-potter/fanon@1.0.2
+  - harry-potter/fanfic/example@1.2.1
 resolution: recency             # precedence (default) | recency | fill
 
 setting:
@@ -77,6 +78,9 @@ setting:
 modules:
   litrpg: false
   languages: false
+  travel: false
+  mysteries: false
+  lineage: false
 ```
 
 - `layers`: layer references, from the base up (§2.2): `<package-id>@<version>`,
@@ -124,7 +128,7 @@ name: "Harry Potter fanon"
 version: 1.0.0
 status: open-for-extraction     # open-for-extraction | locked
 relies-on:                      # pinned; empty for a base package
-  - harry-potter@3.1.0
+  - harry-potter@3.2.0
 ```
 
 - `id` MUST match the package's folder (§2.3). A `base` package's id is the bare fandom
@@ -360,10 +364,12 @@ MAY follow the table it excuses, in `canon-timeline.md` or in any state-history 
 | born-died | born    | Born in 2051, she travels back and dies in 1990  | EP:4     |
 ```
 
-- `Check`: `outside-parent`, `in-world-after`, or `born-died`.
+- `Check`: `outside-parent`, `in-world-after`, or `born-died` (§4.13); or, with the
+  lineage module, `born-before-parent` or `ancestry-cycle` (§9.6).
 - `Subject`: for `outside-parent`, the node. Otherwise the row's key: its attribute in
   a single-entity file, or `<entity>.<attribute>` in a multi-entity one (the `born`
-  attribute, for `born-died`).
+  attribute, for `born-died` and `born-before-parent`; any `parents` or
+  `descends-from` row on the cycle, for `ancestry-cycle`).
 - `Reason`: free text, required.
 - `Citation`: required in a package, where the acceptance records what the source does.
   In a project, it MAY be empty.
@@ -654,8 +660,10 @@ source `bridge`. `As of` in crossover canon is a ruler point qualified by world
 ```
 
 Rows are in manuscript order. `Story time` is free text (an in-world date or "three
-days later"). `Entities` lists the slugs involved. In a stack with a calendar, a `Date`
-column MAY follow `Story time`, holding the event's date (§4.13) when it is known.
+days later"). `Entities` lists the slugs involved. Two optional columns MAY follow the
+required ones, in this order: in a stack with a calendar, `Date`, holding the event's
+date (§4.13) when it is known; and with the travel module, `Place`, the id in
+`places.md` of where the event happens (§9.4).
 
 ## 10.16 `timelines.md` and `branches.md` (frames)
 
@@ -970,3 +978,73 @@ received: 2026-09-17
 
 The beta-reader folds these notes into its review's `## Priorities`, each marked as
 human (§12.18).
+
+## 10.26 `routes.md` (travel)
+
+```markdown
+## Modes
+| Mode | Name    | Notes |
+| ---- | ------- | ----- |
+| foot | On foot |       |
+| cart | By cart |       |
+
+## State history
+| Route                   | Attribute | Value | As of | Source  | Citation |
+| ----------------------- | --------- | ----- | ----- | ------- | -------- |
+| highcairn+the-halfway-inn | foot    | 3d    |       | project | premise  |
+| highcairn+the-halfway-inn | cart    | 2d    |       | project | premise  |
+```
+
+- `Mode`: an id (§10.0), and a key of the file (§2.7): a higher layer adds modes, and
+  never redefines one.
+- `Route`: two place ids from `places.md`. Joined by `+`, in alphabetical order, the
+  route runs both ways. Joined by `>`, it runs one way only, from the first to the
+  second (a river current, a one-way portal).
+- `Attribute`: a mode from `## Modes`, or `distance` (free text, for readers).
+- `Value`, for a mode: a duration (§9.4), `—` (the mode cannot make the journey), or
+  `(unset)` (the route closes to that mode).
+
+## 10.27 `mysteries.md` (mysteries)
+
+```markdown
+## Mysteries
+| Mystery        | Question                                   | Revealed at | Notes |
+| -------------- | ------------------------------------------ | ----------- | ----- |
+| moody-identity | Who is the Moody teaching Defence this year? | GoF:35    |       |
+
+## Clues
+| Mystery        | Clue | Kind        | Points to                          | Planted at | Needed | Citation |
+| -------------- | ---- | ----------- | ---------------------------------- | ---------- | ------ | -------- |
+| moody-identity | c1   | clue        | Moody drinks only from his own flask | GoF:13   | yes    | GoF ch.13 |
+| moody-identity | c3   | red-herring | Karkaroff, a former Death Eater    | GoF:27     | no     | GoF ch.27 |
+```
+
+- `Mystery`: a secret in `knowledge.md` (§10.5), which holds the answer. A key of the
+  file.
+- `Revealed at`: where the reader learns the answer: a ruler point in a package, or a
+  chapter id in a project.
+- `Clue`: an id, unique within its mystery.
+- `Kind`: `clue` or `red-herring`.
+- `Points to`: what the clue suggests, in free text.
+- `Planted at`: where the clue first appears, in the same form as `Revealed at`.
+- `Needed`: `yes` if a reader needs the clue to reach the answer, otherwise `no`. A red
+  herring is always `no`.
+- A higher layer, a project included, MAY add clues to a lower layer's mystery, under
+  the same `Mystery` id. It MUST NOT change or remove them: a project that moves or
+  drops a canon clue logs a divergence (§6.2).
+
+## 10.28 `titles.md` (lineage)
+
+A multi-entity state history (§10.5) whose entities are titles and offices:
+
+```markdown
+## State history
+| Entity                 | Attribute | Value                          | As of  | Source | Citation |
+| ---------------------- | --------- | ------------------------------ | ------ | ------ | -------- |
+| headmaster-of-hogwarts | holder    | albus-dumbledore               | PS:4   | books  | PS ch.4  |
+| headmaster-of-hogwarts | holder    | dolores-umbridge               | OotP:28 | books | OotP ch.28 |
+```
+
+- `holder`: a slug (§10.9), or `(unset)` while the title is vacant.
+- `rule`: how the title passes on, in free text.
+- Other attributes are free.

@@ -10,9 +10,9 @@ parameters:
   target_length: 90000
 
 layers:                         # from the base up
-  - harry-potter@3.1.0
-  - harry-potter/fanon@1.0.1
-  - harry-potter/fanfic/example@1.2.0
+  - harry-potter@3.2.0
+  - harry-potter/fanon@1.0.2
+  - harry-potter/fanfic/example@1.2.1
 resolution: recency             # the latest row wins, from any layer
 
 setting:
@@ -25,3 +25,5 @@ setting:
 modules:
   litrpg: false
   languages: false
+  mysteries: true
+  lineage: true

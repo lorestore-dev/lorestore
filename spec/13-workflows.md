@@ -33,7 +33,7 @@ Workflow files (§11.7) add each step's `Reads`, as given in §12.
 | 4    | character-designer | `bible/characters/<slug>.md`                 |           | per-character |
 | 5    | character-designer | `bible/characters/_roster.md`                |           |               |
 | 6    | character-designer | `bible/relationships.md`, `bible/voice-guide.md` |       | per-file      |
-| 7    | architect          | `bible/knowledge.md`                         |           |               |
+| 7    | architect          | `bible/knowledge.md`, `bible/mysteries.md`   |           | per-file      |
 | 8    | researcher         | `reviews/research.md`                        |           |               |
 | 9    | line-editor        | `bible/style.md`                             | milestone |               |
 
@@ -63,8 +63,8 @@ place to change direction.
   chapter goes on to steps 12 and 13, but the marker blocks step 14 until the author has
   decided, the curator has recorded the decision, and the drafter has redrafted the
   passage (§11.8).
-- Step 12 runs for `timeline.md` always; for `game-state.md`, `timelines.md`, and
-  `branches.md` when their modules are enabled; and for each file of the project's own
+- Step 12 runs for `timeline.md` always; for `game-state.md`, `timelines.md`,
+  `branches.md`, and `mysteries.md` when their modules are enabled; and for each file of the project's own
   entities whose state the chapter changes, to append its story-dated rows (§4.11).
 - If step 13 reports problems, the showrunner routes fixes to the drafter and re-runs
   steps 12 and 13 before step 14.
@@ -395,7 +395,7 @@ host checks the order rules on import.
 | P3   | character-designer | `bible/characters/<slug>.md`             |           | per-character |
 | P4   | character-designer | `bible/characters/_roster.md`            |           |               |
 | P4a  | character-designer | `bible/relationships.md`, `bible/voice-guide.md` |   | per-file      |
-| P4b  | architect          | `bible/knowledge.md`                     |           |               |
+| P4b  | architect          | `bible/knowledge.md`, `bible/mysteries.md` |         | per-file      |
 | P5   | worldbuilder       | `bible/<file>` (inventor)                | milestone | per-file      |
 | P6   | architect          | `bible/sync-points.md`                   | milestone |               |
 | P7   | line-editor        | `bible/style.md`                         | milestone |               |
@@ -484,7 +484,7 @@ step.
     sync points, the ledger's `First occurs`, `Until`, `Absorbed in`, and
     `Decided in`, story-dated rows' `From chapter`, and the chapters of `outline.md`,
     `timeline.md`, `game-state.md`, `timelines.md`, `branches.md`, and
-    `revisions.md`;
+    `revisions.md`, and the `Planted at` and `Revealed at` cells of `mysteries.md`;
   - the folders and `chapter` fields of human feedback (§10.25).
 
   It does not rewrite `reviews/` or `showrunner-log.md`, which are advisory history; the

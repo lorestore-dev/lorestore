@@ -6,7 +6,7 @@ gates: milestones
 seed: "There are no Horcruxes. When Quirrell dies at the end of first year, Voldemort dies with him. What does the wizarding world do with a peace it didn't expect?"
 
 layers:                         # from the base up
-  - harry-potter@3.1.0
+  - harry-potter@3.2.0
 
 setting:
   type: established

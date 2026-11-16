@@ -9,7 +9,8 @@ examples/
 ├── worlds/
 │   ├── harry-potter/
 │   │   ├── base/                # the base: novels and chapters; magic/ catalog; a reveal;
-│   │   │                        #   an iso calendar, ruler dates, and world history
+│   │   │                        #   an iso calendar, ruler dates, and world history;
+│   │   │                        #   a mystery, parentage, and a title
 │   │   ├── films/               # an adaptation: the first film, with adaptation timecodes
 │   │   ├── fanon/               # community conventions, as extension sheets
 │   │   ├── theories/            # a fan theory, as numbered claims
@@ -22,14 +23,15 @@ examples/
 ├── universes/
 │   └── wizards-and-warp/        # a crossover of both: the author's brief and the bridge
 └── projects/
-    ├── two-witnesses/           # Harry Potter with fan layers, recency, divergences
+    ├── two-witnesses/           # Harry Potter with fan layers, recency, divergences, two modules
     ├── two-witnesses-ii/        # its sequel: book 1 as a project layer
     ├── second-year-tournament/  # Harry Potter with canon rearranged: the Tournament in year two
     ├── no-horcruxes/            # a branch: Voldemort dies in year one, later canon never happens
     ├── blind-harry/             # a retelling: Harry is blind, canon still unfolds around him
     ├── three-brothers/          # a short story adopting a fan theory
     ├── the-long-way-back/       # Star Trek, established, a serial with a buffer and early access, frames
-    ├── lantern-road/            # a self-contained book, with a story-dated row and its own calendar
+    ├── lantern-road/            # a self-contained book, with a story-dated row and its own calendar;
+    │                            #   routes and journey times, and a mystery
     ├── lantern-road-before/     # its split-frame follow-up: before and after book 1, on the series ruler
     └── hogwarts-at-warp/        # the crossover: two bases and the universe layer, a cutoff per base
 ```
@@ -40,8 +42,8 @@ stacks, from the base up:
 
 | Name     | Layers                                                                      | Resolution |
 | -------- | --------------------------------------------------------------------------- | ---------- |
-| canon    | `harry-potter@3.1.0`                                                         | precedence |
-| fan      | `harry-potter@3.1.0`, `harry-potter/fanon@1.0.1`, `harry-potter/fanfic/example@1.2.0` | precedence |
+| canon    | `harry-potter@3.2.0`                                                         | precedence |
+| fan      | `harry-potter@3.2.0`, `harry-potter/fanon@1.0.2`, `harry-potter/fanfic/example@1.2.1` | precedence |
 | fan, recency | the same layers                                                         | recency    |
 | fan, fill    | the same layers                                                         | fill       |
 | trek     | `star-trek@2.1.0`                                                            | precedence |
@@ -403,7 +405,7 @@ finds no value seam for Harry, Cedric, Hermione, or Snape. Switched to `preceden
 finds one: `harry-potter.broom`. Book 1 (`recency`) gave the Firebolt from the books,
 and `precedence` gives the fan work's Cleansweep Seven.
 
-**L6. Inherited settings.** A stack of `harry-potter@3.1.0` and
+**L6. Inherited settings.** A stack of `harry-potter@3.2.0` and
 `project:second-year-tournament@chapter-03` sets no order, and so uses book 1's: `GoF:1`
 sorts before `CoS:1`. A sequel to the `no-horcruxes` branch MUST be a branch, with a
 divergence point no later than `PS:17`.
@@ -501,15 +503,44 @@ are `iso`, so the offset is valid (§8.1). Harry's first journey to Hogwarts (`P
 `2364-09-01` in universe time, and Grindelwald's defeat (`1945`) is `2318`, before
 *The Next Generation*'s first season (`2364`).
 
+## Modules
+
+**M1. Travel.** `lantern-road` enables travel (§9.4). Its routes join `highcairn` and
+`lowmere` through `the-halfway-inn`, two days each by cart at the fastest, so the
+shortest journey between the towns is four days, either way. Ines is in `highcairn` on
+`NR 30-01-10` (chapter 1), at the inn on `NR 30-01-15` (chapter 3), and in `lowmere` on
+`NR 30-01-21` (chapter 5): no journey is too fast. An event putting her in `lowmere` on
+`NR 30-01-12` would be a warning (at most three days for a four-day journey), but not if
+its date were `~NR 30-01-12` or `..NR 30-01-12`.
+
+**M2. Mysteries.** The `harry-potter` base records one mystery (§9.5): `moody-identity`,
+whose answer is the secret of the same name, revealed at `GoF:35`. Its needed clues are
+planted at `GoF:13` and `GoF:25`, and a red herring at `GoF:27`, so it is fair. Harry is
+`unaware` at `GoF:34` and `knows` at `GoF:35`. `lantern-road`'s mystery,
+`lamps-going-out`, is revealed in chapter 11, with needed clues in chapters 3 and 7 and
+a red herring in chapter 5: fair too. A higher layer may add a clue to `moody-identity`,
+never redefine `c1`. A mystery whose needed clue is planted in *Chamber of Secrets* and
+revealed in *Goblet of Fire* is fair in the ruler's order, and unfair in
+`second-year-tournament`'s: the canon-keeper's order audit raises it.
+
+**M3. Lineage.** In the canon stack, Harry's `parents` are `james-potter; lily-potter`
+and his `guardians` `petunia-dursley; vernon-dursley`, both from `PS:1`; he has no
+guardians from `DH:7`. The family tree of `lord-voldemort` (§9.6) is just himself at
+`GoF:37`; at `HBP:10` it is `merope-gaunt` (whose parent is `marvolo-gaunt`, descended
+from `salazar-slytherin`) and `tom-riddle-sr`. The `headmaster-of-hogwarts` is
+`albus-dumbledore` at `PS:5`, `dolores-umbridge` at `OotP:30`, `albus-dumbledore` again
+at `OotP:38`, and `severus-snape` at `DH:36`. James and Lily, born in 1960 and dead on
+`1981-10-31`, raise no lineage warning, and the examples have no lineage contradiction.
+
 ## Validation cases
 
 A conforming host MUST report each of these if introduced:
 
 - citing the `films` source from the Harry Potter base (a tier its kind does
   not allow, §2.3);
-- removing `harry-potter/fanon@1.0.1` from `two-witnesses-ii` (a package layer not
+- removing `harry-potter/fanon@1.0.2` from `two-witnesses-ii` (a package layer not
   relisted, §2.2);
-- moving `harry-potter/fanon@1.0.1` below `harry-potter@3.1.0` in any stack (a layer
+- moving `harry-potter/fanon@1.0.2` below `harry-potter@3.2.0` in any stack (a layer
   below what it relies on, §2.2);
 - a `PS:6:2+00:41:10` as-of in a stack without `harry-potter/films` (§4.9);
 - changing the animated package's `TAS:1` row to insert after `TOS:4` (an unknown
@@ -546,8 +577,16 @@ A conforming host MUST report each of these if introduced:
 - an `In-world` of `1999` on a row as of `PS:7`, or an event dated `2001` as of `PS:7` (`in-world-after`, §4.13);
 - a character with `born` `2051` and `died` `1990` and no acceptance (`born-died`, §4.13);
 - an event in `history.md` with no `date` row (§4.13);
-- removing `star-trek`'s calendar while `wizards-and-warp` gives offsets (§8.1).
+- removing `star-trek`'s calendar while `wizards-and-warp` gives offsets (§8.1);
+- in `lantern-road`'s `routes.md`, the route `the-halfway-inn+highcairn` (not in alphabetical order), a route to a place not in `places.md`, an attribute `boat` (not a mode), or a value `three days` (§10.26);
+- in the base's `mysteries.md`, the mystery `who-is-it` (not a secret), a red herring marked needed, a clue of kind `hint`, a second clue `c1`, or a clue planted at `GoF:38` (§10.27), or a higher layer that moves `c1` (§10.27);
+- a `parents` value that is not in the roster, or two characters each the other's parent, or one descended from herself, with no acceptance (`ancestry-cycle`, §9.6);
+- a character born in 2051 whose parent is born in 2070, with no acceptance (`born-before-parent`, §9.6);
+- `modules.romance`, or `lineage: "yes"`, in `project.yaml` (rejected by the schema).
 
 A conforming host SHOULD warn if `the-long-way-back`'s `## Columns` row for `Notes` is
-deleted (an unregistered column, §10.0), or if a `timeline.md` event dated `1975` lists
-`harry-potter`, born in 1980 (§4.13).
+deleted (an unregistered column, §10.0), if a `timeline.md` event dated `1975` lists
+`harry-potter`, born in 1980 (§4.13), if Ines reaches `lowmere` too fast (M1, §9.4), if a
+mystery's needed clue comes after its reveal or it has none before (§9.5), or if a
+parent is under 12 at a birth, a child is born more than a year after a parent's death,
+or a title is held outside its holder's lifetime (§9.6).

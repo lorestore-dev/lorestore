@@ -108,6 +108,12 @@ is defined.
 | A `## Dates` node that is not on the file's own works, or appears twice; or a `## Dates` table in an adaptation | §10.4 |
 | An event in `history.md` with no `date` row                                      | §4.13     |
 | A chronology contradiction (`outside-parent`, `in-world-after`, `born-died`) with no `## Accepted` row for it in a layer that holds one of its rows or nodes | §4.13 |
+| A route that names a place missing from `places.md` or is not in alphabetical order (`+`), a route attribute that is neither a mode nor `distance`, a mode defined twice, or a route value that is not a duration, `—`, or `(unset)` | §9.4, §10.26 |
+| A timeline `Place` that is not in `places.md`                                    | §10.15    |
+| A mystery that is not a secret in `knowledge.md`; a `Planted at` or `Revealed at` that is not a valid point or chapter; a clue with an unknown mystery or kind, or a duplicate id; a red herring marked needed | §10.27 |
+| A higher layer that changes or removes a lower layer's clue                     | §10.27    |
+| A `parents`, `guardians`, `descends-from`, or title `holder` value that is not a slug in the stack's roster | §9.6 |
+| A lineage contradiction (`born-before-parent`, `ancestry-cycle`) with no `## Accepted` row for it in a layer that holds one of its rows | §9.6 |
 | An `## Accepted` row with an unknown check, a subject the file does not hold, no reason, or, in a package, no citation | §10.5 |
 | A universe offset between bases that do not declare the same calendar, or in a unit the calendar lacks | §8.1 |
 | A story-dated row (`From chapter`) that has an `As of`, cites a source other than `project`, or describes an entity the project does not define | §4.11 |
@@ -135,7 +141,10 @@ stale (§7.6), when a project's sync points go backwards
 (§7.5), when a story event's date falls outside the lifetime of an entity it lists, or
 before its chapter's cutoff date (§4.13), when timecodes in one episode or film
 contradict its scene order (§4.2), when a table has an added column that `index.md`
-does not register (§10.0), and when the author releases a serial chapter that is not
+does not register (§10.0), when a journey is faster than the routes allow (§9.4), when
+a mystery is unfair (§9.5), when a parent is under 12 at a birth, a child is born more
+than a year after a parent's death, or a title is held outside its holder's lifetime
+(§9.6), and when the author releases a serial chapter that is not
 ready, or sends one to early access that is not `line-edited` (§13.3, §13.9).
 
 ## 14.3 The contracts, summarized

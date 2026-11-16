@@ -6,7 +6,7 @@ gates: milestones
 seed: "The curse that rebounds at Godric's Hollow takes Harry's sight. Year one, retold."
 
 layers:                         # from the base up
-  - harry-potter@3.1.0
+  - harry-potter@3.2.0
 
 setting:
   type: established

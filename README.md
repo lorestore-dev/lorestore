@@ -19,7 +19,7 @@ editing it; and how a team of narrow AI agents reads and writes those files.
 | 6  | [Divergence](spec/06-divergence.md)                 | Adherence settings, the divergence ledger, classifications           |
 | 7  | [Snapshot](spec/07-snapshot.md)                     | The query: what is true as of X, in stack S; the composed bible      |
 | 8  | [Crossovers](spec/08-crossovers.md)                 | Universes and the bridge                                             |
-| 9  | [Modules](spec/09-modules.md)                       | Frames (time travel), LitRPG, languages                              |
+| 9  | [Modules](spec/09-modules.md)                       | Frames, LitRPG, languages, travel, mysteries, lineage                |
 | 10 | [Formats](spec/10-formats.md)                       | The exact structure of every file                                    |
 | 11 | [Agent contract](spec/11-agent-contract.md)         | The orchestration loop, agent anatomy, retrieval, gates              |
 | 12 | [Agents](spec/12-agents.md)                         | The eighteen agents                                                  |

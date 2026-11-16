@@ -186,6 +186,21 @@
         "languages": {
           "type": "boolean",
           "default": false
+        },
+        "travel": {
+          "type": "boolean",
+          "default": false,
+          "description": "Routes and journey times. See spec/09-modules.md §9.4."
+        },
+        "mysteries": {
+          "type": "boolean",
+          "default": false,
+          "description": "Mysteries, clues, and fair play. See spec/09-modules.md §9.5."
+        },
+        "lineage": {
+          "type": "boolean",
+          "default": false,
+          "description": "Parentage, ancestry, and titles. See spec/09-modules.md §9.6."
         }
       }
     },

@@ -113,5 +113,5 @@ illustrative only.
 | **Agent**               | A markdown file defining one narrow role with exactly one output per step.                                                     | §11, §12   |
 | **Workflow**            | An ordered list of steps, each naming one agent and its inputs and output.                                                     | §11, §13   |
 | **Gate**                | A step after which the orchestrator stops for human approval.                                                                  | §11        |
-| **Module**              | An optional feature set enabled per project: frames, LitRPG, languages.                                                        | §9         |
+| **Module**              | An optional feature set enabled per project: frames, LitRPG, languages, travel, mysteries, lineage.                             | §9         |
 | **Frame**               | The temporal context a character is bound by: the world frame (scene time and branch) or a traveler's personal frame.          | §9.1       |

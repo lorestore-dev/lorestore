@@ -173,7 +173,9 @@ story sits in canon, but not prose.
 
 - **Writes (one per step):** `bible/premise.md`; `bible/outline.md`;
   `bible/sync-points.md` (established worlds, §6.7); `bible/knowledge.md` (in a project
-  with a stack, only the project's own secrets and what original characters know).
+  with a stack, only the project's own secrets and what original characters know);
+  `bible/mysteries.md` (mysteries, §9.5: the project's own mysteries, and clues it adds
+  to canon ones).
 - **Reads:** `project.yaml` (seed, parameters, `setting`); `bible/premise.md` when writing
   the outline; the roster and `world.md` summary sections; for established worlds,
   `bible/divergences.md`, the ruler, and `plot-architecture.md` rows
@@ -184,6 +186,9 @@ story sits in canon, but not prose.
     turn**; a scene with no turn is description, so cut or merge it.
   - Track setups and payoffs in the outline's ledger so nothing is planted and
     forgotten.
+  - **Mysteries** (§9.5): plan each mystery's clues and red herrings with the outline,
+    so that every needed clue is planted before the reveal, and record them in
+    `mysteries.md`. Each mystery's answer is a secret in `knowledge.md`.
   - **Sync points:** map chapters to the cutoffs they follow, never past
     `setting.divergence_point` in a branch (§6.6), and in the project order
     (`setting.order`) if there is one. The order is the author's (§6.8): when the story
@@ -201,7 +206,7 @@ Three modes. The workflow step selects one.
 
 | Mode         | When                                | Writes                                                                                                                                                                              |
 | ------------ | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **inventor** | Self-contained projects; in a project with a stack, its own additions only (§2.7) | One of `bible/world.md`, `places.md`, `society.md`, `culture.md`, `languages.md`, `lang/<language>.md`, `magic/<catalog>.md`, `game-system.md`, `glossary.md`, `canon-timeline.md` |
+| **inventor** | Self-contained projects; in a project with a stack, its own additions only (§2.7) | One of `bible/world.md`, `history.md`, `places.md`, `routes.md`, `society.md`, `culture.md`, `languages.md`, `lang/<language>.md`, `magic/<catalog>.md`, `game-system.md`, `time-travel.md`, `titles.md`, `glossary.md`, `canon-timeline.md` |
 | **curator**  | `setting.type: established`         | `bible/divergences.md`                                                                                                                                                              |
 | **ruler**    | Extraction, step F0 (package context) | `bible/canon-timeline.md`                                                                                                                                                         |
 
@@ -216,7 +221,9 @@ Three modes. The workflow step selects one.
   - **Ruler:** write the `## Dates` table from what the source states, and from the
     extraction records' `date` fields when F0 re-runs (§13.6). **Inventor:** in a world
     with a calendar, date its past in `history.md`, and date the eras of its ruler, if
-    it has one (§4.13).
+    it has one (§4.13). With the travel module, give every route between places the
+    story uses a duration for each mode that can make it (§9.4); with the lineage
+    module, record the succession of titles in `titles.md` (§9.6).
   - **Curator:** do not invent. Log divergences and their consequences in
     `divergences.md` (§6.4) when planned during foundation, or when the showrunner or a
     human accepts an emergent one. Mark consequences absorbed when the chronicler or
@@ -281,7 +288,8 @@ Three modes. The workflow step selects one.
   - per module: the latest `bible/game-state.md` rows and the relevant
     `game-system.md` entries (LitRPG); the travelers' rows in `timelines.md` and the
     branch in `branches.md` (frames); entries in `languages.md` and `lang/` for languages
-    spoken in the chapter (languages);
+    spoken in the chapter (languages); the routes between the chapter's places
+    (travel); the mysteries the chapter touches, with their clues (mysteries);
   - an adopted theory only through the divergences whose `Basis` cites it (§6.13);
     never `bible/theories.md` itself.
 - **Writes:** `manuscript/chapter-<NN>.md`, with `status: drafted`.
@@ -304,6 +312,9 @@ Three modes. The workflow step selects one.
     `TODO: seam conflict` (§6.14).
   - **Frames:** mark each scene's world point and travelers (§10.18); write each
     character to their own frame.
+  - **Mysteries** (§9.5): plant the clues the outline gives this chapter. Never let the
+    narration answer a mystery before its `Revealed at`, even through a viewpoint
+    character who knows the answer.
 - **Guardrails:** don't invent canon: mark gaps with `TODO: needs bible`. Don't drift POV
   or tense; don't summarize the exciting parts; write the beat given, raising
   structural concerns to the showrunner; never reproduce source passages.
@@ -316,14 +327,17 @@ snapshot, and the reviewers can rely on them.
 - **Reads:** the chapter just drafted (or revised); the target ledger or file; the
   showrunner's logged decisions (for paradoxes).
 - **Writes (one per step):** `bible/timeline.md`; `bible/game-state.md` (LitRPG);
-  `bible/timelines.md` or `bible/branches.md` (frames); `revisions.md` (early-access
+  `bible/timelines.md` or `bible/branches.md` (frames); the `Planted at` cells of the
+  project's own clues in `bible/mysteries.md` (mysteries); `revisions.md` (early-access
   chapters, and serials with revisable releases, §10.22); or the story-dated rows of
   an original character's sheet, `bible/relationships.md`, or `bible/knowledge.md`
   (§4.11).
 - **Duties:** append the chapter's story-time events; append game-state changes with
   their causes; append traveler legs, with the mechanism each used, and personal
   cutoffs; register new branches and update branch statuses as the mechanism's model
-  dictates (§9.1); append ripples; record paradox decisions with their rationale; log
+  dictates (§9.1); append ripples; record paradox decisions with their rationale;
+  with the travel module, fill each event's `Place` (§9.4); with the mysteries module,
+  move a clue's `Planted at` when a revision moves the clue to another chapter (§9.5); log
   each revision of a released or early-access chapter, with its audience, date, and a
   reader note (§10.22). Append a story-dated row, with the chapter's id as its
   `From chapter`, for each change the chapter makes to the state of an original
@@ -340,15 +354,18 @@ snapshot, and the reviewers can rely on them.
 - **Reads:** the chapter under review; snapshots for its cast; `bible/timeline.md`; the
   union glossary; earlier chapters only where a check needs them (found by search);
   relevant `relationships.md` and `languages.md` rows; `game-state.md` and
-  `game-system.md` (LitRPG).
+  `game-system.md` (LitRPG); `routes.md` (travel); `mysteries.md` (mysteries); the
+  cast's lineage rows and `titles.md` (lineage).
 - **Writes:** `reviews/continuity.md`.
 - **Duties:** flag **manuscript vs. bible**, **manuscript vs. manuscript**, and
   **drift** (spelling or terminology); for LitRPG, check the game-state invariants
   (§9.2); rank by severity (a reader-breaking contradiction outranks a minor slip, which
   outranks cosmetic drift). In a world with a calendar, raise the date warnings of
   §4.13: events outside a participant's lifetime, ages that the dates rule out, and
-  story events dated before the cutoff's date. Each is the author's to decide, because
-  a flashback or an unreliable narrator can be deliberate.
+  story events dated before the cutoff's date. Raise the module warnings too: journeys
+  faster than the routes allow (travel, §9.4), unfair mysteries (§9.5), and parents,
+  births, and title holders that the dates rule out (lineage, §9.6). Each is the
+  author's to decide, because a flashback or an unreliable narrator can be deliberate.
 - **Guardrails:** internal consistency only (fidelity to the source is the
   canon-keeper's job); report, never rewrite or edit the bible; distinguish a genuine
   contradiction from a deliberate mystery or an unreliable narrator.
@@ -396,7 +413,9 @@ rewrites.
   item of the earlier books ahead of a chapter that no Seam conflicts table decides,
   grouped where a pattern would cover them, with the options (carry back, not yet,
   other), and every value seam, with both values and the options (keep earlier, accept,
-  other). Flag a chapter that uses an undecided item as a seam conflict. **Source
+  other). Flag a chapter that uses an undecided item as a seam conflict. **Mysteries**
+  (§9.5): in an order audit or a divergence audit, list each canon mystery whose needed
+  clue the change moves to after its reveal, or removes. **Source
   leaks**: flag a fact found only in a same-fandom package the stack does not include
   (§5.3). Join reveal aliases to their true identities from the `Revealed at` point
   (§10.9) when judging what characters could know. Report consequences the chapter

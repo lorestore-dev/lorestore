@@ -5,6 +5,37 @@ says what was unclear or contradictory, what was decided, and where the rule now
 
 ## 0.3: in-world time
 
+**D114. Lineage: parentage, ancestry, and titles.** Relationships are pairwise, so the
+spec could not hold a family tree, a dynasty, or a succession. The lineage module adds
+the reserved attributes `parents`, `guardians`, and `descends-from` (slug lists, on any
+entity) and `titles.md`, a state history of titles whose `holder` changes over time.
+Being ordinary attributes, they inherit reveals by `As of`, correction by later rows, and
+the ledger for changes. Two chronology checks join §4.13, `born-before-parent` and
+`ancestry-cycle`, and are accepted in the same way, so a time traveller can be their own
+grandparent; one acceptance excuses a whole cycle. Implausible ages and holders are
+warnings. A family tree is a view at a cutoff, never stored, so it cannot leak a
+parentage reveal. → §1.6, §2.7, §3.3, §9.6, §10.5, §10.28, §12.7, §12.12, §14.2
+
+**D113. Mysteries: clues, reveals, and fair play.** `plot-architecture.md` held running
+mysteries as prose, and nothing tied a mystery's answer to its clues. The mysteries
+module adds `mysteries.md`: each mystery's question, its reveal point, and its clues
+and red herrings, each with where it is planted and whether the reader needs it. The
+answer is a secret in `knowledge.md`, so the snapshot already keeps it hidden. Fair-play
+problems are warnings, since a writer may cheat on purpose. A higher layer adds clues to
+a lower layer's mystery but never changes them. The drafter must not let narration
+answer a mystery early, and the canon-keeper's order and divergence audits list canon
+mysteries a change makes unfair. → §2.7, §3.3, §9.5, §10.27, §12.6, §12.10, §12.11,
+§12.13, §13.1, §13.10, §14.2
+
+**D112. Travel: routes and journey times.** With in-world dates, the spec could say when
+scenes happen but not whether a character could get from one to the next. The travel
+module adds `routes.md`, which holds modes of travel and routes between `places.md`
+entries, each route a state history whose values are durations, and a `Place` column
+in `timeline.md`. A journey faster than the shortest path allows is a warning, never an
+error, because the story may mean it. Only known modes count, and an approximate
+duration counts as instant, so the check warns only when the routes rule a journey
+out. → §9.4, §10.0, §10.15, §10.26, §12.7, §12.10, §12.11, §12.12, §14.2
+
 **D111. Re-pinning to a new minor or patch version is a patch bump.** §2.8 required a
 bump on every change but did not say which one a re-pin is. Adding the calendar to the
 two example bases bumped them to minor versions, so every package relying on them had to

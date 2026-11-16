@@ -2,7 +2,7 @@ spec_version: "0.2"
 id: harry-potter/fanfic/example
 kind: fanfic
 name: "An imported fan work (placeholder)"
-version: 1.2.0
+version: 1.2.1
 status: locked
 relies-on:
-  - harry-potter@3.1.0
+  - harry-potter@3.2.0

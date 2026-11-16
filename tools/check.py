@@ -4,8 +4,9 @@ Validates the example workspace in examples/ against the JSON schemas, and runs 
 reference implementation of layer stacks (§2.2), the snapshot algorithm (§7), canon
 points and adaptation timecodes (§4.2, §4.9), sync points and the project order
 (§6.7-6.8), branch and retelling modes (§6.6), hidden truths (§4.4, §6.12), theory
-conflicts (§6.13), in-world dates and world history (§4.13), and chapter statuses
-(§10.18), comparing each result with the
+conflicts (§6.13), in-world dates and world history (§4.13), the travel, mysteries,
+and lineage modules (§9.4-9.6), and chapter statuses (§10.18), comparing each result
+with the
 expected answers in examples/README.md.
 
 Usage:
@@ -59,7 +60,7 @@ bad = pyaml("hogwarts-at-warp"); bad["setting"]["cutoff"] = "HBP:7"
 check("schema rejects cutoff beside a universe layer", schema("project").is_valid(bad), False)
 bad = pyaml("two-witnesses"); bad["setting"]["cutoffs"] = {"harry-potter": "GoF:37"}
 check("schema rejects cutoffs without a universe layer", schema("project").is_valid(bad), False)
-for ref, ok in [("harry-potter@3.1.0", True), ("harry-potter/fanfic/example@1.2.0", True), ("universe:wizards-and-warp@2.0.1", True),
+for ref, ok in [("harry-potter@3.2.0", True), ("harry-potter/fanfic/example@1.2.1", True), ("universe:wizards-and-warp@2.0.2", True),
                 ("project:two-witnesses@chapter-02", True), ("harry-potter", False), ("project:two-witnesses@1.0.0", False),
                 ("harry-potter/a/b/c@1.0.0", False), ("fanon-hp@latest", False)]:
     d = pyaml("blind-harry"); d["layers"] = [ref]
@@ -114,7 +115,7 @@ def entity_rows(d, entity):
     f = d/"characters"/f"{entity}.md"
     out = table(f, "## State history") if f.exists() else []
     if (d/"relationships.md").exists(): out += [r for r in table(d/"relationships.md", "## State history") if r["Pair"] == entity]
-    for multi in ("species.md", "history.md"):
+    for multi in ("species.md", "history.md", "titles.md"):
         if (d/multi).exists(): out += [r for r in table(d/multi, "## State history") if r["Entity"] == entity]
     if (d/"knowledge.md").exists():
         out += [dict(r, Attribute=r["Secret"], Value=r["State"]) for r in table(d/"knowledge.md", "## Knowledge") if r["Character"] == entity]
@@ -530,8 +531,8 @@ def hidden(stack, entity, cutoff, base=None):
     return {r["Attribute"] for r in stack.layer_rows(entity, base) if r.get("True from")
             and ruler.cmp(r["True from"], cutoff) <= 0 < ruler.cmp(r["As of"], cutoff)}
 
-PURIST  = Stack(["harry-potter@3.1.0"])
-ENRICH  = Stack(["harry-potter@3.1.0", "harry-potter/fanon@1.0.1", "harry-potter/fanfic/example@1.2.0"])
+PURIST  = Stack(["harry-potter@3.2.0"])
+ENRICH  = Stack(["harry-potter@3.2.0", "harry-potter/fanon@1.0.2", "harry-potter/fanfic/example@1.2.1"])
 ENHANCE = Stack(ENRICH.refs, "recency")
 FILL    = Stack(ENRICH.refs, "fill")
 TREK    = Stack(["star-trek@2.1.0"])
@@ -555,7 +556,7 @@ check("3 broom fill PS:10: the base has a row, so it stands", g(FILL, "harry-pot
 check("3 broom fill PoA:10: the base's (unset) stands", g(FILL, "harry-potter", "PoA:10", "broom"), None)
 check("3 broom fill PoA:11", g(FILL, "harry-potter", "PoA:11", "broom"), "Firebolt")
 check("3 glasses fill: canon's round stands", g(FILL, "harry-potter", "GoF:37", "glasses"), "round")
-FILMS = Stack(["harry-potter@3.1.0", "harry-potter/films@1.0.1"])
+FILMS = Stack(["harry-potter@3.2.0", "harry-potter/films@1.0.2"])
 check("3 quote: the books give the line to Ron", quote(PURIST, "harry-potter", "q1", "GoF:1"), "ron-weasley")
 check("3 quote: precedence with the films gives it to Hermione", quote(FILMS, "harry-potter", "q1", "GoF:1"), "hermione-granger")
 check("3 quote: recency, same point, the higher layer", quote(Stack(FILMS.refs, "recency"), "harry-potter", "q1", "GoF:1"), "hermione-granger")
@@ -600,8 +601,8 @@ check("12 universe stack has two bases", sorted(HW.bases), ["harry-potter", "sta
 check("12 harry broom", g(HW, "harry-potter", None, "broom", base="harry-potter"), "Firebolt")
 check("12 picard", g(HW, "jean-luc-picard", None, "status", base="star-trek"), "captain of the USS Enterprise-D")
 check("12 each base has its own ruler", (HW.ruler("harry-potter").base.id, HW.ruler("star-trek").base.id), ("harry-potter", "star-trek"))
-raises("12 two bases without a universe rejected", lambda: Stack(["harry-potter@3.1.0", "star-trek@2.1.0"]), StackError)
-raises("12 universe below its bases rejected", lambda: Stack(["universe:wizards-and-warp@2.0.1", "harry-potter@3.1.0", "star-trek@2.1.0"]), StackError)
+raises("12 two bases without a universe rejected", lambda: Stack(["harry-potter@3.2.0", "star-trek@2.1.0"]), StackError)
+raises("12 universe below its bases rejected", lambda: Stack(["universe:wizards-and-warp@2.0.2", "harry-potter@3.2.0", "star-trek@2.1.0"]), StackError)
 u = load(EX/"universes/wizards-and-warp/universe.yaml")
 check("V universe pins", sorted(u["relies-on"]), sorted(f"{b}@{Package(b).cfg['version']}" for b in ["harry-potter", "star-trek"]))
 check("V universe offsets name its bases", set(u["offsets"]) <= {d.split("@")[0] for d in u["relies-on"]}, True)
@@ -638,7 +639,7 @@ check("I spock without the package: no pet (a source leak if used)", g(TREK, "sp
 check("I animated is an official package of secondary-official sources", (Package("star-trek/animated").kind, set(Package("star-trek/animated").sources.values())), ("official", {"secondary-official"}))
 
 # --- adaptation timecodes (§4.9) ---------------------------------------------------
-FILMS = Stack(["harry-potter@3.1.0", "harry-potter/films@1.0.1"]); HF = FILMS.ruler()
+FILMS = Stack(["harry-potter@3.2.0", "harry-potter/films@1.0.2"]); HF = FILMS.ruler()
 for pt, want in [("PS:6:2+00:41:10", True), ("PS:6+00:41:10", True), ("PS+00:41:10", False), ("CoS:1+00:01:00", False), ("PS:6:2", True)]:
     check(f"A valid with films {pt}", isvalid(HF, pt), want)
 check("A timecode needs the films layer", isvalid(HP, "PS:6:2+00:41:10"), False)
@@ -882,7 +883,7 @@ def extensions_ok(stack):
         seen[p.id] = {r["Slug"] for r in p.roster()}
     return True
 check("V extension sheets extend a lower layer", extensions_ok(ENRICH), True)
-raises("V fanon below its base rejected", lambda: Stack(["harry-potter/fanon@1.0.1", "harry-potter@3.1.0"]), StackError)
+raises("V fanon below its base rejected", lambda: Stack(["harry-potter/fanon@1.0.2", "harry-potter@3.2.0"]), StackError)
 raises("V wrong package pin rejected", lambda: Stack(["harry-potter@2.1.0"]), StackError)
 
 # --- packages: kinds, ids, sources, points ------------------------------------------
@@ -1039,11 +1040,11 @@ def branch_ok(setting, layers):
         if q.get("follow") == "branch" and (setting.get("follow") != "branch" or r.cmp(setting["divergence_point"], q["divergence_point"]) > 0): return False
     return True
 check("SE every project keeps its layers' branches", all(branch_ok(pyaml(p)["setting"], pyaml(p).get("layers", [])) for p in PROJECTS), True)
-NH = ["harry-potter@3.1.0", "project:no-horcruxes@chapter-01"]
+NH = ["harry-potter@3.2.0", "project:no-horcruxes@chapter-01"]
 check("SE a retelling sequel to a branch is rejected", branch_ok({"cutoff": "CoS:1"}, NH), False)
 check("SE a branch sequel diverging later is rejected", branch_ok({"follow": "branch", "divergence_point": "CoS:1"}, NH), False)
 check("SE a branch sequel diverging no later is accepted", branch_ok({"follow": "branch", "divergence_point": "PS:17"}, NH), True)
-INH = Stack(["harry-potter@3.1.0", "project:second-year-tournament@chapter-03"])
+INH = Stack(["harry-potter@3.2.0", "project:second-year-tournament@chapter-03"])
 check("SE the order is inherited from a project layer", (INH.order() == pyaml("second-year-tournament")["setting"]["order"], INH.ruler().cmp("GoF:1", "CoS:1")), (True, -1))
 check("V seam decisions fit their items", all(r["Decision"] in ({"keep-earlier", "accept", "other"} if ":" not in r["Item"] else {"carry-back", "not-yet", "other"})
       and (r["Decision"] != "other" or r["Note"]) for f in (EX/"projects").glob("*/bible/divergences.md") if has(f, "## Seam conflicts") for r in table(f, "## Seam conflicts")), True)
@@ -1218,7 +1219,7 @@ def point_date(stack, pt, base=None):
 def accepted(f):
     return [(r["Check"], r["Subject"], r) for r in table(f, "## Accepted")] if has(f, "## Accepted") else []
 
-STATE_FILES = ("relationships.md", "species.md", "history.md")
+STATE_FILES = ("relationships.md", "species.md", "history.md", "titles.md")
 def state_tables(d):
     """(file, key column or None, rows) for each state-history table in a bible directory."""
     out = [(f, None, table(f, "## State history")) for f in sorted((d/"characters").glob("[!_]*.md"))] if (d/"characters").exists() else []
@@ -1242,7 +1243,7 @@ def contradictions(stack, base=None, extra=()):
                     if dcmp(dates[node][0], dates[node[:n]][0]) is not None:
                         found.append(("outside-parent", r["Node"], {layer, dates[node[:n]][1]}))
                     break
-    born, died = {}, {}
+    born, died, edges = {}, {}, {}
     for layer, d in layers:
         for f, key, rows in state_tables(d):
             acc |= {(c, s, layer) for c, s, _ in accepted(f)}
@@ -1251,6 +1252,8 @@ def contradictions(stack, base=None, extra=()):
                 ent = f.stem if key is None else r[key]
                 if r["Attribute"] in ("born", "died") and r["Value"] != "(unset)":
                     (born if r["Attribute"] == "born" else died).setdefault(ent, []).append((cal.parse(r["Value"]), layer, subj.rsplit(".", 1)[0] + ".born" if key else "born"))
+                if r["Attribute"] in ("parents", "descends-from") and r["Value"] != "(unset)":
+                    edges.setdefault(ent, []).extend((p, layer, subj) for p in r["Value"].split("; "))
                 when = r["Value"] if (r["Attribute"] == "date" and f.name == "history.md") else r.get("In-world")
                 if not when: continue
                 for pt in {r.get("True from") or r["As of"], r["As of"]} - {""}:
@@ -1260,6 +1263,26 @@ def contradictions(stack, base=None, extra=()):
         for b, lb, subj in born[ent]:
             for dd, ld, _ in died.get(ent, []):
                 if dcmp(b, dd) == 1: found.append(("born-died", subj, {lb, ld}))
+    for ent, ups in edges.items():                               # lineage (§9.6)
+        for p, le, _ in ups:
+            for b, lb, subj in born.get(ent, []):
+                for pb, lp, _ in born.get(p, []):
+                    if dcmp(b, pb) == -1: found.append(("born-before-parent", subj, {lb, lp, le}))
+    graph = {e: {p for p, *_ in ups} for e, ups in edges.items()}
+    def reach(a):
+        seen, todo = set(), [a]
+        while todo:
+            for y in graph.get(todo.pop(), ()):
+                if y not in seen: seen.add(y); todo.append(y)
+        return seen
+    cycles = {}
+    for ent, ups in edges.items():
+        for p, le, subj in ups:
+            if ent in reach(p) or p == ent:
+                comp = frozenset(x for x in reach(ent) | {ent} if x == ent or ent in reach(x))
+                cycles.setdefault(comp, []).append((subj, le))
+    for items in cycles.values():                                # one acceptance excuses the whole cycle
+        if not any(("ancestry-cycle", s, l) in acc for s, l in items): found.append(("ancestry-cycle", min(s for s, _ in items), set()))
     return sorted({(c, s) for c, s, ls in found if not any((c, s, l) in acc for l in ls)})
 
 def chronology(stack, cutoff, base=None):
@@ -1397,7 +1420,7 @@ check("D in-world-after: a fact dated after the point that shows it", contradict
 w = scratch_layer({"history.md": "## State history\n| Entity | Attribute | Value | As of | Source | Citation |\n| - | - | - | - | - | - |\n| omen | date | 2001 | PS:7 | books | x |\n"})
 check("D in-world-after: an event dated after its as-of", contradictions(PURIST, extra=[("x", w)]), [("in-world-after", "omen.date")])
 for x in (t, u, v, w): shutil.rmtree(x)
-vals = {"outside-parent", "in-world-after", "born-died"}
+vals = {"outside-parent", "in-world-after", "born-died", "born-before-parent", "ancestry-cycle"}
 for f in [pkg_dir("harry-potter")/"canon-timeline.md"]:
     check("D acceptances name a known check, a held subject, a reason, and a citation", all(
         c in vals and s in {r["Node"] for r in table(f, "## Dates")} and r["Reason"] and r["Citation"] for c, s, r in accepted(f)), True)
@@ -1417,6 +1440,270 @@ Package.__init__ = _cfg
 off = int(u_["offsets"]["harry-potter"][:-1])
 check("D universe time: Harry's first journey to Hogwarts is in 2364", shift(point_date(PURIST, "PS:6"), off), P("2364-09-01"))
 check("D universe time: Grindelwald's defeat comes before TNG season 1", dcmp(shift(P("1945"), off), point_date(TREK, "TNG:1")), -1)
+
+# --- travel (§9.4, §10.26) ------------------------------------------------------------
+UNITS = {"min": 1, "h": 60, "d": 1440, "w": 10080}
+def duration(s):
+    """A duration (§9.4): (low minutes or None, high minutes or None, approximate)."""
+    def one(x):
+        if x == "0": return 0
+        m = re.fullmatch(r"([1-9]\d*)(min|h|d|w)", x)
+        if not m: raise ValueError(x)
+        return int(m[1]) * UNITS[m[2]]
+    if s.startswith("~"): v = one(s[1:]); return v, v, True
+    if ".." in s:
+        a, b = s.split("..", 1)
+        if not a and not b: raise ValueError(s)
+        lo, hi = (one(a) if a else None), (one(b) if b else None)
+        if lo is not None and hi is not None and lo > hi: raise ValueError(s)
+        return lo, hi, False
+    v = one(s); return v, v, False
+
+def day_number(cal, t):
+    """Days since a fixed epoch, for a (year, month, day) in a calendar with months."""
+    y, m, d = t
+    if cal.iso:
+        y -= m <= 2; era = (y if y >= 0 else y - 399) // 400; yoe = y - era * 400
+        doy = (153 * (m + (-3 if m > 2 else 9)) + 2) // 5 + d - 1
+        return era * 146097 + yoe * 365 + yoe // 4 - yoe // 100 + doy
+    return y * sum(cal.months) + sum(cal.months[:m - 1]) + d
+
+def routes(d):
+    """(modes, places, edges): edges {(from, to): fastest lower bound in minutes}, both ways for `+` (§9.4)."""
+    f = d/"routes.md"; modes = [r["Mode"] for r in table(f, "## Modes")]
+    places = {r["Entity"] for r in table(d/"places.md", "## State history")}
+    state = {}
+    for r in table(f, "## State history"):
+        if r["Value"] == "(unset)": state.pop((r["Route"], r["Attribute"]), None)
+        else: state[(r["Route"], r["Attribute"])] = r["Value"]
+    edges = {}
+    for route in dict.fromkeys(k for k, _ in state):
+        known = [state[(route, m)] for m in modes if (route, m) in state]
+        lows = [0 if dur[2] or dur[0] is None else dur[0] for dur in map(duration, (v for v in known if v != "—"))]
+        if known and not lows: continue                     # every known mode is impossible
+        w = min(lows) if lows else 0                        # no known mode: instant
+        a, b = re.split(r"[+>]", route)
+        edges[(a, b)] = min(w, edges.get((a, b), w))
+        if "+" in route: edges[(b, a)] = min(w, edges.get((b, a), w))
+    return modes, places, edges
+
+def shortest(edges, a, b):
+    import heapq
+    dist, todo = {a: 0}, [(0, a)]
+    while todo:
+        w, x = heapq.heappop(todo)
+        if x == b: return w
+        if w > dist[x]: continue
+        for (p, q), e in edges.items():
+            if p == x and w + e < dist.get(q, float("inf")): dist[q] = w + e; heapq.heappush(todo, (w + e, q))
+    return None
+
+def route_errors(d):
+    """§9.4, §10.26: known places, alphabetical two-way routes, attributes that are modes or distance, valid values."""
+    out = []; modes = [r["Mode"] for r in table(d/"routes.md", "## Modes")]
+    places = {r["Entity"] for r in table(d/"places.md", "## State history")}
+    if len(set(modes)) != len(modes): out.append("a mode defined twice")
+    for r in table(d/"routes.md", "## State history"):
+        route, att, v = r["Route"], r["Attribute"], r["Value"]
+        parts = re.split(r"[+>]", route)
+        if len(parts) != 2 or not set(parts) <= places: out.append(f"{route}: unknown place")
+        elif "+" in route and parts != sorted(parts): out.append(f"{route}: not in alphabetical order")
+        if att not in modes and att != "distance": out.append(f"{route}: unknown mode {att}")
+        elif att in modes and v not in ("—", "(unset)") and raises_ok(lambda: duration(v), ValueError): out.append(f"{route}: bad duration {v}")
+    return out
+
+def travel_warnings(events, edges, cal):
+    """Journeys definitely faster than the routes allow (§9.4): (entity, from chapter, to chapter)."""
+    out, by = [], {}
+    for e in events:
+        if not (e.get("Date") and e.get("Place")): continue
+        for who in e["Entities"].split("; "): by.setdefault(who, []).append(e)
+    for who, evs in by.items():
+        evs = sorted(evs, key=lambda e: dkey(cal.parse(e["Date"])))
+        for a, b in zip(evs, evs[1:]):
+            if a["Place"] == b["Place"]: continue
+            da, db = cal.parse(a["Date"]), cal.parse(b["Date"])
+            if da[2] or db[2] or da[0] is None or db[1] is None: continue
+            most = (day_number(cal, db[1]) - day_number(cal, da[0]) + 1) * 1440
+            need = shortest(edges, a["Place"], b["Place"])
+            if need is not None and most < need: out.append((who, a["Chapter"], b["Chapter"]))
+    return out
+
+LRD = EX/"projects/lantern-road/bible"
+check("T durations", [duration(s) for s in ("3d", "4d..6d", "..12h", "~8h", "0", "30min", "2w")],
+      [(4320, 4320, False), (5760, 8640, False), (None, 720, False), (480, 480, True), (0, 0, False), (30, 30, False), (20160, 20160, False)])
+for s in ("3 days", "0d", "6d..4d", "..", "3", "~1d..2d"):
+    raises(f"T duration {s!r} invalid", lambda: duration(s))
+check("T lantern-road's routes are valid", route_errors(LRD), [])
+modes, places, edges = routes(LRD)
+check("T shortest journey: highcairn to lowmere by cart, 4 days", shortest(edges, "highcairn", "lowmere"), 4 * 1440)
+check("T the route runs both ways", shortest(edges, "lowmere", "highcairn"), 4 * 1440)
+check("T no route, no journey", shortest(edges, "highcairn", "nowhere"), None)
+e2 = dict(edges); e2[("lowmere", "highcairn")] = 1440
+check("T a one-way route: downstream only", (shortest(e2, "lowmere", "highcairn"), shortest(e2, "highcairn", "lowmere")), (1440, 4 * 1440))
+tl = table(LRD/"timeline.md", "## Events")
+check("T the timeline's places are in places.md", {e["Place"] for e in tl} <= places, True)
+check("T the timeline's dates parse", all(not raises_ok(lambda: LRC.parse(e["Date"]), ValueError) for e in tl), True)
+check("T no journey too fast in lantern-road", travel_warnings(tl, edges, LRC), [])
+fast = {"Chapter": "chapter-02", "Story time": "", "Event": "x", "Entities": "ines-varga", "Date": "NR 30-01-12", "Place": "lowmere"}
+check("T warns: highcairn to lowmere in at most 3 days", travel_warnings(tl + [fast], edges, LRC), [("ines-varga", "chapter-01", "chapter-02")])
+check("T an approximate date never warns", travel_warnings(tl + [dict(fast, Date="~NR 30-01-12")], edges, LRC), [])
+check("T an open-ended date never warns", travel_warnings(tl + [dict(fast, Date="..NR 30-01-12")], edges, LRC), [])
+check("T days in an iso date: 1991-02-28 to 1991-03-01, and across 1992's leap day",
+      (day_number(ISO, (1991, 3, 1)) - day_number(ISO, (1991, 2, 28)), day_number(ISO, (1992, 3, 1)) - day_number(ISO, (1992, 2, 28))), (1, 2))
+def lr_routes(text, places_extra=""):
+    d = scratch_layer({"routes.md": "## Modes\n| Mode | Name | Notes |\n| - | - | - |\n| foot | On foot | |\n| cart | By cart | |\n\n## State history\n| Route | Attribute | Value | As of | Source | Citation |\n| - | - | - | - | - | - |\n" + text,
+                       "places.md": (LRD/"places.md").read_text() + places_extra})
+    try: errs = route_errors(d); return errs, None if errs else routes(d)[2]
+    finally: shutil.rmtree(d)
+for label, row in [("not in alphabetical order", "| the-halfway-inn+highcairn | foot | 3d | | project | x |\n"),
+                   ("an unknown place", "| highcairn+nowhere | foot | 3d | | project | x |\n"),
+                   ("an unknown mode", "| highcairn+the-halfway-inn | boat | 3d | | project | x |\n"),
+                   ("a bad duration", "| highcairn+the-halfway-inn | foot | three days | | project | x |\n")]:
+    check(f"T route error: {label}", len(lr_routes(row)[0]), 1)
+check("T a route that every known mode cannot make is not a path", lr_routes("| highcairn+the-halfway-inn | foot | — | | project | x |\n")[1], {})
+check("T an approximate duration, or no known mode, counts as instant",
+      (lr_routes("| highcairn+the-halfway-inn | foot | ~3d | | project | x |\n")[1][("highcairn", "the-halfway-inn")],
+       lr_routes("| highcairn+the-halfway-inn | distance | far | | project | x |\n")[1][("highcairn", "the-halfway-inn")]), (0, 0))
+check("T a closed mode is left out", lr_routes("| highcairn+the-halfway-inn | foot | 3d | | project | x |\n| highcairn+the-halfway-inn | cart | 2d | | project | x |\n| highcairn+the-halfway-inn | cart | (unset) | | project | x |\n")[1][("highcairn", "the-halfway-inn")], 3 * 1440)
+
+# --- mysteries (§9.5, §10.27) ---------------------------------------------------------
+def mystery_layers(dirs):
+    """[(label, secrets, mysteries, clues)] for each bible directory, in stack order."""
+    out = []
+    for label, d in dirs:
+        k, m = d/"knowledge.md", d/"mysteries.md"
+        out.append((label, {r["Secret"] for r in table(k, "## Secrets")} if has(k, "## Secrets") else set(),
+                    table(m, "## Mysteries") if has(m, "## Mysteries") else [], table(m, "## Clues") if has(m, "## Clues") else []))
+    return out
+
+def mystery_errors(layers, point_ok):
+    out, secrets, owner, clues = [], set(), {}, {}
+    for label, sec, mys, cls in layers:
+        secrets |= sec
+        for r in mys:
+            if r["Mystery"] not in secrets: out.append(f"{r['Mystery']}: not a secret")
+            if r["Mystery"] in owner: out.append(f"{r['Mystery']}: defined twice")
+            if not point_ok(r["Revealed at"]): out.append(f"{r['Mystery']}: bad Revealed at")
+            owner.setdefault(r["Mystery"], label)
+        for r in cls:
+            key = (r["Mystery"], r["Clue"])
+            if r["Mystery"] not in owner: out.append(f"{key}: unknown mystery")
+            if r["Kind"] not in ("clue", "red-herring"): out.append(f"{key}: unknown kind")
+            if r["Needed"] not in ("yes", "no") or (r["Kind"] == "red-herring" and r["Needed"] == "yes"): out.append(f"{key}: bad Needed")
+            if not point_ok(r["Planted at"]): out.append(f"{key}: bad Planted at")
+            if key in clues: out.append(f"{key}: " + ("duplicate" if clues[key] == label else f"redefines {clues[key]}'s clue"))
+            clues.setdefault(key, label)
+    return out
+
+def fair_play(layers, cmp):
+    """Unfair mysteries (§9.5): a needed clue at or after the reveal, or no needed clue before it."""
+    reveal = {r["Mystery"]: r["Revealed at"] for *_, mys, _ in layers for r in mys}
+    clues = [r for *_, cls in layers for r in cls]
+    out = [("late clue", r["Mystery"], r["Clue"]) for r in clues if r["Needed"] == "yes" and cmp(r["Planted at"], reveal[r["Mystery"]]) >= 0]
+    out += [("no needed clue", m, "") for m, at in reveal.items()
+            if not any(r["Mystery"] == m and r["Needed"] == "yes" and cmp(r["Planted at"], at) < 0 for r in clues)]
+    return out
+
+chapter_ok = lambda c: re.fullmatch(r"chapter-\d{2,}", c) is not None
+chapter_cmp = lambda a, b: (chap(a) > chap(b)) - (chap(a) < chap(b))
+HPM = mystery_layers([("harry-potter", pkg_dir("harry-potter"))])
+LRM = mystery_layers([("lantern-road", LRD)])
+check("M Harry Potter's mysteries are valid", mystery_errors(HPM, lambda p: isvalid(HP, p)), [])
+check("M lantern-road's mysteries are valid", mystery_errors(LRM, chapter_ok), [])
+check("M the moody mystery is fair: two needed clues before GoF:35", fair_play(HPM, HP.cmp), [])
+check("M lantern-road's mystery is fair", fair_play(LRM, chapter_cmp), [])
+check("M the answer is the secret, hidden from Harry until the reveal",
+      (g(PURIST, "harry-potter", "GoF:34", "moody-identity"), g(PURIST, "harry-potter", "GoF:35", "moody-identity")), ("unaware", "knows"))
+def mutate(layers, i, which, row_i, **kw):
+    out = copy.deepcopy(layers); rows = out[i][2 if which == "m" else 3]; rows[row_i] = dict(rows[row_i], **kw); return out
+for label, bad, want in [
+        ("a mystery that is not a secret", mutate(HPM, 0, "m", 0, Mystery="who-is-it"), 1),
+        ("a red herring marked needed", mutate(HPM, 0, "c", 2, Needed="yes"), 1),
+        ("an unknown kind", mutate(HPM, 0, "c", 0, Kind="hint"), 1),
+        ("a duplicate clue", mutate(HPM, 0, "c", 1, Clue="c1"), 1),
+        ("an invalid Planted at", mutate(HPM, 0, "c", 0, **{"Planted at": "GoF:38"}), 1)]:
+    check(f"M error: {label}", len(mystery_errors(bad, lambda p: isvalid(HP, p))) >= want, True)
+higher = copy.deepcopy(HPM) + [("fanfic", set(), [], [dict(HPM[0][3][0], **{"Planted at": "GoF:36"}), dict(HPM[0][3][0], Clue="c4", **{"Planted at": "GoF:20"})])]
+check("M a higher layer may add a clue, never redefine one", mystery_errors(higher, lambda p: isvalid(HP, p)), ["('moody-identity', 'c1'): redefines harry-potter's clue"])
+late = mutate(HPM, 0, "c", 1, **{"Planted at": "GoF:36"})
+check("M unfair: a needed clue after the reveal", fair_play(late, HP.cmp), [("late clue", "moody-identity", "c2")])
+none = mutate(mutate(HPM, 0, "c", 0, Needed="no"), 0, "c", 1, Needed="no")
+check("M unfair: no needed clue before the reveal", fair_play(none, HP.cmp), [("no needed clue", "moody-identity", "")])
+heir = [("x", {"chamber-heir"}, [{"Mystery": "chamber-heir", "Question": "q", "Revealed at": "GoF:30", "Notes": ""}],
+         [{"Mystery": "chamber-heir", "Clue": "c1", "Kind": "clue", "Points to": "p", "Planted at": "CoS:10", "Needed": "yes", "Citation": "x"},
+          {"Mystery": "chamber-heir", "Clue": "c2", "Kind": "clue", "Points to": "p", "Planted at": "GoF:20", "Needed": "yes", "Citation": "x"}])]
+SYT = Stack.of("second-year-tournament")
+check("M fair in the ruler's order", fair_play(heir, HP.cmp), [])
+check("M the order audit: moving GoF before CoS puts a needed clue after its reveal", fair_play(heir, SYT.ruler().cmp), [("late clue", "chamber-heir", "c1")])
+
+# --- lineage (§9.6, §10.28) -----------------------------------------------------------
+LINEAGE = ("parents", "guardians", "descends-from")
+def lineage_values(d):
+    """Every slug that a lineage attribute or a title's holder names in one bible directory."""
+    out = set()
+    for f, key, rows in state_tables(d):
+        for r in rows:
+            if (r["Attribute"] in LINEAGE or (f.name == "titles.md" and r["Attribute"] == "holder")) and r["Value"] != "(unset)":
+                out |= set(r["Value"].split("; "))
+    return out
+def family_tree(stack, entity, cutoff, seen=()):
+    """The family-tree view (§9.6): an entity's parents and named ancestors, as the reader knows them at the cutoff."""
+    s = snapshot(stack, entity, cutoff)
+    up = [p for a in ("parents", "descends-from") for p in s.get(a, "").split("; ") if p]
+    return (entity, [family_tree(stack, p, cutoff, seen + (entity,)) for p in up if p not in seen + (entity,)])
+def lineage_warnings(people, titles, cal):
+    """§9.6 warnings. people: {slug: resolved state}; titles: [(title, holder, date of its As of)]."""
+    out = []; P_ = lambda s: cal.parse(s)
+    for child, s in people.items():
+        if "born" not in s: continue
+        cb = P_(s["born"])
+        for p in s.get("parents", "").split("; "):
+            ps = people.get(p, {})
+            if "born" in ps and age(P_(ps["born"]), cb)[1] < 12: out.append(("young parent", child, p))
+            if "died" in ps and dcmp(cb, shift(P_(ps["died"]), 1)) == 1: out.append(("born after death", child, p))
+    for title, holder, when in titles:
+        h = people.get(holder, {})
+        if when and (("born" in h and dcmp(when, P_(h["born"])) == -1) or ("died" in h and dcmp(when, P_(h["died"])) == 1)):
+            out.append(("holder outside lifetime", title, holder))
+    return out
+
+HPR = {r["Slug"] for r in Package("harry-potter").roster()}
+check("L every lineage value and title holder is in the roster", lineage_values(pkg_dir("harry-potter")) <= HPR, True)
+check("L Harry's parents and guardians at PS:2", (g(PURIST, "harry-potter", "PS:2", "parents"), g(PURIST, "harry-potter", "PS:2", "guardians")),
+      ("james-potter; lily-potter", "petunia-dursley; vernon-dursley"))
+check("L Harry has no guardians once he comes of age (DH:7)", g(PURIST, "harry-potter", "DH:7", "guardians"), None)
+check("L family tree: Voldemort's parentage is unknown at GoF:37", family_tree(PURIST, "lord-voldemort", "GoF:37"), ("lord-voldemort", []))
+check("L family tree: from HBP:10, back to Slytherin", family_tree(PURIST, "lord-voldemort", "HBP:10"),
+      ("lord-voldemort", [("merope-gaunt", [("marvolo-gaunt", [("salazar-slytherin", [])])]), ("tom-riddle-sr", [])]))
+check("L family tree: Harry at PS:1", family_tree(PURIST, "harry-potter", "PS:1"), ("harry-potter", [("james-potter", []), ("lily-potter", [])]))
+for c, want in [("PS:5", "albus-dumbledore"), ("OotP:30", "dolores-umbridge"), ("OotP:38", "albus-dumbledore"), ("DH:36", "severus-snape")]:
+    check(f"L the headship of Hogwarts at {c}", g(PURIST, "headmaster-of-hogwarts", c, "holder"), want)
+people = {s: snapshot(PURIST, s, "DH:36") for s in HPR}
+trows = [(r["Entity"], r["Value"], point_date(PURIST, r["As of"])) for r in table(pkg_dir("harry-potter")/"titles.md", "## State history") if r["Attribute"] == "holder"]
+check("L no lineage warnings in Harry Potter", lineage_warnings(people, trows, ISO), [])
+check("L Harry was born 1 to 2 years before his parents died", age(P(people["harry-potter"]["born"]), P(people["james-potter"]["died"])), (1, 1))
+check("L warning: a parent under 12", lineage_warnings({"a": {"born": "1990", "parents": "b"}, "b": {"born": "1980"}}, [], ISO), [("young parent", "a", "b")])
+check("L warning: born more than a year after a parent died", lineage_warnings({"a": {"born": "1983", "parents": "b"}, "b": {"born": "1950", "died": "1981-10-31"}}, [], ISO), [("born after death", "a", "b")])
+check("L no warning: born months after a father's death", lineage_warnings({"a": {"born": "1982-03", "parents": "b"}, "b": {"born": "1950", "died": "1981-10-31"}}, [], ISO), [])
+check("L warning: a title held before its holder's birth", lineage_warnings({"h": {"born": "1990"}}, [("t", "h", P("1985"))], ISO), [("holder outside lifetime", "t", "h")])
+CH = "## State history\n| Attribute | Value | As of | Source | Citation |\n| - | - | - | - | - |\n"
+t = scratch_layer({"characters/ann.md": CH + "| born | 2051 | PS:7 | books | x |\n| parents | bob | PS:7 | books | x |\n",
+                   "characters/bob.md": CH + "| born | 2070 | PS:7 | books | x |\n| parents | ann | PS:7 | books | x |\n"})
+check("L born-before-parent and ancestry-cycle: her own grandparent", contradictions(PURIST, extra=[("x", t)]),
+      [("ancestry-cycle", "parents"), ("born-before-parent", "born")])
+(t/"characters/ann.md").write_text((t/"characters/ann.md").read_text() + "\n## Accepted\n| Check | Subject | Reason | Citation |\n| - | - | - | - |\n| born-before-parent | born | she travels back | x |\n| ancestry-cycle | parents | she travels back | x |\n")
+check("L both accepted, one acceptance excusing the cycle", contradictions(PURIST, extra=[("x", t)]), [])
+shutil.rmtree(t)
+t = scratch_layer({"characters/ann.md": CH + "| descends-from | ann | PS:7 | books | x |\n"})
+check("L ancestry-cycle needs no dates: descended from herself", contradictions(PURIST, extra=[("x", t)]), [("ancestry-cycle", "descends-from")])
+shutil.rmtree(t)
+check("L no lineage contradictions in the examples", contradictions(PURIST), [])
+
+# schemas: the modules a project enables
+check("L schema: lantern-road enables travel and mysteries", (pyaml("lantern-road")["modules"], schema("project").is_valid(pyaml("lantern-road"))), ({"travel": True, "mysteries": True}, True))
+d = pyaml("two-witnesses"); d["modules"]["romance"] = True; check("L schema: an unknown module rejected", schema("project").is_valid(d), False)
+d = pyaml("two-witnesses"); d["modules"]["lineage"] = "yes"; check("L schema: a module flag is a boolean", schema("project").is_valid(d), False)
 
 # --- serial buffer and early access (§13.3, §13.9, §10.18) ---------------------------
 STATUS = ["drafted", "line-edited", "final", "early-access", "released"]

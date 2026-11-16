@@ -687,7 +687,8 @@ Each of these is optional.
    takes place on the page needs no entry unless other facts refer to it: `## Dates`
    already dates the canon itself.
 
-5. **Story events.** `timeline.md` (§10.15) MAY add a `Date` column after `Story time`.
+5. **Story events.** `timeline.md` (§10.15) MAY add a `Date` column after its required
+   columns.
 
 With a universe layer, a date of one base is moved by that base's offset into the
 universe's time (§8.1).

@@ -1,14 +1,19 @@
 # 9. Optional modules
 
 Modules are dormant unless a project enables them in `project.yaml`. A package MAY
-ship a module's world-layer files (`game-system.md`, `languages.md`) whether or not a
-given project uses them.
+ship a module's world-layer files (`game-system.md`, `languages.md`, `routes.md`,
+`mysteries.md`, `titles.md`) whether or not a given project uses them. A host
+validates a module's files and reserved attributes wherever they appear. Agents read
+them, and the host raises the module's warnings, only in a project that enables it.
 
 | Module        | Enabled by                        | World-layer files            | Story-layer files              |
 | ------------- | --------------------------------- | ---------------------------- | ------------------------------ |
 | **Frames**    | `setting.temporal_model: frames`  | `time-travel.md`             | `timelines.md`, `branches.md`  |
 | **LitRPG**    | `modules.litrpg: true`            | `game-system.md`             | `game-state.md`                |
 | **Languages** | `modules.languages: true`         | `languages.md`, `lang/*.md`  | —                              |
+| **Travel**    | `modules.travel: true`            | `routes.md`                  | — (a `Place` column in `timeline.md`) |
+| **Mysteries** | `modules.mysteries: true`         | `mysteries.md`               | —                              |
+| **Lineage**   | `modules.lineage: true`           | `titles.md`                  | —                              |
 
 ## 9.1 Frames: time travel and parallel worlds
 
@@ -129,3 +134,112 @@ How the game UI is rendered in prose (status windows, notifications) belongs in
   **rendered** on the page (in-language, tagged, or described, which can depend on the
   POV character), and how it is **translated**.
 - A **constructed language** gets a dictionary, `lang/<language>.md` (§10.12).
+
+## 9.4 Travel
+
+A story that moves its characters across a map can break its own geography: a journey
+that takes a week in one chapter takes two days in another, or a character reaches a
+town faster than any road allows. The travel module records how long journeys take, so
+that, with in-world dates (§4.13), the time between two scenes can be checked against
+the distance between their places.
+
+- `places.md` already holds the places: one entity per place (§10.5).
+- `routes.md` (world layer) holds the **routes** between them, and the **modes** of
+  travel the world has (format: §10.26). A route is an entity, so it has a state
+  history like any other: a bridge washes out, a railway opens, a Floo connection is
+  made. Each of its attributes is a mode, and each value is a **duration**: how long
+  that mode takes over that route.
+- `timeline.md` gains an optional `Place` column: the place where each story event
+  happens (§10.15).
+
+A **duration** is a number and a unit, `min`, `h`, `d`, or `w`: `30min`, `9h`, `4d`. It
+takes the same forms as a date (§4.13): a range (`4d..6d`), open at either end
+(`..12h`), or approximate (`~8h`). `0` is instant. A day is 24 hours. A route's value
+`—` means that the mode cannot make the journey at all: no Apparating into Hogwarts.
+A mode with no row on a route is unknown, not impossible, and the check below leaves it
+out.
+
+**The check.** For each entity that `timeline.md` events list, the continuity-editor
+takes the events that have both a `Date` and a `Place`, in date order. Where the place
+changes between two consecutive events, the most time that can have passed (from the
+start of the first date to the end of the second) MUST be at least the shortest journey
+between the two places: the quickest path over the routes as they stand at the second
+event's chapter, taking on each route its fastest known mode at the lower end of its
+duration. A journey that is definitely too fast is a **warning** (§4.13), because the
+story may mean it: a secret road, a magic the routes do not record.
+
+- An approximate duration counts as instant, and so does a route with no known mode.
+  A route on which every known mode is `—` cannot be used.
+- It never warns where either date is approximate or open-ended, or where no path joins
+  the two places.
+
+## 9.5 Mysteries
+
+A mystery is a question the reader is invited to answer before the story does: who
+the impostor is, why the lamps keep going out. The module records each mystery's
+**clues**, where they are planted, and where the answer is revealed, so that a mystery
+can be checked for **fair play**: every clue the reader needs is on the page before the
+reveal.
+
+- A mystery's answer is a **secret** (`knowledge.md`, §10.5). The secret's `Truth` is
+  the solution, and its knowledge rows say which characters know it, and from when. The
+  snapshot already keeps it from leaking (§7.3).
+- `mysteries.md` (world layer) adds the mystery itself: its question, where the answer
+  is revealed to the reader, and its clues (format: §10.27). A package records the
+  canon's mysteries, and a project adds its own. The architect plans a project's clues
+  in the outline and records them here; the chronicler moves a clue's `Planted at` if
+  the chapter that plants it changes.
+- A clue is **needed** if a reader must have it to reach the answer. A **red herring**
+  points somewhere else, and is never needed.
+
+**The checks.** Each is a warning, because a mystery may be unfair on purpose:
+
+- a needed clue planted at or after the reveal;
+- a mystery with no needed clue before its reveal;
+- in an established project, a project order (§6.8) or a divergence that moves a
+  canon mystery's needed clue to after its reveal, or removes it. The canon-keeper
+  raises it in its audit.
+
+The drafter MUST NOT let the narration answer a mystery before its `Revealed at`,
+even where a viewpoint character already knows the answer.
+
+## 9.6 Lineage
+
+Relationships are pairwise (§10.5), so they cannot hold a family tree, a dynasty, or a
+line of succession. The lineage module adds three reserved attributes to any entity's
+state history, and a file of titles:
+
+- `parents`: the entity's birth parents, as slugs separated by `; `;
+- `guardians`: those who raise it, if not its parents, in the same form;
+- `descends-from`: distant ancestors, when the generations between are unknown (the
+  Gaunts, from Salazar Slytherin);
+- `titles.md` (world layer, format §10.28): offices and titles that pass from one
+  holder to the next, each an entity whose `holder` attribute names the current holder
+  and whose `rule` says, in free text, how it passes on.
+
+They are ordinary attributes, so everything else applies unchanged. Parentage is
+visible from its `As of`, which keeps a parentage reveal from leaking. A later row can
+correct a belief that a story has overturned. A project changes canon parentage
+through the ledger (§6.4). Each value MUST name a slug in the stack's roster (§10.9).
+
+**Chronology contradictions.** With in-world dates (§4.13), two more checks join
+those of §4.13, and an `## Accepted` row can excuse them in the same way:
+
+| Check                | Fails when                                                                                     |
+| -------------------- | ---------------------------------------------------------------------------------------------- |
+| `born-before-parent` | An entity's `born` is definitely before the `born` of one of its `parents` or `descends-from` ancestors |
+| `ancestry-cycle`     | Following `parents` and `descends-from` leads back to the entity itself                        |
+
+A time traveller who becomes their own grandparent is both, on purpose. `ancestry-cycle`
+needs no dates, so it applies in every world. Its subject is any one of the `parents`
+or `descends-from` rows on the cycle: one acceptance excuses the whole cycle.
+
+**Warnings**, raised by the continuity-editor:
+
+- a parent definitely younger than 12 at the child's `born`;
+- a child born definitely more than a year after a birth parent's `died`;
+- a title's `holder` row dated (by the date of its `As of` point) definitely before the
+  holder's `born` or after their `died`.
+
+A family tree is a view, never stored: start from an entity and follow `parents` and
+`descends-from` at a cutoff, which shows only the parentage a reader knows by then.

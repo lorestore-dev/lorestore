@@ -37,6 +37,8 @@ point (§4.4), and universe offsets (§8.1) shift a base calendar that nothing d
 - Let rows and story events carry in-world dates, so that ages, durations, prequels,
   and time travel can be checked rather than judged.
 - Give universe offsets a calendar to apply to.
+- Build on the dates with three modules: travel (journey times), mysteries (clues and
+  fair play), and lineage (parentage and titles).
 - Add the examples, checks, and decisions that go with it. Tag `v0.3`.
 
 ### 3. Reference agents and workflows (0.4)

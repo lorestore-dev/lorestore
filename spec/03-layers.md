@@ -86,6 +86,9 @@ any project file (§13.10).
 | `magic/<catalog>.md`         | world  | Catalogs (spells, potions, creatures, artifacts, games): theory vs. practice, definition level     | merger                         | worldbuilder           |
 | `game-system.md`             | world  | LitRPG: the System's rules (§9.2)                                                                  | merger                         | worldbuilder           |
 | `time-travel.md`             | world  | Frames: time-travel mechanisms, each with its model, reach, and limits (§9.1)                      | merger                         | worldbuilder           |
+| `routes.md`                  | world  | Travel: modes of travel, and routes between places with how long each mode takes (§9.4)            | merger                         | worldbuilder           |
+| `mysteries.md`               | world  | Mysteries: each mystery's question, reveal, and clues (§9.5)                                       | merger                         | architect; chronicler (`Planted at`, §9.5) |
+| `titles.md`                  | world  | Lineage: titles and offices, and who holds each, over time (§9.6)                                  | merger                         | worldbuilder           |
 | `plot-architecture.md`       | world  | Canon setups and payoffs, prophecies, foreshadowing, running mysteries                             | merger                         | — (the outline's ledger serves) |
 | `knowledge.md`               | world  | Who knows what, dated: secrets and reveals                                                         | merger                         | architect; chronicler (story-dated rows, §4.11) |
 | `relationships.md`           | world  | Pairwise relationship state histories                                                              | merger                         | character-designer; chronicler (story-dated rows, §4.11) |

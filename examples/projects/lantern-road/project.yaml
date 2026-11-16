@@ -9,6 +9,10 @@ setting:
   type: original
   temporal_model: linear
 
+modules:
+  travel: true
+  mysteries: true
+
 calendar:                       # the world's own calendar (§4.13)
   eras:
     - { id: BL, name: before the Lamps, counts: down }
