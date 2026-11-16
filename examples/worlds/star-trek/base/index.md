@@ -3,7 +3,7 @@
 ## Files
 | Path                          | Layer  | Holds                                                     |
 | ----------------------------- | ------ | --------------------------------------------------------- |
-| world-config.yaml             | config | Identity, version, status, profiles                       |
+| package.yaml                  | config | Identity, version, kind, relies-on                      |
 | canon-timeline.md             | world  | The ruler: series as works, seasons as segments           |
 | sources.md                    | world  | Source registry                                           |
 | glossary.md                   | union  | Canonical terms                                           |

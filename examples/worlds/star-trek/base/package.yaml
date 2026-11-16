@@ -1,16 +1,7 @@
-spec_version: "0.1"
+spec_version: "0.2"
 id: star-trek
+kind: base
 name: "Star Trek"
-version: 1.5.0
+version: 2.0.0
 status: open-for-extraction
-
-canon_basis:
-  primary: canon
-  also_canon: []
-  excluded: [tas]
-
-canon_profiles:
-  canon-only: { order: [canon] }
-  enhanced:   { order: [canon, fanon-trek], resolution: recency }
-
-active_profile: canon-only
+relies-on: []

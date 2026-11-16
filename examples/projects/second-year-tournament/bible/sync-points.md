@@ -1,9 +1,10 @@
-# Canon track
+# Sync points
 
 The story follows canon from second year, but with *Goblet of Fire* moved forward: the
 Tournament is year two, *Chamber of Secrets* year three, *Prisoner of Azkaban* year four.
+The order itself is `setting.order` in `project.yaml`.
 
-## Track
+## Sync points
 | From chapter | Cutoff |
 | ------------ | ------ |
 | chapter-01   | GoF:1  |
@@ -13,14 +14,3 @@ Tournament is year two, *Chamber of Secrets* year three, *Prisoner of Azkaban* y
 | chapter-16   | CoS:1  |
 | chapter-30   | PoA:1  |
 | chapter-40   | PoA:17 |
-
-## Order
-| Order | Segment |
-| ----- | ------- |
-| 1     | PS      |
-| 2     | GoF     |
-| 3     | CoS     |
-| 4     | PoA     |
-| 5     | OotP    |
-| 6     | HBP     |
-| 7     | DH      |

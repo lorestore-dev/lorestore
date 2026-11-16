@@ -1,55 +1,61 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "world-config.yaml",
-  "description": "World package configuration. See spec/10-formats.md §10.2. Cross-file rules (profiles name registered sources; excluded sources appear in no profile; active_profile names a defined profile) are host validations, spec/14-implementation.md §14.2.",
+  "title": "package.yaml",
+  "description": "Package configuration. See spec/10-formats.md §10.2. Cross-file rules (the id matches the package's folder; every relies-on entry names a package that exists at that version; a base package registers only primary and secondary-official sources) are host validations, spec/14-implementation.md §14.2.",
   "type": "object",
-  "required": ["spec_version", "id", "name", "version", "status", "canon_basis", "canon_profiles", "active_profile"],
+  "required": ["spec_version", "id", "kind", "name", "version", "status", "relies-on"],
   "additionalProperties": false,
   "properties": {
-    "spec_version": { "type": "string", "const": "0.1" },
-    "id": { "$ref": "#/$defs/id" },
+    "spec_version": { "type": "string", "const": "0.2" },
+    "id": { "$ref": "#/$defs/packageId" },
+    "kind": {
+      "enum": ["base", "official", "adaptation", "fanon", "fanfic", "theories"],
+      "description": "What the package holds. See spec/02-layout.md §2.3."
+    },
     "name": { "type": "string", "minLength": 1 },
-    "version": {
-      "type": "string",
-      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
-    },
+    "version": { "$ref": "#/$defs/semver" },
     "status": { "enum": ["open-for-extraction", "locked"] },
-    "canon_basis": {
-      "type": "object",
-      "required": ["primary"],
-      "additionalProperties": false,
-      "properties": {
-        "primary": { "$ref": "#/$defs/id" },
-        "also_canon": { "type": "array", "items": { "$ref": "#/$defs/id" }, "uniqueItems": true },
-        "excluded": { "type": "array", "items": { "$ref": "#/$defs/id" }, "uniqueItems": true }
-      }
-    },
-    "canon_profiles": {
-      "type": "object",
-      "minProperties": 1,
-      "propertyNames": { "$ref": "#/$defs/id" },
-      "additionalProperties": {
-        "type": "object",
-        "required": ["order"],
-        "additionalProperties": false,
+    "relies-on": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/packagePin" },
+      "description": "The packages this one describes, pinned. Every one MUST appear below this package in any stack that uses it (spec §2.2)."
+    }
+  },
+  "allOf": [
+    {
+      "description": "A base package: its id is a bare fandom id and it relies on nothing.",
+      "if": { "properties": { "kind": { "const": "base" } } },
+      "then": {
         "properties": {
-          "order": {
-            "type": "array",
-            "minItems": 1,
-            "uniqueItems": true,
-            "items": { "$ref": "#/$defs/id" }
-          },
-          "resolution": {
-            "enum": ["precedence", "recency"],
-            "default": "precedence",
-            "description": "How conflicts between active sources resolve. See spec/05-sources.md §5.4."
-          }
+          "id": { "$ref": "#/$defs/id" },
+          "relies-on": { "maxItems": 0 }
+        }
+      },
+      "else": {
+        "properties": {
+          "id": { "pattern": "/" },
+          "relies-on": { "minItems": 1 }
         }
       }
     },
-    "active_profile": { "$ref": "#/$defs/id" }
-  },
+    {
+      "description": "A fanfic package lives under <fandom>/fanfic/<work>.",
+      "if": { "properties": { "kind": { "const": "fanfic" } } },
+      "then": { "properties": { "id": { "pattern": "^[a-z0-9]+(-[a-z0-9]+)*/fanfic/[a-z0-9]+(-[a-z0-9]+)*$" } } }
+    }
+  ],
   "$defs": {
-    "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" }
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "packageId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(/[a-z0-9]+(-[a-z0-9]+)*){0,2}$",
+      "description": "<fandom> for a base package, <fandom>/<package> otherwise, <fandom>/fanfic/<work> for a fan work."
+    },
+    "semver": { "type": "string", "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$" },
+    "packagePin": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(/[a-z0-9]+(-[a-z0-9]+)*){0,2}@(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
+    }
   }
 }

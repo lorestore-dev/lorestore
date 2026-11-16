@@ -6,6 +6,11 @@
 | D1 | Cedric is killed in the graveyard (GoF:32)  | Cedric survives, badly injured | cedric-diggory.status=alive | planned | chapter-01   |
 | D2 | (silent) Cedric has no scars               | A curse scar across his chest  | cedric-diggory.scars=curse scar across his chest | planned | chapter-01 |
 
+## Hidden canon
+| Entity        | Attribute | Revealed at | Decision    | Divergence | Decided in | Note |
+| ------------- | --------- | ----------- | ----------- | ---------- | ---------- | ---- |
+| severus-snape | loyalty   | DH:33       | keep-hidden | —          | chapter-01 |      |
+
 ## Consequences
 | Divergence | Consequence                                                           | Status   | Absorbed in |
 | ---------- | --------------------------------------------------------------------- | -------- | ----------- |

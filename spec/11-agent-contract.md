@@ -41,7 +41,7 @@ for step in workflow.steps:
 ## 11.2 Contexts
 
 Every step runs in exactly one context (§2.6): **project context**, rooted at a
-project; **world context**, rooted at a world package and its extraction workspace; or
+project; **package context**, rooted at a package and its extraction workspace; or
 **universe context**, rooted at a universe.
 The workflow declares its context. Paths in agent files and workflow files are agent
 paths, never workspace paths.
@@ -87,7 +87,7 @@ An agent pulls only the data its step needs. This keeps each call small, focused
 cheap, and lets the framework scale to long novels and multi-season serials.
 
 The bible is decomposed into small addressable units (one file per character, ledger
-entries as rows) precisely so a slice can be loaded without its neighbours. A `Reads`
+entries as rows) precisely so a slice can be loaded without its neighbors. A `Reads`
 section is a **retrieval spec, not a "load everything" list**:
 
 - Prefer the narrowest path that covers the job: `bible/characters/hermione-granger.md`,
@@ -97,6 +97,10 @@ section is a **retrieval spec, not a "load everything" list**:
   ledger.
 - Read `bible/index.md` first to learn which files exist, and what any added columns
   in them mean (§10.3).
+
+In project context, `bible/…` reads come from the composed bible (§7.6), so one slice
+spans every layer of the stack. Each row's `Layer` column says which layer it came
+from; an agent never needs to know where the packages live.
 
 Two ways to retrieve, both file-only:
 
@@ -123,7 +127,7 @@ A workflow is a markdown file, `workflows/<id>.md`, with front matter and a step
 ---
 id: novel
 kind: chain          # chain | overlay
-context: project     # project | world | universe
+context: project     # project | package | universe
 ---
 ## Steps
 | Step | Agent     | Reads                      | Writes             | Gate      | Repeat |
@@ -132,9 +136,9 @@ context: project     # project | world | universe
 ```
 
 - `Gate`: `milestone` or empty (§11.8).
-- `Repeat`: empty, or one of `per-arc`, `per-chapter`, `per-character`, `per-file`, `per-unit`,
-  `per-target`. The instance value substitutes into placeholders in `Reads` and
-  `Writes` (`<NN>`, `<slug>`, `<file>`, `<work>`, `<target>`).
+- `Repeat`: empty, or one of `per-arc`, `per-chapter`, `per-character`, `per-file`,
+  `per-unit`, `per-target`. The instance value substitutes into placeholders in `Reads`
+  and `Writes` (`<NN>`, `<slug>`, `<file>`, `<work>`, `<target>`).
 - A **phase** is a group of steps that repeats together (the per-chapter drafting loop).
   Mark it with a `### Phase <n> — <name> (repeat: <kind>)` heading above its table.
 
@@ -160,11 +164,14 @@ three signals:
 - **`back: <step>`**: return to an earlier step (for example, the outline needs
   rework).
 
-Gates are separate from **decisions** (§6.9): a pending decide item blocks progress
-past its chapter under every gate policy. Under `gates: none` the showrunner makes the
-decision; otherwise a human does. **Order inversions** (§6.8), **divergence
-conflicts** (§6.6), and **hidden canon** (§6.12) are the exception: they are always the
-author's decision, and wait for the author even under `gates: none`.
+Gates are separate from **decisions** (§6.9): a pending decide item blocks progress past
+its chapter under every gate policy. A `TODO: hidden canon` or `TODO: seam conflict`
+marker (§10.18) still in a chapter counts as a pending decide item for it. Under `gates:
+none` the showrunner makes the decision; otherwise a human does. **Order inversions**
+(§6.8), **divergence conflicts** (§6.6), **hidden canon** (§6.12), **theory conflicts**
+(§6.13), and **seam conflicts** (§6.14) are the exception: they are always the author's
+decision, and wait for the author even under `gates: none`. So are the author's
+publishing steps: sending a chapter to early access and releasing it (§13.3, §13.9).
 
 ## 11.9 Signals between agents
 
@@ -172,14 +179,16 @@ Agents communicate only through files, using these conventions:
 
 | Signal               | Written by          | Form                                         | Consumed by                                   |
 | -------------------- | ------------------- | -------------------------------------------- | --------------------------------------------- |
-| Missing canon        | drafter             | `<!-- TODO: needs bible: … -->` (§10.19)     | showrunner, which routes it to a builder      |
-| Hidden canon         | drafter             | `<!-- TODO: hidden canon: … -->` (§10.19)    | showrunner, which surfaces it to the author   |
-| Leftover markers     | beta-reader         | `## Leftover markers` (§10.20)               | showrunner, which routes each marker as above |
-| Review priorities    | every reviewer      | `## Priorities` (§10.20)                     | showrunner, which schedules revisions         |
-| Canon findings       | canon-keeper        | `## Findings` with a class (§10.20)          | showrunner and the human, for decide items    |
+| Missing canon        | drafter             | `<!-- TODO: needs bible: … -->` (§10.18)     | showrunner, which routes it to a builder      |
+| Hidden canon         | drafter             | `<!-- TODO: hidden canon: … -->` (§10.18)    | showrunner, which surfaces it to the author   |
+| Seam conflict        | drafter             | `<!-- TODO: seam conflict: … -->` (§10.18)   | showrunner, which surfaces it to the author   |
+| Leftover markers     | beta-reader         | `## Leftover markers` (§10.19)               | showrunner, which routes each marker as above |
+| Review priorities    | every reviewer      | `## Priorities` (§10.19)                     | showrunner, which schedules revisions         |
+| Canon findings       | canon-keeper        | `## Findings` with a class (§10.19)          | showrunner and the human, for decide items    |
 | Needs a human        | extractor           | `## Needs a human` (§10.6)                   | the human at the next extraction gate         |
 | Merge conflicts      | merger              | `## Unresolved conflicts` in its target      | the human at the next extraction gate         |
-| Chapter status       | drafter, line-editor | front-matter `status` (§10.19)              | the host and the showrunner                   |
+| Chapter status       | drafter, line-editor, `release` skill | front-matter `status` (§10.18) | the host and the showrunner               |
+| Human feedback       | the author          | `references/feedback/…` (§10.25)             | beta-reader, which folds it into its priorities |
 
 ## 11.10 Skills
 
@@ -188,10 +197,16 @@ language-model agents, but they obey the same one-output rule:
 
 | Skill               | Writes                     | Does                                                         |
 | ------------------- | -------------------------- | ------------------------------------------------------------ |
+| `compose`           | `derived/bible/…`          | Builds the composed bible from the stack and the project's own `bible/` (§7.6) |
 | `temporal-snapshot` | `derived/as-of-….md`       | Materializes a snapshot (§7.6)                               |
-| `world-index`       | `bible/index.md`           | Lists every file on its side, with its layer from §3.3       |
+| `indexer`           | `bible/index.md`           | Lists every file in its package or project, with its layer from §3.3 |
 | `cite`              | the requested output file  | Renders `sources.md` bibliography entries as APA, MLA, or Chicago |
-| `release`           | `manuscript/chapter-<NN>.md` | Serial only: sets the chapter's front matter to `status: released` and `released: <date>` (§13.3) |
+| `renumber`          | every chapter id in the project | Applies a mapping of old chapter ids to new ones across the project's files, refusing to move a chapter readers have seen or another project pins (§13.10) |
+| `release`           | `manuscript/chapter-<NN>.md` | At the author's word only: sets the chapter's front matter to `status: early-access` and `early-access: <date>`, or (serials) `status: released` and `released: <date>`, refusing a chapter out of order (§13.3, §13.9) |
+
+`compose` writes many files, but they are one output: the composed bible as a whole. No
+other step writes under `derived/bible/`. Likewise, `renumber` writes one output: the
+project's chapter ids, everywhere they occur (§13.10).
 
 ## 11.11 Writing a new agent
 

@@ -15,5 +15,6 @@ origin: canon
 | role      | Gryffindor Seeker                         | PS:9   | books          | PS ch.9                                    |
 | broom     | Nimbus Two Thousand                       | PS:10  | books          | PS ch.10                                   |
 | broom     | (unset)                                   | PoA:9  | books          | PoA ch.9, destroyed by the Whomping Willow |
-| glasses   | contact lenses                            | PoA:1  | fanfic-example | placeholder fan work, ch.1                 |
 | broom     | Firebolt                                  | PoA:11 | books          | PoA ch.11                                  |
+| graveyard-echoes | his mother's echo emerges first, then his father's | GoF:34 | books | GoF ch.34, later editions |
+| graveyard-echoes | his father's echo emerges first, then his mother's | GoF:34 | gof-first-printing | GoF ch.34, first printings |

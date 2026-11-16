@@ -1,4 +1,4 @@
-spec_version: "0.1"
+spec_version: "0.2"
 id: the-long-way-back
 name: "The Long Way Back"
 workflow: serial                # released installments are locked (the default)
@@ -9,15 +9,14 @@ parameters:
   tense: past
   target_length: 85000
 
-world:
-  id: star-trek
-  version: 1.5.0
+layers:                         # from the base up
+  - star-trek@2.0.0
 
 setting:
   type: established
   fidelity: au
-  canon_point: "TNG:3:15"
-  active_profile: canon-only
+  fidelity_notes: "Forks are expected; the canon-keeper concentrates on self-consistency and frames."
+  cutoff: "TNG:3:15"
   temporal_model: frames
 
 modules:

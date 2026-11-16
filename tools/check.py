@@ -1,9 +1,11 @@
 """LoreStore conformance checker for the examples in this repository.
 
 Validates the example workspace in examples/ against the JSON schemas, and runs a
-reference implementation of the snapshot algorithm (§7), canon points (§4.2), the canon
-track and project order (§6.7-6.8), branch and retelling modes (§6.6), and hidden truths
-(§4.4, §6.12), comparing each result with the expected answers in examples/README.md.
+reference implementation of layer stacks (§2.2), the snapshot algorithm (§7), canon
+points and adaptation timecodes (§4.2, §4.9), sync points and the project order
+(§6.7-6.8), branch and retelling modes (§6.6), hidden truths (§4.4, §6.12), theory
+conflicts (§6.13), and chapter statuses (§10.18), comparing each result with the
+expected answers in examples/README.md.
 
 Usage:
     pip install -r tools/requirements.txt
@@ -16,7 +18,7 @@ hard-coded), so it is not a validator for arbitrary workspaces. It does not chec
 markdown links or § references, the agent and workflow chapters, or prose formats
 beyond the tables it parses.
 """
-import json, re, sys, pathlib, copy, yaml, jsonschema
+import json, re, sys, pathlib, copy, functools, yaml, jsonschema
 
 ROOT = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else pathlib.Path(__file__).resolve().parent.parent
 EX = ROOT / "examples"
@@ -25,31 +27,57 @@ def check(label, got, want):
     global fails
     ok = got == want; fails += not ok
     print(("ok  " if ok else "FAIL"), label, "" if ok else f": got {got!r}, want {want!r}")
+def raises_ok(fn, exc):
+    try: fn()
+    except exc: return True
+    return False
+
+def raises(label, fn, exc=ValueError):
+    try: fn(); check(label, "no error", "error")
+    except exc: check(label, "error", "error")
 
 def schema(name): return jsonschema.Draft202012Validator(json.loads((ROOT / "schemas" / f"{name}.schema.json").read_text()))
 def valid(name, doc):
     try: schema(name).validate(doc); return True
     except jsonschema.ValidationError as e: print("   ", e.message); return False
+def load(p): return yaml.safe_load(p.read_text())
+def pyaml(p): return load(EX/"projects"/p/"project.yaml")
 
 # --- schemas -----------------------------------------------------------------
-for w in ["harry-potter", "star-trek"]:
-    check(f"schema world-config {w}", valid("world-config", yaml.safe_load((EX/f"worlds/{w}/world-config.yaml").read_text())), True)
-for p in ["two-witnesses", "the-long-way-back", "hogwarts-at-warp"]:
-    check(f"schema project {p}", valid("project", yaml.safe_load((EX/f"projects/{p}/project.yaml").read_text())), True)
-check("schema universe", valid("universe", yaml.safe_load((EX/"universes/wizards-and-warp/universe.yaml").read_text())), True)
-for f, idx, name in [("10-formats", 0, "project"), ("10-formats", 2, "world-config"), ("08-crossovers", 0, "universe")]:
+PKG_FILES = sorted((EX/"worlds").rglob("package.yaml"))
+PROJECTS = sorted(p.parent.name for p in (EX/"projects").glob("*/project.yaml"))
+for f in PKG_FILES:
+    check(f"schema package {f.parent.relative_to(EX/'worlds').as_posix()}", valid("package", load(f)), True)
+for p in PROJECTS:
+    check(f"schema project {p}", valid("project", pyaml(p)), True)
+check("schema universe", valid("universe", load(EX/"universes/wizards-and-warp/universe.yaml")), True)
+for f, idx, name in [("10-formats", 0, "project"), ("10-formats", 2, "package"), ("08-crossovers", 1, "universe")]:
     block = re.findall(r"```yaml\n(.*?)```", (ROOT/f"spec/{f}.md").read_text(), re.S)[idx]
     check(f"schema spec example {f}[{idx}]", valid(name, yaml.safe_load(block)), True)
-bad = yaml.safe_load((EX/"projects/hogwarts-at-warp/project.yaml").read_text()); bad["setting"]["canon_point"] = "HBP:7"
-check("schema rejects canon_point in universe project", schema("project").is_valid(bad), False)
-ser = yaml.safe_load((EX/"projects/the-long-way-back/project.yaml").read_text())
+bad = pyaml("hogwarts-at-warp"); bad["setting"]["cutoff"] = "HBP:7"
+check("schema rejects cutoff beside a universe layer", schema("project").is_valid(bad), False)
+bad = pyaml("two-witnesses"); bad["setting"]["cutoffs"] = {"harry-potter": "GoF:37"}
+check("schema rejects cutoffs without a universe layer", schema("project").is_valid(bad), False)
+for ref, ok in [("harry-potter@3.0.0", True), ("harry-potter/fanfic/example@1.0.0", True), ("universe:wizards-and-warp@2.0.0", True),
+                ("project:two-witnesses@chapter-02", True), ("harry-potter", False), ("project:two-witnesses@1.0.0", False),
+                ("harry-potter/a/b/c@1.0.0", False), ("fanon-hp@latest", False)]:
+    d = pyaml("blind-harry"); d["layers"] = [ref]
+    if ref.startswith("universe:"): d["setting"]["cutoffs"] = {"harry-potter": d["setting"].pop("cutoff")}; d["setting"]["divergence_points"] = {"harry-potter": d["setting"].pop("divergence_point")}
+    check(f"schema layer ref {ref}", schema("project").is_valid(d), ok)
+d = pyaml("two-witnesses"); d["resolution"] = "newest"; check("schema rejects unknown resolution", schema("project").is_valid(d), False)
+d = pyaml("two-witnesses"); d["setting"]["active_profile"] = "enhanced"; check("schema rejects 0.1 active_profile", schema("project").is_valid(d), False)
+d = load(EX/"worlds/harry-potter/fanon/package.yaml"); d["relies-on"] = []
+check("schema non-base package must rely on something", schema("package").is_valid(d), False)
+d = load(EX/"worlds/harry-potter/base/package.yaml"); d["relies-on"] = ["star-trek@2.0.0"]
+check("schema base package relies on nothing", schema("package").is_valid(d), False)
+d = load(EX/"worlds/harry-potter/fanfic/example/package.yaml"); d["id"] = "harry-potter/example"
+check("schema fanfic id under <fandom>/fanfic/", schema("package").is_valid(d), False)
+ser = pyaml("the-long-way-back")
 check("schema serial project, default release policy", (ser["workflow"], "serial" in ser, schema("project").is_valid(ser)), ("serial", False, True))
 ser["serial"] = {"released": "revisable"}; check("schema serial revisable accepted", schema("project").is_valid(ser), True)
 ser["serial"] = {"released": "frozen"}; check("schema serial unknown policy rejected", schema("project").is_valid(ser), False)
-nov = yaml.safe_load((EX/"projects/two-witnesses/project.yaml").read_text()); nov["serial"] = {"released": "locked"}
+nov = pyaml("two-witnesses"); nov["serial"] = {"released": "locked"}
 check("schema serial block on novel rejected", schema("project").is_valid(nov), False)
-bad = yaml.safe_load((EX/"worlds/harry-potter/world-config.yaml").read_text()); bad["canon_profiles"]["x"] = {"order": ["books"], "resolution": "newest"}
-check("schema rejects unknown resolution", schema("world-config").is_valid(bad), False)
 
 # --- parsing -------------------------------------------------------------------
 def table(path, heading):
@@ -59,36 +87,115 @@ def table(path, heading):
         elif started: break
     cells = [[c.strip() for c in re.split(r"(?<!\\)\|", l)[1:-1]] for l in out]
     return [dict(zip(cells[0], r)) for r in cells[2:]]
+def has(path, heading): return path.exists() and heading in path.read_text().splitlines()
+def front(p): return yaml.safe_load(p.read_text().split("---")[1])
+def entries(path):
+    out, cur = {}, None
+    for l in path.read_text().splitlines():
+        m = re.match(r"### ([A-Za-z0-9-]+) — ", l)
+        if m: cur = out.setdefault(m.group(1), {}); continue
+        m = re.match(r"- ([a-z0-9-]+): (.*?)\s*(#.*)?$", l)
+        if cur is not None and m: cur[m.group(1)] = m.group(2)
+    return out
+def chap(c): return int(c.split("-")[1])
+
+# --- packages and stacks (§2.2, §2.3) -------------------------------------------
+TIERS = ["primary", "secondary-official", "adaptation", "fanon", "fanfic", "theory", "erratum"]
+UNRESOLVED = {"theory", "erratum"}            # never resolve into state (§5.2)
+KIND_TIERS = {"base": {"primary", "secondary-official", "erratum"}, "official": {"secondary-official", "erratum"}, "adaptation": {"adaptation", "erratum"}, "fanon": {"fanon"},
+              "fanfic": {"fanfic"}, "theories": {"theory"}}
+def pkg_dir(pid):
+    fandom, *rest = pid.split("/")
+    return EX/"worlds"/fandom/("/".join(rest) if rest else "base")
+
+def entity_rows(d, entity):
+    """An entity's state rows in one bible directory (§10.5)."""
+    f = d/"characters"/f"{entity}.md"
+    out = table(f, "## State history") if f.exists() else []
+    if (d/"relationships.md").exists(): out += [r for r in table(d/"relationships.md", "## State history") if r["Pair"] == entity]
+    if (d/"species.md").exists(): out += [r for r in table(d/"species.md", "## State history") if r["Entity"] == entity]
+    if (d/"knowledge.md").exists():
+        out += [dict(r, Attribute=r["Secret"], Value=r["State"]) for r in table(d/"knowledge.md", "## Knowledge") if r["Character"] == entity]
+    return out
+
+class Package:
+    def __init__(self, pid):
+        self.id, self.dir = pid, pkg_dir(pid)
+        self.cfg = load(self.dir/"package.yaml"); self.kind = self.cfg["kind"]
+        self.base = pid.split("/")[0]
+        self.sources = {r["ID"]: r["Tier"] for r in table(self.dir/"sources.md", "## Sources")} if (self.dir/"sources.md").exists() else {}
+    def roster(self):
+        f = self.dir/"characters/_roster.md"
+        return table(f, "## Characters") if f.exists() else []
+    def rows(self, entity): return entity_rows(self.dir, entity)
+    def all_rows(self):
+        d = self.dir; out = []
+        for f in (d/"characters").glob("[!_]*.md") if (d/"characters").exists() else []:
+            out += [dict(r, _entity=f.stem) for r in table(f, "## State history")]
+        if (d/"relationships.md").exists(): out += [dict(r, _entity=r["Pair"]) for r in table(d/"relationships.md", "## State history")]
+        return out
 
 class Incomparable(Exception): pass
 
-class World:
-    def __init__(self, wid):
-        self.dir = EX / "worlds" / wid
-        self.cfg = yaml.safe_load((self.dir/"world-config.yaml").read_text())
-        ruler = self.dir/"canon-timeline.md"
-        self.works = {}
-        for r in table(ruler, "## Works"):
-            levels = [l.strip() for l in r["Levels"].split("›")] if r["Levels"] else []
-            tl = r["Timed level"]
-            self.works[r["Work"]] = (levels, None if not tl else 0 if tl == "work" else levels.index(tl) + 1)
+def ruler_works(f):
+    """A canon-timeline's ## Works table: {work: (levels, timed level index)} (§10.4)."""
+    out = {}
+    for r in table(f, "## Works"):
+        levels = [l.strip() for l in r["Levels"].split("›")] if r["Levels"] else []
+        tl = r["Timed level"]
+        out[r["Work"]] = (levels, None if not tl else 0 if tl == "work" else levels.index(tl) + 1)
+    return out
+
+def insert_segments(ruler, f, label):
+    """Apply a file's ## Works and ## Insert tables to a ruler (§4.10, §4.12). `After: —` goes first."""
+    for w, v in ruler_works(f).items():
+        assert w not in ruler.works, f"inserted work {w} already on the ruler"
+        ruler.works[w] = v
+    order = sorted(ruler.segments, key=ruler.segments.get)
+    for r in table(f, "## Insert"):
+        seg = Ruler.split(r["Segment"])
+        if r["After"] == "—": order.insert(0, seg)
+        else:
+            after = Ruler.split(r["After"])
+            assert after in order, f"{label}: inserts after unknown segment {r['After']}"
+            order.insert(order.index(after) + 1, seg)
+        ruler.counts[seg] = r["Children"]
+    ruler.segments = {s: i + 1 for i, s in enumerate(order)}
+
+class Ruler:
+    """A base's ruler (§4), plus any adaptation maps (§4.9) and inserted works (§4.10) in the stack."""
+    def __init__(self, base, adaptations=(), officials=()):
+        self.base = base; ruler = base.dir/"canon-timeline.md"
+        self.works = ruler_works(ruler)
         self.segments = {}; self.counts = {}
         for r in table(ruler, "## Order"):
             path = self.split(r["Segment"]); self.segments[path] = int(r["Order"]); self.counts[path] = r["Children"]
-        if "## Counts" in ruler.read_text():
+        if has(ruler, "## Counts"):
             for r in table(ruler, "## Counts"): self.counts[self.split(r["Node"])] = r["Children"]
+        for o in officials:                       # inserted works (§4.10)
+            f = o.dir/"canon-timeline.md"
+            if has(f, "## Insert"): insert_segments(self, f, o.id)
+        self.check_segments()
+        self.adapted = []          # (from, to, film work): base ranges an adaptation's timecodes may attach to
+        for a in adaptations:
+            for r in table(a.dir/"canon-timeline.md", "## Adapts"):
+                self.adapted.append((self.split(r["From"]), self.split(r["To"]), r["Work"]))
+    def check_segments(self):
         segs = list(self.segments)
         assert not any(a != b and a == b[:len(a)] for a in segs for b in segs), "overlapping segments"
-    def reordered(self, project):
-        f = EX / "projects" / project / "bible/canon-track.md"
-        if not f.exists() or "## Order" not in f.read_text(): return self
-        rows = table(f, "## Order")
-        segs = {self.split(r["Segment"]): int(r["Order"]) for r in rows}
-        assert set(segs) == set(self.segments) and len(rows) == len(self.segments), "order must be a permutation"
+    def reordered(self, order):
+        if not order: return self
+        segs = {self.split(s): i + 1 for i, s in enumerate(order)}
+        assert set(segs) == set(self.segments) and len(order) == len(self.segments), "order must be a permutation"
         w = copy.copy(self); w.segments = segs; return w
     @staticmethod
     def split(s):
         w, *idx = s.split(":"); return (w, *map(int, idx))
+    def adaptation_of(self, path):
+        """The adaptation work whose range covers path, if any (§4.9)."""
+        for lo, hi, work in self.adapted:
+            if lo[0] == path[0] and lo[1:] <= path[1:len(lo)] <= hi[1:]: return work
+        return None
     def parse(self, pt):
         m = re.fullmatch(r"([A-Za-z][A-Za-z0-9-]*)((?::[1-9]\d*)*)(?:\+(\d{2,}):([0-5]\d):([0-5]\d(?:\.\d+)?))?", pt)
         if not m: raise ValueError(pt)
@@ -104,7 +211,11 @@ class World:
             c = self.counts.get(path[:d], "")
             if c == "—": raise ValueError(pt)
             if c and path[d] > int(c): raise ValueError(pt)
-        if tc is not None and (timed is None or len(path) - 1 < timed): raise ValueError(pt)
+        if tc is not None:
+            if timed is not None:                        # the work's own timecode (§4.2)
+                if len(path) - 1 < timed: raise ValueError(pt)
+            elif len(path) < 2 or not self.adaptation_of(path): raise ValueError(pt)   # an adaptation timecode (§4.9)
+            else: timed = len(path) - 1                  # it only orders rows at this exact path
         return path, tc, inside, contains, timed
     def pos(self, pt):
         path, tc, inside, contains, timed = self.parse(pt)
@@ -113,8 +224,10 @@ class World:
     def cmp(self, a, b):
         """-1/0/1 per §4.2; raises Incomparable. Empty = timeless, sorts first."""
         if not a or not b: return (bool(a) > bool(b)) - (bool(a) < bool(b))
-        (ka, pa, ta, timed), (kb, pb, tb, _) = self.pos(a), self.pos(b)
+        (ka, pa, ta, timed), (kb, pb, tb, timed_b) = self.pos(a), self.pos(b)
         if ka[:2] != kb[:2] or ka[1] == 0: return (ka > kb) - (ka < kb)
+        if timed is None: timed = timed_b
+        if self.works[pa[0]][1] is None and pa != pb: timed = None    # adaptation timecodes never cross paths
         same_timed = timed is not None and len(pa) - 1 >= timed and len(pb) - 1 >= timed and pa[:timed+1] == pb[:timed+1]
         if same_timed and ta is not None and tb is not None and ta != tb: return (ta > tb) - (ta < tb)
         if same_timed and (ta is None) != (tb is None):
@@ -125,132 +238,423 @@ class World:
     def key(self, pt):
         if pt: self.parse(pt)          # validate
         return pt
-    def rows(self, entity):
-        f = self.dir / "characters" / f"{entity}.md"
-        out = table(f, "## State history") if f.exists() else []
-        if (self.dir/"relationships.md").exists():
-            out += [r for r in table(self.dir/"relationships.md", "## State history") if r["Pair"] == entity]
-        if (self.dir/"species.md").exists():
-            out += [r for r in table(self.dir/"species.md", "## State history") if r["Entity"] == entity]
-        if (self.dir/"knowledge.md").exists():
-            out += [dict(r, Attribute=r["Secret"], Value=r["State"]) for r in table(self.dir/"knowledge.md", "## Knowledge") if r["Character"] == entity]
+
+class SeriesRuler(Ruler):
+    """The ruler of a series begun by a self-contained book (§4.12): the book's own eras, if any,
+    then its manuscript as a work counted to the pin, then each later book's inserts."""
+    def __init__(self, root, pin, inserters):
+        self.base, self.works, self.segments, self.counts, self.adapted = None, {}, {}, {}, []
+        f = EX/"projects"/root/"bible/canon-timeline.md"; order = []
+        if has(f, "## Order"):
+            self.works.update(ruler_works(f))
+            for r in sorted(table(f, "## Order"), key=lambda r: int(r["Order"])):
+                order.append(self.split(r["Segment"])); self.counts[order[-1]] = r["Children"]
+        self.works[root] = (["chapter"], None); order.append((root,)); self.counts[(root,)] = str(chap(pin))
+        self.segments = {s: i + 1 for i, s in enumerate(order)}
+        for p in inserters:
+            g = EX/"projects"/p/"bible/canon-timeline.md"
+            if has(g, "## Insert"): insert_segments(self, g, p)
+        self.check_segments()
+
+class StackError(Exception): pass
+
+class Stack:
+    """A project's layers, from the base up (§2.2). _rank = (layer index, -tier index): the lower tier ranks first."""
+    def __init__(self, layers, resolution="precedence", project=None):
+        self.refs, self.resolution, self.project = list(layers), resolution, project
+        self.packages, self.projects, self.universe = [], [], None   # packages: (index, Package)
+        self.project_index = {}
+        for i, ref in enumerate(self.refs):
+            kind, ident, pin = self.parse_ref(ref)
+            if kind == "package":
+                p = Package(ident); self.packages.append((i, p))
+                if p.cfg["version"] != pin: raise StackError(f"{ref}: package is at {p.cfg['version']}")
+                for dep in p.cfg["relies-on"]:
+                    if dep not in self.refs[:i]: raise StackError(f"{ref} relies on {dep}, which is not below it")
+            elif kind == "universe":
+                self.universe = load(EX/"universes"/ident/"universe.yaml")
+                if self.universe["version"] != pin: raise StackError(ref)
+                for dep in self.universe["relies-on"]:
+                    if dep not in self.refs[:i]: raise StackError(f"{ref} relies on {dep}, which is not below it")
+            else:
+                self.projects.append((ident, pin)); self.project_index[ident] = i
+        self.bases = {p.id: p for _, p in self.packages if p.kind == "base"}
+        if len(self.bases) > 1 and not self.universe: raise StackError("two bases need a universe layer")
+    @staticmethod
+    def parse_ref(ref):
+        if ref.startswith("project:"): ident, pin = ref[8:].split("@"); return "project", ident, pin
+        if ref.startswith("universe:"): ident, pin = ref[9:].split("@"); return "universe", ident, pin
+        ident, pin = ref.split("@"); return "package", ident, pin
+    @classmethod
+    def of(cls, project):
+        y = pyaml(project); return cls(y.get("layers", []), y.get("resolution", "precedence"), project)
+    def ledgers(self):
+        """Read-only project-layer ledgers in stack order, transitively (§6.4): [(project, pinned chapter)]."""
+        out = []
+        for p, pin in self.projects:
+            for q in Stack.of(p).ledgers() + [(p, pin)]:
+                if q not in out: out.append(q)
         return out
+    def ruler(self, base=None):
+        if not self.bases: return self.series_ruler().reordered(self.order())
+        b = self.bases[base] if base else next(iter(self.bases.values()))
+        r = Ruler(b, [p for _, p in self.packages if p.kind == "adaptation" and p.base == b.id],
+                  [p for _, p in self.packages if p.kind == "official" and p.base == b.id])
+        return r.reordered(self.order())
+    def order(self):
+        """The project order, else the highest project layer's (§6.14)."""
+        own = pyaml(self.project)["setting"].get("order") if self.project else None
+        if own: return own
+        for p, _ in reversed(self.projects):
+            o = Stack.of(p).order()
+            if o: return o
+        return None
+    def series_ruler(self):
+        """§4.12: the self-contained book at the root of the stack, and every later book's inserts."""
+        layers = self.ledgers(); pins = dict(layers); pins.update(dict(self.projects))
+        roots = [p for p, _ in layers if not Stack.of(p).refs]
+        if not roots: raise StackError("no ruler")
+        inserters = [p for p, _ in layers if p != roots[0]] + ([self.project] if self.project else [])
+        return SeriesRuler(roots[0], pins[roots[0]], list(dict.fromkeys(inserters)))
+    def layer_rows(self, entity, base):
+        out = []
+        for i, p in self.packages:
+            if p.base != base: continue
+            for r in p.rows(entity):
+                tier = p.sources.get(r["Source"])
+                if tier is None: raise StackError(f"{p.id}: unregistered source {r['Source']}")
+                if tier in UNRESOLVED: continue                 # theories and errata never resolve (§5.2)
+                out.append(dict(r, _rank=(i, -TIERS.index(tier)), _layer=p.id))
+        return out
+    def project_rows(self, entity, position=None, cutoff=None, ruler=None, pending=None):
+        """The project's own rows, and its project layers', for an entity it defines (§2.7),
+        with story-dated rows (§4.11) kept only from their chapter on. A layer's timeless and
+        story-dated rows are anchored (§6.14): ahead of the cutoff, they need the author's carry-back,
+        and undecided ones go to `pending`. A self-contained layer's story-dated rows are dated on
+        its work (§4.12). Ruler-dated rows are time-filtered at the cutoff."""
+        out = []
+        layers = [(p, pin, self.project_index[p]) for p, pin in self.projects]
+        if self.project: layers.append((self.project, position, len(self.refs)))
+        for p, pos, i in layers:
+            layer = p != self.project; root = layer and not Stack.of(p).refs
+            for r in entity_rows(EX/"projects"/p/"bible", entity):
+                fc = r.get("From chapter")
+                if fc and pos and chap(fc) > chap(pos): continue
+                r = dict(r, _rank=(i, -len(TIERS)), _layer=f"project:{p}")
+                if layer and not r["As of"]:
+                    item = f"{p}:{entity}.{r['Attribute']}" + (f"@{fc}" if fc else "")
+                    if root and fc: r["As of"] = f"{p}:{chap(fc)}"; r["From chapter"] = ""
+                    if cutoff and ruler and ahead(ruler, p, fc or "chapter-01", cutoff):
+                        d = seam_decision(self, item)
+                        if d is None and pending is not None: pending.add(item)
+                        if d != "carry-back": continue
+                elif r["As of"] and cutoff and ruler and ruler.cmp(r["As of"], cutoff) > 0: continue
+                out.append(r)
+        return out
+
+def rcmp(ruler, a, b):
+    """Row order on the ruler: timeless first, then ruler points, then story-dated rows by chapter (§4.11)."""
+    ca, cb = a.get("From chapter") or "", b.get("From chapter") or ""
+    if ca or cb:
+        if not (ca and cb): return 1 if ca else -1
+        return (chap(ca) > chap(cb)) - (chap(ca) < chap(cb))
+    return ruler.cmp(a["As of"], b["As of"])
 
 BRANCH_ERRORS = []
 
 def track_cutoff(project, position, default):
-    f = EX / "projects" / project / "bible/canon-track.md"
-    if not f.exists() or "## Track" not in f.read_text(): return default
-    chap = lambda c: int(c.split("-")[1]); cut = default
-    for r in table(f, "## Track"):
+    f = EX/"projects"/project/"bible/sync-points.md"
+    if not has(f, "## Sync points"): return default
+    cut = default
+    for r in table(f, "## Sync points"):
         if chap(r["From chapter"]) <= chap(position): cut = r["Cutoff"]
     return cut
 
-def snapshot(world, entity, cutoff, profile, position=None, project=None):
-    if project:
-        world = world.reordered(project)
-        st = yaml.safe_load((EX/f"projects/{project}/project.yaml").read_text())["setting"]
-        if cutoff is None:
-            cutoff = track_cutoff(project, position, st["canon_point"])
-        if st.get("canon_mode") == "branch" and world.cmp(cutoff, st["divergence_point"]) > 0:
-            BRANCH_ERRORS.append((project, cutoff)); cutoff = st["divergence_point"]
-    prof = world.cfg["canon_profiles"][profile]
-    order = ["project", "bridge"] + prof["order"]; mode = prof.get("resolution", "precedence")
-    import functools
-    K = functools.cmp_to_key(world.cmp)
-    rows = [r for r in world.rows(entity) if r["Source"] in order and world.cmp(r["As of"], cutoff) <= 0]
-    out = {}
-    for attr in {r["Attribute"] for r in rows}:
-        cand = [r for r in rows if r["Attribute"] == attr]
-        if mode == "precedence":
-            best = min(order.index(r["Source"]) for r in cand)
-            win = max((r for r in cand if order.index(r["Source"]) == best), key=lambda r: K(r["As of"]))
-        else:
-            latest = max((r["As of"] for r in cand), key=K)
-            win = min((r for r in cand if world.cmp(r["As of"], latest) == 0), key=lambda r: order.index(r["Source"]))
-        if win["Value"] != "(unset)": out[attr] = win["Value"]
-    if project:
-        chap = lambda c: int(c.split("-")[1])
-        for d in table(EX/f"projects/{project}/bible/divergences.md", "## Divergences"):
-            active = position is None or (chap(d["First occurs"]) <= chap(position) and not (d.get("Until") and chap(d["Until"]) <= chap(position)))
-            if d["Overrides"] != "—" and active:
-                for a in d["Overrides"].split("; "):
-                    lhs, v = a.split("=", 1); ent, att = lhs.rsplit(".", 1)
-                    if ent == entity:
-                        if v == "(unset)": out.pop(att, None)
-                        else: out[att] = v
+def active(d, position):
+    return position is None or (chap(d["First occurs"]) <= chap(position) and not (d.get("Until") and chap(d["Until"]) <= chap(position)))
+
+def anchor(p, chapter):
+    """Where an earlier book established an item (§6.14): its cutoff at the chapter, or, for a
+    self-contained book, the chapter on its own work (§4.12). None for per-base cutoffs."""
+    if not Stack.of(p).refs: return f"{p}:{chap(chapter)}"
+    return track_cutoff(p, chapter, pyaml(p)["setting"].get("cutoff"))
+
+def ahead(ruler, p, chapter, cutoff):
+    a = anchor(p, chapter); return a is not None and ruler.cmp(a, cutoff) > 0
+
+def seam_rules(stack):
+    """Seam conflicts rows: project-layer ledgers as of their pins, then the project's own (§6.4)."""
+    out = []
+    for p, pin in stack.ledgers() + ([(stack.project, None)] if stack.project else []):
+        f = EX/f"projects/{p}/bible/divergences.md"
+        if has(f, "## Seam conflicts"):
+            out += [r for r in table(f, "## Seam conflicts") if pin is None or chap(r["Decided in"]) <= chap(pin)]
     return out
 
-HP, ST = World("harry-potter"), World("star-trek")
-g = lambda w, e, c, p, a, **k: snapshot(w, e, c, p, **k).get(a)
+def seam_match(pattern, item):
+    """`*` stands for a whole slug, attribute, chapter, or divergence number (§6.14)."""
+    return re.fullmatch("".join("[^.:@]+" if c == "*" else re.escape(c) for c in pattern), item) is not None
+
+def seam_decision(stack, item):
+    """An exact item beats a pattern; between patterns, the later row wins (§6.14)."""
+    rules = seam_rules(stack)
+    exact = [r for r in rules if r["Item"] == item]
+    if exact: return exact[-1]["Decision"]
+    pats = [r for r in rules if "*" in r["Item"] and seam_match(r["Item"], item)]
+    return pats[-1]["Decision"] if pats else None
+
+def apply_ledger(out, project, position, entity, stack=None, cutoff=None, ruler=None, pending=None):
+    """Apply one ledger's overrides for an entity. For a project layer's ledger, a divergence
+    anchored ahead of the cutoff applies only if carried back (§6.14)."""
+    f = EX/f"projects/{project}/bible/divergences.md"
+    for d in table(f, "## Divergences") if f.exists() else []:
+        if d["Overrides"] != "—" and active(d, position):
+            mine = [a for a in d["Overrides"].split("; ") if a.split("=", 1)[0].rsplit(".", 1)[0] == entity]
+            if mine and stack and cutoff and ahead(ruler, project, d["First occurs"], cutoff):
+                item = f"{project}:{d['ID']}"; dec = seam_decision(stack, item)
+                if dec is None and pending is not None: pending.add(item)
+                if dec != "carry-back": continue
+            for a in d["Overrides"].split("; "):
+                lhs, v = a.split("=", 1); ent, att = lhs.rsplit(".", 1)
+                if ent == entity:
+                    if v == "(unset)": out.pop(att, None)
+                    else: out[att] = v
+
+def reach_candidates(stack):
+    """Divergence reach (§6.6): for every divergence in the project's ledgers, its own and
+    its project layers', each canon row on an attribute it overrides, dated at or after the
+    cutoff where the divergence first occurs. Returns sorted (divergence, entity.attribute, as-of)."""
+    project = stack.project; base = next(iter(stack.bases)); ruler = stack.ruler(base)
+    st = pyaml(project)["setting"]; out = []
+    for p, qual in [(q, f"{q}:") for q, _ in stack.ledgers()] + [(project, "")]:
+        f = EX/f"projects/{p}/bible/divergences.md"
+        for d in table(f, "## Divergences") if f.exists() else []:
+            if d["Overrides"] == "—": continue
+            first = d["First occurs"] if p == project else None
+            cut = track_cutoff(project, first, st["cutoff"]) if first else st["cutoff"]
+            for a in d["Overrides"].split("; "):
+                ent, att = a.split("=", 1)[0].rsplit(".", 1)
+                for r in stack.layer_rows(ent, base):
+                    if r["Attribute"] == att and r["As of"] and ruler.cmp(r["As of"], cut) >= 0:
+                        out.append((qual + d["ID"], f"{ent}.{att}", r["As of"]))
+    return sorted(set(out))
+
+def snapshot(stack, entity, cutoff=None, position=None, base=None, ledger=True):
+    return resolve(stack, entity, cutoff, position, base, ledger)[0]
+
+def ties(stack, entity, cutoff=None, position=None, base=None):
+    """Tied rows in one package (§4.4, §7.2): an invalid package. {attribute: sorted source ids}."""
+    return resolve(stack, entity, cutoff, position, base)[1]
+
+def seams(stack, entity, cutoff=None, position=None, base=None):
+    """Earlier books' items ahead of the cutoff that no seam decision covers (§6.14, §7.2 step 8)."""
+    return resolve(stack, entity, cutoff, position, base)[2]
+
+def decisions(stack, entity, heading, value=lambda r: r["Decision"]):
+    """The author's decisions in one ledger table, from project-layer ledgers as of their pins,
+    then the project's own; a later ledger wins (§6.4)."""
+    out = {}
+    for p, pin in stack.ledgers() + ([(stack.project, None)] if stack.project else []):
+        f = EX/f"projects/{p}/bible/divergences.md"
+        if has(f, heading):
+            for r in table(f, heading):
+                if r["Entity"] == entity and (pin is None or chap(r["Decided in"]) <= chap(pin)):
+                    out[r["Attribute"]] = value(r)
+    return out
+def hidden_decisions(stack, entity): return decisions(stack, entity, "## Hidden canon")       # §6.12
+
+def resolve(stack, entity, cutoff=None, position=None, base=None, ledger=True):
+    base = base or next(iter(stack.bases), None)
+    ruler = stack.ruler(base); project = stack.project
+    if project:
+        st = pyaml(project)["setting"]
+        if cutoff is None:
+            cutoff = track_cutoff(project, position, st["cutoff"] if "cutoff" in st else st["cutoffs"][base])
+        if st.get("follow") == "branch" and ruler.cmp(cutoff, st["divergence_point"]) > 0:
+            BRANCH_ERRORS.append((project, cutoff)); cutoff = st["divergence_point"]
+    pending = set()
+    rows = [r for r in stack.layer_rows(entity, base) if ruler.cmp(r["As of"], cutoff) <= 0]
+    rows += stack.project_rows(entity, position, cutoff, ruler, pending)
+    out, open_conflicts = {}, {}
+    for attr in {r["Attribute"] for r in rows}:
+        cand = [r for r in rows if r["Attribute"] == attr]
+        win = pick(cand, stack.resolution, ruler)
+        tied = [r for r in cand if r["_rank"] == win["_rank"] and rcmp(ruler, r, win) == 0]
+        if len({r["Value"] for r in tied}) > 1:                  # an invalid package (§4.4)
+            open_conflicts[attr] = sorted(r["Source"] for r in tied); continue
+        if win["Value"] != "(unset)": out[attr] = win["Value"]
+    if ledger:
+        for p, pin in stack.ledgers(): apply_ledger(out, p, pin, entity, stack, cutoff, ruler, pending)
+        if project: apply_ledger(out, project, position, entity)
+    return out, open_conflicts, pending
+
+def pick(cand, mode, ruler):
+    """The winning row among one attribute's candidates, by resolution mode (§5.4)."""
+    K = functools.cmp_to_key(lambda a, b: rcmp(ruler, a, b))
+    if mode == "precedence":
+        best = max(r["_rank"] for r in cand)
+    elif mode == "fill":                         # the lowest layer with a row wins
+        low = min(r["_rank"][0] for r in cand)
+        best = max(r["_rank"] for r in cand if r["_rank"][0] == low)
+    else:                                        # recency
+        latest = max(cand, key=K)
+        return max((r for r in cand if rcmp(ruler, r, latest) == 0), key=lambda r: r["_rank"])
+    return max((r for r in cand if r["_rank"] == best), key=K)
+
+def quote(stack, owner, qid, cutoff, attr="Speaker"):
+    """A quotation's resolved Speaker or Line (§2.7, §10.13): the owner's row, plus higher
+    layers' rows for `<owner>:<qid>`. Erratum rows never resolve (§5.2); a tie is an invalid package (§4.4)."""
+    return quote_resolve(stack, owner, qid, cutoff, attr)[0]
+
+def quote_resolve(stack, owner, qid, cutoff, attr="Speaker"):
+    """(value, tied sources if the package is invalid)."""
+    ruler = stack.ruler(owner); cand = []
+    for i, p in stack.packages:
+        f = p.dir/"quotations.md"
+        if p.base != owner or not f.exists(): continue
+        for r in table(f, "## Quotations"):
+            if (r["ID"] == qid and p.id == owner) or r["ID"] == f"{owner}:{qid}":
+                if r[attr] and ruler.cmp(r["As of"], cutoff) <= 0 and p.sources[r["Source"]] not in UNRESOLVED:
+                    cand.append(dict(r, _rank=(i, -TIERS.index(p.sources[r["Source"]])), _layer=p.id))
+    if not cand: return None, []
+    win = pick(cand, stack.resolution, ruler)
+    tied = [r for r in cand if r["_rank"] == win["_rank"] and ruler.cmp(r["As of"], win["As of"]) == 0]
+    if len({r[attr] for r in tied}) > 1: return None, sorted(r["Source"] for r in tied)
+    return win[attr], []
+
+def hidden(stack, entity, cutoff, base=None):
+    base = base or next(iter(stack.bases)); ruler = stack.ruler(base)
+    return {r["Attribute"] for r in stack.layer_rows(entity, base) if r.get("True from")
+            and ruler.cmp(r["True from"], cutoff) <= 0 < ruler.cmp(r["As of"], cutoff)}
+
+PURIST  = Stack(["harry-potter@3.0.0"])
+ENRICH  = Stack(["harry-potter@3.0.0", "harry-potter/fanon@1.0.0", "harry-potter/fanfic/example@1.0.0"])
+ENHANCE = Stack(ENRICH.refs, "recency")
+FILL    = Stack(ENRICH.refs, "fill")
+TREK    = Stack(["star-trek@2.0.0"])
+TAS     = Stack(["star-trek@2.0.0", "star-trek/animated@1.0.0"])
+HP, ST = PURIST.ruler(), TREK.ruler()
+g = lambda s, e, c, a, **k: snapshot(s, e, c, **k).get(a)
 
 # --- Harry Potter ---------------------------------------------------------------
-check("1 residence PS:2", g(HP, "harry-potter", "PS:2", "book-purist", "residence"), "cupboard under the stairs, 4 Privet Drive")
-check("1 residence PS:3", g(HP, "harry-potter", "PS:3", "book-purist", "residence"), "Dudley's second bedroom")
+check("1 residence PS:2", g(PURIST, "harry-potter", "PS:2", "residence"), "cupboard under the stairs, 4 Privet Drive")
+check("1 residence PS:3", g(PURIST, "harry-potter", "PS:3", "residence"), "Dudley's second bedroom")
 for c, want in [("PS:9", None), ("PS:10", "Nimbus Two Thousand"), ("PoA:10", None), ("PoA:11", "Firebolt")]:
-    check(f"2 broom {c}", g(HP, "harry-potter", c, "book-purist", "broom"), want)
-for p, early, late in [("book-purist", "round", "round"), ("enriched", "round", "round"), ("enhanced", "round", "contact lenses")]:
-    check(f"3 glasses {p} PS:5", g(HP, "harry-potter", "PS:5", p, "glasses"), early)
-    check(f"3 glasses {p} GoF:37", g(HP, "harry-potter", "GoF:37", p, "glasses"), late)
-check("4 daphne house book-purist", g(HP, "daphne-greengrass", "GoF:37", "book-purist", "house"), None)
-check("4 daphne house enriched", g(HP, "daphne-greengrass", "GoF:37", "enriched", "house"), "Slytherin")
-check("4 daphne house enhanced", g(HP, "daphne-greengrass", "GoF:37", "enhanced", "house"), "Slytherin")
-check("4 daphne year OotP:30", g(HP, "daphne-greengrass", "OotP:30", "enhanced", "year"), None)
-check("4 daphne year OotP:31", g(HP, "daphne-greengrass", "OotP:31", "book-purist", "year"), "Harry's year")
-check("5 cedric no ledger", g(HP, "cedric-diggory", "GoF:37", "enhanced", "status"), "dead")
-check("5 cedric ledger ch1", g(HP, "cedric-diggory", "GoF:37", "enhanced", "status", position="chapter-01", project="two-witnesses"), "alive")
-check("5 cedric GoF:20", (g(HP, "cedric-diggory", "GoF:20", "enhanced", "status"), g(HP, "cedric-diggory", "GoF:20", "enhanced", "role")), ("alive", "Hogwarts Triwizard champion"))
-check("6 bond PS:8", g(HP, "harry-potter+hermione-granger", "PS:8", "book-purist", "bond"), "acquaintances")
-check("6 bond PS:10", g(HP, "harry-potter+hermione-granger", "PS:10", "book-purist", "bond"), "friends")
-check("7 knowledge GoF:34", g(HP, "harry-potter", "GoF:34", "book-purist", "moody-identity"), "unaware")
-check("7 knowledge GoF:35", g(HP, "harry-potter", "GoF:35", "book-purist", "moody-identity"), "knows")
-roster = {r["Slug"]: r for r in table(HP.dir/"characters/_roster.md", "## Characters")}
+    check(f"2 broom {c}", g(PURIST, "harry-potter", c, "broom"), want)
+for n, s, early, late in [("canon only", PURIST, "round", "round"), ("precedence", ENRICH, "round", "contact lenses"), ("recency", ENHANCE, "round", "contact lenses")]:
+    check(f"3 glasses {n} PS:5", g(s, "harry-potter", "PS:5", "glasses"), early)
+    check(f"3 glasses {n} GoF:37", g(s, "harry-potter", "GoF:37", "glasses"), late)
+check("3 broom precedence PoA:11: the top layer wins though older", g(ENRICH, "harry-potter", "PoA:11", "broom"), "Cleansweep Seven")
+check("3 broom recency PoA:11: the later canon row wins", g(ENHANCE, "harry-potter", "PoA:11", "broom"), "Firebolt")
+check("3 broom recency PoA:10: canon's later (unset) wins", g(ENHANCE, "harry-potter", "PoA:10", "broom"), None)
+check("3 broom recency PS:10: same point, higher layer breaks the tie", g(ENHANCE, "harry-potter", "PS:10", "broom"), "Cleansweep Seven")
+check("3 broom fill PS:10: the base has a row, so it stands", g(FILL, "harry-potter", "PS:10", "broom"), "Nimbus Two Thousand")
+check("3 broom fill PoA:10: the base's (unset) stands", g(FILL, "harry-potter", "PoA:10", "broom"), None)
+check("3 broom fill PoA:11", g(FILL, "harry-potter", "PoA:11", "broom"), "Firebolt")
+check("3 glasses fill: canon's round stands", g(FILL, "harry-potter", "GoF:37", "glasses"), "round")
+FILMS = Stack(["harry-potter@3.0.0", "harry-potter/films@1.0.0"])
+check("3 quote: the books give the line to Ron", quote(PURIST, "harry-potter", "q1", "GoF:1"), "ron-weasley")
+check("3 quote: precedence with the films gives it to Hermione", quote(FILMS, "harry-potter", "q1", "GoF:1"), "hermione-granger")
+check("3 quote: recency, same point, the higher layer", quote(Stack(FILMS.refs, "recency"), "harry-potter", "q1", "GoF:1"), "hermione-granger")
+check("3 quote: fill keeps the book's speaker", quote(Stack(FILMS.refs, "fill"), "harry-potter", "q1", "GoF:1"), "ron-weasley")
+check("3 quote: the film row leaves the line to the book", quote(FILMS, "harry-potter", "q1", "GoF:1", "Line").startswith("[to kill Harry"), True)
+check("3 quote: not yet said at PoA:16", quote(FILMS, "harry-potter", "q1", "PoA:16"), None)
+check("V qualified quotation ids name a lower package's quotation", all(
+    r["ID"].rsplit(":", 1)[1] in {q["ID"] for q in table(pkg_dir(r["ID"].rsplit(":", 1)[0])/"quotations.md", "## Quotations")}
+    for f in (EX/"worlds").rglob("quotations.md") for r in table(f, "## Quotations") if ":" in r["ID"]), True)
+check("4 daphne house canon only", g(PURIST, "daphne-greengrass", "GoF:37", "house"), None)
+check("4 daphne house with fanon (fill: canon is silent)", g(FILL, "daphne-greengrass", "GoF:37", "house"), "Slytherin")
+check("4 daphne year (fill: canon's row)", g(FILL, "daphne-greengrass", "OotP:31", "year"), "Harry's year")
+check("4 daphne house with fanon (precedence)", g(ENRICH, "daphne-greengrass", "GoF:37", "house"), "Slytherin")
+check("4 daphne house with fanon (recency)", g(ENHANCE, "daphne-greengrass", "GoF:37", "house"), "Slytherin")
+check("4 daphne year OotP:30", g(ENHANCE, "daphne-greengrass", "OotP:30", "year"), None)
+check("4 daphne year OotP:31", g(PURIST, "daphne-greengrass", "OotP:31", "year"), "Harry's year")
+TW = Stack.of("two-witnesses")
+check("5 cedric no ledger", g(ENHANCE, "cedric-diggory", "GoF:37", "status"), "dead")
+check("5 cedric ledger ch1", g(TW, "cedric-diggory", "GoF:37", "status", position="chapter-01"), "alive")
+check("5 cedric GoF:20", (g(ENHANCE, "cedric-diggory", "GoF:20", "status"), g(ENHANCE, "cedric-diggory", "GoF:20", "role")), ("alive", "Hogwarts Triwizard champion"))
+check("6 bond PS:8", g(PURIST, "harry-potter+hermione-granger", "PS:8", "bond"), "acquaintances")
+check("6 bond PS:10", g(PURIST, "harry-potter+hermione-granger", "PS:10", "bond"), "friends")
+check("7 knowledge GoF:34", g(PURIST, "harry-potter", "GoF:34", "moody-identity"), "unaware")
+check("7 knowledge GoF:35", g(PURIST, "harry-potter", "GoF:35", "moody-identity"), "knows")
+roster = {r["Slug"]: r for r in Package("harry-potter").roster()}
 check("7 reveal alias", (roster["moody-impostor"]["Reveal of"], roster["moody-impostor"]["Revealed at"]), ("barty-crouch-jr", "GoF:35"))
 
 # --- Star Trek ------------------------------------------------------------------
 for c, want in [("TNG:3:25", "captain of the USS Enterprise-D"), ("TNG:3:26", "assimilated as Locutus of Borg"),
                 ("TNG:4", "assimilated as Locutus of Borg"), ("TNG:4:1", "captain of the USS Enterprise-D")]:
-    check(f"8 picard {c}", g(ST, "jean-luc-picard", c, "canon-only", "status"), want)
-check("9 tasha TNG:1", g(ST, "tasha-yar", "TNG:1", "canon-only", "status"), "chief of security, USS Enterprise-D")
-check("9 tasha TNG:2", g(ST, "tasha-yar", "TNG:2", "canon-only", "status"), "dead")
-check("10 mirror TOS2:3", snapshot(ST, "spock-mirror", "TOS:2:3", "canon-only"), {})
-check("10 mirror TOS2:4", g(ST, "spock-mirror", "TOS:2:4", "canon-only", "appearance"), "bearded")
-check("10 spock has no mirror rows", "appearance" in snapshot(ST, "spock", "TNG:4:26", "canon-only"), False)
-check("species borg TNG2:15", g(ST, "borg", "TNG:2:15", "canon-only", "known-to-federation"), None)
+    check(f"8 picard {c}", g(TREK, "jean-luc-picard", c, "status"), want)
+check("9 tasha TNG:1", g(TREK, "tasha-yar", "TNG:1", "status"), "chief of security, USS Enterprise-D")
+check("9 tasha TNG:2", g(TREK, "tasha-yar", "TNG:2", "status"), "dead")
+check("10 mirror TOS2:3", snapshot(TREK, "spock-mirror", "TOS:2:3"), {})
+check("10 mirror TOS2:4", g(TREK, "spock-mirror", "TOS:2:4", "appearance"), "bearded")
+check("10 spock has no mirror rows", "appearance" in snapshot(TREK, "spock", "TNG:4:26"), False)
+check("species borg TNG2:15", g(TREK, "borg", "TNG:2:15", "known-to-federation"), None)
 
-# --- Crossover ------------------------------------------------------------------
-pj = yaml.safe_load((EX/"projects/hogwarts-at-warp/project.yaml").read_text())["setting"]
-check("12 harry broom", g(HP, "harry-potter", pj["canon_points"]["harry-potter"], pj["active_profiles"]["harry-potter"], "broom"), "Firebolt")
-check("12 picard", g(ST, "jean-luc-picard", pj["canon_points"]["star-trek"], pj["active_profiles"]["star-trek"], "status"), "captain of the USS Enterprise-D")
+# --- Crossover: the universe is a layer (§8) --------------------------------------
+HW = Stack.of("hogwarts-at-warp")
+check("12 universe stack has two bases", sorted(HW.bases), ["harry-potter", "star-trek"])
+check("12 harry broom", g(HW, "harry-potter", None, "broom", base="harry-potter"), "Firebolt")
+check("12 picard", g(HW, "jean-luc-picard", None, "status", base="star-trek"), "captain of the USS Enterprise-D")
+check("12 each base has its own ruler", (HW.ruler("harry-potter").base.id, HW.ruler("star-trek").base.id), ("harry-potter", "star-trek"))
+raises("12 two bases without a universe rejected", lambda: Stack(["harry-potter@3.0.0", "star-trek@2.0.0"]), StackError)
+raises("12 universe below its bases rejected", lambda: Stack(["universe:wizards-and-warp@2.0.0", "harry-potter@3.0.0", "star-trek@2.0.0"]), StackError)
+u = load(EX/"universes/wizards-and-warp/universe.yaml")
+check("V universe pins", sorted(u["relies-on"]), sorted(f"{b}@{Package(b).cfg['version']}" for b in ["harry-potter", "star-trek"]))
+check("V universe offsets name its bases", set(u["offsets"]) <= {d.split("@")[0] for d in u["relies-on"]}, True)
 
-# --- canon points (§4.2) ---------------------------------------------------------
-def isvalid(pt):
-    try: ST.parse(pt); return True
+# --- ruler points (§4.2) ---------------------------------------------------------
+def isvalid(r, pt):
+    try: r.parse(pt); return True
     except ValueError: return False
 for pt, want in [("TOS:3:2:14", True), ("TOS:3:2:14+00:12:31", True), ("TMP+01:10:05", True), ("TOS:3:25", False),
                  ("TNG:1:5", False), ("TOS:3+00:01:00", False), ("TOS:3:2:14:1", False), ("TOS:3:2+00:61:00", False), ("DS9:1", False),
                  ("TOS", True), ("TNG", True), ("TMP:4", True)]:
-    check(f"P valid {pt}", isvalid(pt), want)
+    check(f"P valid {pt}", isvalid(ST, pt), want)
 chain = "TOS TOS:1 TOS:3:2 TOS:3:2:14 TOS:3:2:14+00:12:31 TOS:3:2:15 TMP TMP+01:10:05 TNG TNG:1 TNG:2 TNG:2:16".split()
 check("P ordering chain", all(ST.cmp(a, b) < 0 for a, b in zip(chain, chain[1:])), True)
 check("P ordering transitive sample", all(ST.cmp(chain[i], chain[j]) < 0 for i in range(len(chain)) for j in range(i+1, len(chain))), True)
 check("P timecodes win over scenes", ST.cmp("TOS:3:2:14+00:20:00", "TOS:3:2:15+00:10:00"), 1)
-try: ST.cmp("TOS:3:2+00:12:31", "TOS:3:2:14"); check("P incomparable reported", False, True)
-except Incomparable: check("P incomparable reported", True, True)
+raises("P incomparable reported", lambda: ST.cmp("TOS:3:2+00:12:31", "TOS:3:2:14"), Incomparable)
 check("P different episodes comparable", ST.cmp("TOS:3:2+00:12:31", "TOS:3:3:1"), -1)
 check("P HP chapter scene", HP.cmp("PS:6", "PS:6:2") < 0 and HP.cmp("PS:6:2", "PS:7") < 0, True)
-try: HP.parse("PS:6+00:00:01"); check("P untimed work rejects timecode", False, True)
-except ValueError: check("P untimed work rejects timecode", True, True)
+raises("P untimed work rejects timecode", lambda: HP.parse("PS:6+00:00:01"))
 
-# --- canon track and rearranged canon (§6.6–6.7) ----------------------------------------
-R = "second-year-tournament"
+# --- inserted works: the animated series (§4.10) -----------------------------------
+TR = TAS.ruler()
+check("I TAS points need the animated package", isvalid(ST, "TAS:1:2"), False)
+check("I TAS point valid with it", isvalid(TR, "TAS:1:2"), True)
+check("I TAS:1 has 16 episodes", isvalid(TR, "TAS:1:17"), False)
+check("I TAS sorts after TOS season 3", TR.cmp("TOS:3:24", "TAS:1:1"), -1)
+check("I TAS sorts before TMP", TR.cmp("TAS:2:6", "TMP"), -1)
+check("I TAS season order", TR.cmp("TAS:1:16", "TAS:2:1"), -1)
+check("I TOS order unchanged", TR.cmp("TOS:3:2", "TMP"), -1)
+check("I spock childhood pet with the package", g(TAS, "spock", "TNG:4:1", "childhood-pet"), "I-Chaya, a sehlat, put to sleep after a le-matya wounded him")
+check("I spock childhood pet absent at TOS:3:24", g(TAS, "spock", "TOS:3:24", "childhood-pet"), None)
+check("I spock without the package: no pet (a source leak if used)", g(TREK, "spock", "TNG:4:1", "childhood-pet"), None)
+check("I animated is an official package of secondary-official sources", (Package("star-trek/animated").kind, set(Package("star-trek/animated").sources.values())), ("official", {"secondary-official"}))
+
+# --- adaptation timecodes (§4.9) ---------------------------------------------------
+FILMS = Stack(["harry-potter@3.0.0", "harry-potter/films@1.0.0"]); HF = FILMS.ruler()
+for pt, want in [("PS:6:2+00:41:10", True), ("PS:6+00:41:10", True), ("PS+00:41:10", False), ("CoS:1+00:01:00", False), ("PS:6:2", True)]:
+    check(f"A valid with films {pt}", isvalid(HF, pt), want)
+check("A timecode needs the films layer", isvalid(HP, "PS:6:2+00:41:10"), False)
+check("A same path: timecode orders", HF.cmp("PS:6:2+00:41:10", "PS:6:2+00:42:00"), -1)
+check("A same path: untimed row first", HF.cmp("PS:6:2", "PS:6:2+00:00:01"), -1)
+check("A book path decides across scenes", HF.cmp("PS:6:3+00:10:00", "PS:6:2+00:50:00"), 1)
+check("A book path decides chapter vs scene", HF.cmp("PS:6+00:59:00", "PS:6:1"), -1)
+check("A adaptation work for PS:6:2", HF.adaptation_of(("PS", 6, 2)), "PS-film")
+check("A film rows resolve on the book ruler", [k for k in entries(pkg_dir("harry-potter/films")/"magic/spells.md")], ["oculus-reparo"])
+HF.key(entries(pkg_dir("harry-potter/films")/"magic/spells.md")["oculus-reparo"]["as-of"])
+
+# --- sync points and rearranged canon (§6.6–6.8) ----------------------------------------
+R = "second-year-tournament"; SYT = Stack.of(R)
 def snap_r(e, a, ch, ledger=True):
-    if ledger: return snapshot(HP, e, None, "book-purist", position=ch, project=R).get(a)
-    return snapshot(HP.reordered(R), e, track_cutoff(R, ch, "PS:17"), "book-purist").get(a)
-check("T track cutoff ch05", track_cutoff(R, "chapter-05", "PS:17"), "GoF:1")
-check("T track cutoff ch15", track_cutoff(R, "chapter-15", "PS:17"), "GoF:37")
+    return snapshot(SYT, e, None, position=ch, ledger=ledger).get(a)
+check("T sync point cutoff ch05", track_cutoff(R, "chapter-05", "PS:17"), "GoF:1")
+check("T sync point cutoff ch15", track_cutoff(R, "chapter-15", "PS:17"), "GoF:37")
 check("T track before first row", track_cutoff(R, "chapter-00", "PS:17"), "PS:17")
-check("T order: GoF before PoA", HP.reordered(R).cmp("GoF:20", "PoA:17"), -1)
+check("T order: GoF before PoA", HP.reordered(pyaml(R)["setting"]["order"]).cmp("GoF:20", "PoA:17"), -1)
 check("T ruler order unchanged", HP.cmp("GoF:20", "PoA:17"), 1)
 check("T sirius bond ch05 (no ledger needed)", snap_r("harry-potter+sirius-black", "bond", "chapter-05", ledger=False), "strangers")
 check("T sirius bond ch15 without ledger = inversion leak", snap_r("harry-potter+sirius-black", "bond", "chapter-15", ledger=False), "correspondents")
@@ -263,112 +667,268 @@ check("T cedric ch40 without D3 resurrects", snap_r("cedric-diggory", "status", 
 check("T cedric ch40 with D3", (snap_r("cedric-diggory", "status", "chapter-40"), snap_r("cedric-diggory", "role", "chapter-40")), ("dead", None))
 check("T cedric house kept via confirmation row", snap_r("cedric-diggory", "house", "chapter-10"), "Hufflepuff")
 
-def inversions(world, project):
-    w = world.reordered(project); out = set(); groups = {}
-    for f in (world.dir/"characters").glob("[!_]*.md"):
-        for r in table(f, "## State history"): groups.setdefault((f.stem, r["Attribute"]), []).append(r)
-    for r in table(world.dir/"relationships.md", "## State history"): groups.setdefault((r["Pair"], r["Attribute"]), []).append(r)
+def inversions(stack):
+    ruler, w = Ruler(next(iter(stack.bases.values()))), stack.ruler()    # ruler order, project order
+    out = set(); groups = {}
+    for _, p in stack.packages:
+        for r in p.all_rows(): groups.setdefault((r["_entity"], r["Attribute"]), []).append(r)
     for (e, a), rows in groups.items():
         for x in rows:
             for y in rows:
-                if x["Value"] != y["Value"] and x["As of"] and y["As of"] and world.cmp(x["As of"], y["As of"]) < 0 and w.cmp(x["As of"], y["As of"]) > 0:
+                if x["Value"] != y["Value"] and x["As of"] and y["As of"] and ruler.cmp(x["As of"], y["As of"]) < 0 and w.cmp(x["As of"], y["As of"]) > 0:
                     out.add(f"{e}.{a}")
     return out
-inv = inversions(HP, R)
+inv = inversions(SYT)
 check("T inversions found", inv, {"harry-potter+sirius-black.bond", "cedric-diggory.status", "cedric-diggory.role"})
 covered = set()
 for d in table(EX/f"projects/{R}/bible/divergences.md", "## Divergences"):
     if d["Overrides"] != "—": covered |= {a.split("=")[0] for a in d["Overrides"].split("; ")}
 check("T every inversion covered by a divergence", inv - covered, set())
-check("T no inversions in two-witnesses (canon order)", inversions(HP, "two-witnesses"), set())
-check("T Q2 addition D2 (scar)", snapshot(HP, "cedric-diggory", "GoF:37", "enhanced", position="chapter-02", project="two-witnesses").get("scars"), "curse scar across his chest")
+check("T no inversions in two-witnesses (canon order)", inversions(TW), set())
+def inversion_candidates(stack):
+    """§6.8: for each pair of segments the project order swaps, every entity with rows in both."""
+    base, w = Ruler(next(iter(stack.bases.values()))), stack.ruler()
+    segs = sorted(base.segments, key=base.segments.get)
+    def seg(pt):
+        p = Ruler.split(pt.split("+")[0]); return next((s for s in segs if p[:len(s)] == s), None)
+    swapped = [(a, b) for i, a in enumerate(segs) for b in segs[i+1:] if w.segments[a] > w.segments[b]]
+    by = {}
+    for _, p in stack.packages:
+        for r in p.all_rows():
+            if r["As of"]: by.setdefault(r["_entity"], set()).add(seg(r["As of"]))
+    name = lambda s: ":".join(map(str, s))
+    return sorted((e, name(b), name(a)) for e, m in by.items() for a, b in swapped if a in m and b in m)
+IC = inversion_candidates(SYT)
+check("T inversion candidates: entities with rows on both sides of a swap", IC,
+      [("cedric-diggory", "GoF", "PoA"), ("harry-potter", "GoF", "PoA"), ("harry-potter+sirius-black", "GoF", "PoA")])
+review = table(EX/f"projects/{R}/reviews/canon.md", "## Inversion candidates")
+check("T every inversion candidate is addressed in the order audit", sorted(r["Candidate"] for r in review), sorted(f"{e} ({b}, {a})" for e, a, b in IC))
+check("T the Firebolt candidate became I4, covered by D4", any(d["ID"] == "D4" and "I4" in d["This story changes it to"] for d in table(EX/f"projects/{R}/bible/divergences.md", "## Divergences")), True)
+check("T no candidates in canon order", inversion_candidates(TW), [])
+def propose_order(order, ruler):
+    """§6.8 rule 1: keep the old order's segments the ruler still has; place each new one right
+    after the segment it follows on the new ruler, in ruler order."""
+    have = sorted(ruler.segments, key=ruler.segments.get); name = lambda s: ":".join(map(str, s))
+    out = [s for s in order if Ruler.split(s) in ruler.segments]
+    for i, s in enumerate(have):
+        if name(s) in out: continue
+        out.insert(out.index(name(have[i - 1])) + 1 if i else 0, name(s))
+    return out
+TREK_ORDER = [":".join(map(str, s)) for s in sorted(ST.segments, key=ST.segments.get)]
+TREK_ORDER[2], TREK_ORDER[3] = TREK_ORDER[3], TREK_ORDER[2]          # a project order swapping TOS:3 and TMP
+NEW = propose_order(TREK_ORDER, TAS.ruler())
+check("T adding a package: inserted segments follow theirs in the project order", NEW[:6], ["TOS:1", "TOS:2", "TMP", "TOS:3", "TAS:1", "TAS:2"])
+check("T the proposal is a permutation of the new stack's segments", sorted(NEW) == sorted(":".join(map(str, s)) for s in TAS.ruler().segments), True)
+check("T removing it again drops them", propose_order(NEW, ST), TREK_ORDER)
+check("T Q2 addition D2 (scar)", snapshot(TW, "cedric-diggory", "GoF:37", position="chapter-02").get("scars"), "curse scar across his chest")
 for d in table(EX/f"projects/{R}/bible/divergences.md", "## Divergences"):
-    if d.get("Until"): check(f"V Until after First occurs {d['ID']}", int(d["Until"].split("-")[1]) > int(d["First occurs"].split("-")[1]), True)
+    if d.get("Until"): check(f"V Until after First occurs {d['ID']}", chap(d["Until"]) > chap(d["First occurs"]), True)
 
 # --- branch and retelling (§6.6) -------------------------------------------------------
-B, T = "no-horcruxes", "blind-harry"
-check("B voldemort dead from chapter-01", snapshot(HP, "lord-voldemort", None, "book-purist", position="chapter-01", project=B).get("status"), "dead")
-check("B broom at chapter-50 stays Nimbus (no later canon)", snapshot(HP, "harry-potter", None, "book-purist", position="chapter-50", project=B).get("broom"), "Nimbus Two Thousand")
-check("B sirius never met", snapshot(HP, "harry-potter+sirius-black", None, "book-purist", position="chapter-50", project=B).get("bond"), "strangers")
+B, T = Stack.of("no-horcruxes"), Stack.of("blind-harry")
+check("B voldemort dead from chapter-01", snapshot(B, "lord-voldemort", position="chapter-01").get("status"), "dead")
+check("B broom at chapter-50 stays Nimbus (no later canon)", snapshot(B, "harry-potter", position="chapter-50").get("broom"), "Nimbus Two Thousand")
+check("B sirius never met", snapshot(B, "harry-potter+sirius-black", position="chapter-50").get("bond"), "strangers")
 check("B no branch errors from fixture track", BRANCH_ERRORS, [])
-check("B cutoff past divergence point is clamped and reported", (BRANCH_ERRORS, snapshot(HP, "harry-potter", "PoA:11", "book-purist", position="chapter-50", project=B).get("broom")), ([(B, "PoA:11")], "Nimbus Two Thousand"))
+check("B cutoff past divergence point is clamped and reported", (BRANCH_ERRORS, snapshot(B, "harry-potter", "PoA:11", position="chapter-50").get("broom")), ([("no-horcruxes", "PoA:11")], "Nimbus Two Thousand"))
 BRANCH_ERRORS.clear()
-sr = lambda a, ch: snapshot(HP, "harry-potter", None, "book-purist", position=ch, project=T).get(a)
+sr = lambda a, ch: snapshot(T, "harry-potter", position=ch).get(a)
 check("R sight blind from chapter-01", sr("sight", "chapter-01"), "blind")
 check("R glasses removed (C1 remove)", sr("glasses", "chapter-05"), None)
 check("R role at chapter-08 absent (PS:9 not reached)", sr("role", "chapter-08"), None)
 check("R role adapted at chapter-09 (C2 adapt)", sr("role", "chapter-09"), "Gryffindor Seeker, flying by sound and feel")
 check("R broom kept at chapter-10 (C3 keep)", sr("broom", "chapter-10"), "Nimbus Two Thousand")
 check("R canon still happens: house at chapter-09", sr("house", "chapter-09"), "Gryffindor")
-br = yaml.safe_load((EX/f"projects/{B}/project.yaml").read_text()); del br["setting"]["divergence_point"]
+check("R reach: canon rows each divergence's overrides meet ahead", reach_candidates(T),
+      [("D2", "harry-potter.glasses", "PS:2"), ("D3", "harry-potter.role", "PS:9")])
+check("R reach: every candidate is a decided divergence conflict", all(
+    f"— {e} (" in (EX/"projects/blind-harry/reviews/canon.md").read_text() for _, e, _ in reach_candidates(T)), True)
+br = pyaml("no-horcruxes"); del br["setting"]["divergence_point"]
 check("schema branch without divergence point rejected", schema("project").is_valid(br), False)
-og = yaml.safe_load((EX/f"projects/{T}/project.yaml").read_text()); og["setting"]["type"] = "original"; og["setting"].pop("fidelity")
-check("schema canon_mode on original rejected", schema("project").is_valid(og), False)
-for pj in (B, T): check(f"schema project {pj}", schema("project").is_valid(yaml.safe_load((EX/f"projects/{pj}/project.yaml").read_text())), True)
+og = pyaml("blind-harry"); og["setting"]["type"] = "original"; og["setting"].pop("fidelity")
+check("schema follow on original rejected", schema("project").is_valid(og), False)
+og = pyaml("second-year-tournament"); og["setting"] = {"type": "original", "order": og["setting"]["order"]}
+check("schema order on original rejected", schema("project").is_valid(og), False)
+og = pyaml("two-witnesses"); og["setting"] = {k: v for k, v in og["setting"].items() if k != "fidelity"}; og["setting"]["type"] = "original"
+check("schema fidelity_notes on original rejected", schema("project").is_valid(og), False)
+og = pyaml("two-witnesses"); og.pop("layers")
+check("schema established without layers rejected", schema("project").is_valid(og), False)
+og["layers"] = []
+check("schema established with empty layers rejected", schema("project").is_valid(og), False)
+og = pyaml("lantern-road"); check("schema original without layers accepted", schema("project").is_valid(og), True)
+og["layers"] = pyaml("two-witnesses")["layers"]
+check("schema original with layers rejected", schema("project").is_valid(og), False)
+bad = pyaml("hogwarts-at-warp"); bad["setting"]["order"] = ["PS"]
+check("schema rejects order beside a universe layer", schema("project").is_valid(bad), False)
+bad = pyaml("second-year-tournament"); bad["setting"]["orders"] = {"harry-potter": bad["setting"].pop("order")}
+check("schema rejects orders without a universe layer", schema("project").is_valid(bad), False)
+check("V no project keeps an adherence file; the settings are in project.yaml", sorted(f.parent.parent.name for f in (EX/"projects").glob("*/bible/canon.md")), [])
 
 # --- True from and hidden canon (§4.4, §6.12, §7.2) ----------------------------------------
-def hidden(world, entity, cutoff, profile, project=None):
-    if project: world = world.reordered(project)
-    order = ["project", "bridge"] + world.cfg["canon_profiles"][profile]["order"]
-    return {r["Attribute"] for r in world.rows(entity) if r["Source"] in order and r.get("True from")
-            and world.cmp(r["True from"], cutoff) <= 0 < world.cmp(r["As of"], cutoff)}
-check("H snape loyalty not resolved at PS:17", snapshot(HP, "severus-snape", "PS:17", "book-purist").get("loyalty"), None)
-check("H snape loyalty is a hidden truth at PS:17", hidden(HP, "severus-snape", "PS:17", "book-purist"), {"loyalty"})
-check("H hidden truth even at PS:1", hidden(HP, "severus-snape", "PS:1", "book-purist"), {"loyalty"})
-check("H not hidden once revealed (DH:33)", (hidden(HP, "severus-snape", "DH:33", "book-purist"), snapshot(HP, "severus-snape", "DH:33", "book-purist").get("loyalty")), (set(), "loves Lily Potter, and protects Harry for her sake"))
-check("H branch: hidden at chapter-05", snapshot(HP, "severus-snape", None, "book-purist", position="chapter-05", project="no-horcruxes").get("loyalty"), None)
-check("H branch: revealed early at chapter-20 (D2)", snapshot(HP, "severus-snape", None, "book-purist", position="chapter-20", project="no-horcruxes").get("loyalty"), "loves Lily Potter, and protects Harry for her sake")
-for f in (HP.dir/"characters").glob("[!_]*.md"):
-    for r in table(f, "## State history"):
-        if r.get("True from"): assert HP.cmp(r["True from"], r["As of"]) <= 0, (f, r)
+check("H snape loyalty not resolved at PS:17", g(PURIST, "severus-snape", "PS:17", "loyalty"), None)
+check("H snape loyalty is a hidden truth at PS:17", hidden(PURIST, "severus-snape", "PS:17"), {"loyalty"})
+check("H hidden truth even at PS:1", hidden(PURIST, "severus-snape", "PS:1"), {"loyalty"})
+check("H not hidden once revealed (DH:33)", (hidden(PURIST, "severus-snape", "DH:33"), g(PURIST, "severus-snape", "DH:33", "loyalty")), (set(), "loves Lily Potter, and protects Harry for her sake"))
+check("H branch: hidden at chapter-05", snapshot(B, "severus-snape", position="chapter-05").get("loyalty"), None)
+check("H branch: revealed early at chapter-20 (D2)", snapshot(B, "severus-snape", position="chapter-20").get("loyalty"), "loves Lily Potter, and protects Harry for her sake")
+for r in Package("harry-potter").all_rows():
+    if r.get("True from"): assert HP.cmp(r["True from"], r["As of"]) <= 0, r
 check("V True from never later than As of", True, True)
 for r in table(EX/"projects/no-horcruxes/bible/divergences.md", "## Hidden canon"):
     ok = (r["Decision"] != "reveal-early" or r["Divergence"] not in ("", "—")) and (r["Decision"] != "other" or r["Note"])
     check(f"V hidden canon decision {r['Entity']}.{r['Attribute']}", ok, True)
 
-# --- validations ----------------------------------------------------------------
-try: ST.key("TNG:1:5"); check("V TNG:1:5 rejected", False, True)
-except ValueError: check("V TNG:1:5 rejected", True, True)
-for w in (HP, ST):
-    ex = set(w.cfg["canon_basis"]["excluded"])
-    check(f"V no excluded in profiles {w.cfg['id']}", any(ex & set(p["order"]) for p in w.cfg["canon_profiles"].values()), False)
-    reg = {r["ID"] for r in table(w.dir/"sources.md", "## Sources")} | {"project", "bridge"}
-    for p in w.cfg["canon_profiles"].values(): assert set(p["order"]) <= reg, p
-    for f in (w.dir/"characters").glob("[!_]*.md"):
-        for r in table(f, "## State history"):
-            assert r["Source"] in reg, (f, r); w.key(r["As of"])
-    check(f"V sources and points valid {w.cfg['id']}", True, True)
-for proj, w in [("two-witnesses", HP), ("the-long-way-back", ST)]:
-    wr = {r["Slug"] for r in table(w.dir/"characters/_roster.md", "## Characters")}
-    pr = {r["Slug"] for r in table(EX/f"projects/{proj}/bible/characters/_roster.md", "## Characters")}
-    check(f"V no union collision {proj}", wr & pr, set())
-    pin = yaml.safe_load((EX/f"projects/{proj}/project.yaml").read_text())["world"]["version"]
-    check(f"V version pin {proj}", pin, w.cfg["version"])
+# --- series: a project layer (§2.2, §6.4) -----------------------------------------------
+S2 = Stack.of("two-witnesses-ii")
+check("L hidden truth decided in book 1 binds book 2", (hidden(S2, "severus-snape", "OotP:1"), hidden_decisions(S2, "severus-snape")), ({"loyalty"}, {"loyalty": "keep-hidden"}))
+EARLY = Stack(S2.refs[:-1] + ["project:two-witnesses@chapter-00"])
+check("L a decision made after the pin does not carry over", hidden_decisions(EARLY, "severus-snape"), {})
+
+# --- errata (§4.4, §5.2, §6.9, §6.13) --------------------------------------------------
+CORRECT, ERROR = "his mother's echo emerges first, then his father's", "his father's echo emerges first, then his mother's"
+check("E erratum rows never resolve, in every mode", [g(Stack(PURIST.refs, m), "harry-potter", "GoF:37", "graveyard-echoes") for m in ("precedence", "recency", "fill")], [CORRECT] * 3)
+check("E the corrected quotation resolves", (quote(PURIST, "harry-potter", "q2", "GoF:37"), quote_resolve(PURIST, "harry-potter", "q2", "GoF:37", "Line")[1]), ("lily-potter", []))
+check("E no ties anywhere", ties(PURIST, "harry-potter", "GoF:37"), {})
+def package_ties(p, tiers=None):
+    """§4.4: rows of one package sharing entity, attribute, tier, and point with different values."""
+    tiers = tiers or p.sources; groups = {}
+    for r in p.all_rows():
+        groups.setdefault((r["_entity"], r["Attribute"], r["As of"], tiers[r["Source"]]), set()).add(r["Value"])
+    f = p.dir/"quotations.md"
+    if f.exists():
+        for r in table(f, "## Quotations"):
+            for col in ("Speaker", "Line"):
+                if r[col]: groups.setdefault((r["ID"], col, r["As of"], tiers[r["Source"]]), set()).add(r[col])
+    return sorted(k for k, v in groups.items() if len(v) > 1)
+check("E no package in the examples holds tied rows", [p for f in PKG_FILES for p in [Package(f.parent.relative_to(EX/"worlds").as_posix().replace("/base", "", 1) if f.parent.name == "base" else f.parent.relative_to(EX/"worlds").as_posix())] if package_ties(p)], [])
+HPB = Package("harry-potter")
+check("E the first printing registered as primary would tie", package_ties(HPB, dict(HPB.sources, **{"gof-first-printing": "primary"})),
+      [("harry-potter", "graveyard-echoes", "GoF:34", "primary"), ("q2", "Line", "GoF:34", "primary"), ("q2", "Speaker", "GoF:34", "primary")])
+check("E only base, official, and adaptation packages may register errata", sorted(k for k, v in KIND_TIERS.items() if "erratum" in v), ["adaptation", "base", "official"])
+def errata(stack, entity, cutoff, base=None):
+    """The stack's erratum rows for an entity, at or before the cutoff: {attribute: {values}}."""
+    base = base or next(iter(stack.bases)); ruler = stack.ruler(base); out = {}
+    for _, p in stack.packages:
+        if p.base != base: continue
+        for r in p.rows(entity):
+            if p.sources.get(r["Source"]) == "erratum" and ruler.cmp(r["As of"], cutoff) <= 0:
+                out.setdefault(r["Attribute"], set()).add(r["Value"])
+    return out
+def erratum_use(snap, err, attr, value):
+    """§6.9: prose relying on an erratum's value that the snapshot (divergences applied) does not give."""
+    return value in err.get(attr, set()) and snap.get(attr) != value
+ERR = errata(PURIST, "harry-potter", "GoF:37"); SNAP = snapshot(PURIST, "harry-potter", "GoF:37")
+check("E prose using the error is erratum use", erratum_use(SNAP, ERR, "graveyard-echoes", ERROR), True)
+check("E prose following the corrected text is not", erratum_use(SNAP, ERR, "graveyard-echoes", CORRECT), False)
+check("E a divergence that sets the erratum's value covers it", erratum_use(dict(SNAP, **{"graveyard-echoes": ERROR}), ERR, "graveyard-echoes", ERROR), False)
+check("L project layer ledgers", S2.ledgers(), [("two-witnesses", "chapter-02")])
+check("L book 1's D1 applies in book 2", snapshot(S2, "cedric-diggory").get("status"), "alive")
+check("L book 1's D2 applies in book 2", snapshot(S2, "cedric-diggory").get("scars"), "curse scar across his chest")
+check("L without the project layer, canon", snapshot(Stack(S2.refs[:-1]), "cedric-diggory", "OotP:1").get("status"), "dead")
+check("L book 2 resolves at its own cutoff", track_cutoff("two-witnesses-ii", "chapter-01", pyaml("two-witnesses-ii")["setting"]["cutoff"]), "OotP:1")
+def relisted(stack):
+    """Every package layer of a project layer is relisted at the same major version (§2.2)."""
+    mine = {Stack.parse_ref(r)[1]: Stack.parse_ref(r)[2] for r in stack.refs if Stack.parse_ref(r)[0] != "project"}
+    for p, _ in stack.projects:
+        for r in Stack.of(p).refs:
+            kind, ident, pin = Stack.parse_ref(r)
+            if kind == "project": continue
+            if ident not in mine or mine[ident].split(".")[0] != pin.split(".")[0] or tuple(map(int, mine[ident].split("."))) < tuple(map(int, pin.split("."))): return False
+    return True
+check("L book 1's package layers relisted", relisted(S2), True)
+check("L dropping a relisted layer fails", relisted(Stack([r for r in S2.refs if "fanon" not in r], "recency", "two-witnesses-ii")), False)
+check("L pinned chapter exists in book 1's ledger range", chap(S2.projects[0][1]) >= min(chap(d["First occurs"]) for d in table(EX/"projects/two-witnesses/bible/divergences.md", "## Divergences")), True)
+
+# --- union across layers and the composed bible (§2.7, §7.6) ---------------------------
+def compose_roster(stack):
+    """The compose skill's roster view: (slug, layer) per row; a repeated key is an error."""
+    out = {}
+    layers = [(p.id, p.roster()) for _, p in stack.packages]
+    for proj, _ in stack.ledgers() + ([(stack.project, None)] if stack.project else []):
+        f = EX/"projects"/proj/"bible/characters/_roster.md"
+        layers.append((f"project:{proj}", table(f, "## Characters") if f.exists() else []))
+    for layer, rows in layers:
+        for r in rows:
+            if r["Slug"] in out: raise StackError(f"{layer} redefines {r['Slug']} from {out[r['Slug']]}")
+            out[r["Slug"]] = layer
+    return out
+for p in PROJECTS:
+    s = Stack.of(p); check(f"V union keys unique {p}", isinstance(compose_roster(s), dict), True)
+cr = compose_roster(S2)
+check("L composed roster: book 1's original cast, with provenance", cr.get("mara-quill"), "project:two-witnesses")
+check("L composed roster: canon cast from the base", cr.get("cedric-diggory"), "harry-potter")
+def extensions_ok(stack):
+    """An extension sheet (front matter `extends`) names a lower layer that defines the slug (§2.7)."""
+    seen = {}
+    for i, p in stack.packages:
+        for f in (p.dir/"characters").glob("[!_]*.md") if (p.dir/"characters").exists() else []:
+            fm = front(f)
+            if "extends" in fm:
+                if fm["extends"] not in seen or f.stem not in seen[fm["extends"]]: return False
+            elif f.stem not in {r["Slug"] for r in p.roster()}: return False
+        seen[p.id] = {r["Slug"] for r in p.roster()}
+    return True
+check("V extension sheets extend a lower layer", extensions_ok(ENRICH), True)
+raises("V fanon below its base rejected", lambda: Stack(["harry-potter/fanon@1.0.0", "harry-potter@3.0.0"]), StackError)
+raises("V wrong package pin rejected", lambda: Stack(["harry-potter@2.1.0"]), StackError)
+
+# --- packages: kinds, ids, sources, points ------------------------------------------
+for f in PKG_FILES:
+    p = Package(f.parent.relative_to(EX/"worlds").as_posix().replace("/base", "", 1) if f.parent.name == "base" else f.parent.relative_to(EX/"worlds").as_posix())
+    check(f"V id matches folder {p.id}", p.cfg["id"], p.id)
+    check(f"V source tiers fit kind {p.id}", set(p.sources.values()) <= KIND_TIERS[p.kind], True)
+    for dep in p.cfg["relies-on"]:
+        did, ver = dep.split("@"); check(f"V relies-on pin {p.id} -> {did}", Package(did).cfg["version"], ver)
+    s = Stack([*p.cfg["relies-on"], f"{p.id}@{p.cfg['version']}"]); r = s.ruler(p.base)
+    for row in p.all_rows():
+        assert row["Source"] in p.sources, (p.id, row); r.key(row["As of"])
+    check(f"V sources and points valid {p.id}", True, True)
+for proj in ["two-witnesses", "the-long-way-back", "three-brothers"]:
     divs = {d["ID"] for d in table(EX/f"projects/{proj}/bible/divergences.md", "## Divergences")}
     cons = {c["Divergence"] for c in table(EX/f"projects/{proj}/bible/divergences.md", "## Consequences")}
     check(f"V consequences {proj}", divs <= cons, True)
-u = yaml.safe_load((EX/"universes/wizards-and-warp/universe.yaml").read_text())
-check("V universe pins", {x["id"]: x["version"] for x in u["worlds"]}, {"harry-potter": HP.cfg["version"], "star-trek": ST.cfg["version"]})
 for t in table(EX/"projects/the-long-way-back/bible/timelines.md", "## Legs"):
     for pt in (t["Departs"], t["Arrives"]): ST.key(pt.split("@")[0])
     ST.key(t["Personal cutoff"])
 check("V frames points valid", True, True)
 
-# --- time-travel mechanisms (§9.1, §10.25) and branches (§10.16) ------------------
-def entries(path):
-    out, cur = {}, None
-    for l in path.read_text().splitlines():
-        m = re.match(r"### ([a-z0-9-]+) — ", l)
-        if m: cur = out.setdefault(m.group(1), {}); continue
-        m = re.match(r"- ([a-z-]+): (.*?)\s*(#.*)?$", l)
-        if cur is not None and m: cur[m.group(1)] = m.group(2)
-    return out
+# --- theories and theory conflicts (§6.13, §10.13) ------------------------------------
+TB = "three-brothers"; TBS = Stack.of(TB)
+theories = entries(pkg_dir("harry-potter/theories")/"theories.md")
+claims = {t: {int(k.split("-")[1]) for k in e if k.startswith("claim-")} for t, e in theories.items()}
+check("Q theory claims numbered", claims["T1"], {1, 2, 3, 4})
+check("Q theories never resolve into state", snapshot(TBS, "albus-dumbledore"), {})
+def basis(d):
+    m = re.fullmatch(r"(\S+):(T\d+) \(claims? ([\d, ]+)\)", d.get("Basis", ""))
+    return (m[1], m[2], {int(x) for x in m[3].split(", ")}) if m else None
+DV = EX/f"projects/{TB}/bible/divergences.md"
+adopted = [basis(d) for d in table(DV, "## Divergences") if basis(d)]
+check("Q basis parsed", adopted, [("harry-potter/theories", "T1", {1, 3, 4})])
+check("Q basis package is a layer", all(any(r.startswith(pk + "@") for r in TBS.refs) for pk, _, _ in adopted), True)
+check("Q basis claims exist", all(c <= claims[t] for _, t, c in adopted), True)
+tc = table(DV, "## Theory conflicts")
+check("Q conflict decisions valid", all(r["Decision"] in {"keep", "adapt", "discard"} for r in tc), True)
+check("Q conflict points valid", all(TBS.ruler().key(r["At"]) for r in tc), True)
+used = {(pk + ":" + t, c) for pk, t, cs in adopted for c in cs}
+check("Q discarded claims not adopted", all((r["Theory"], int(r["Claim"])) not in used for r in tc if r["Decision"] == "discard"), True)
+check("Q kept or adapted claims adopted", all((r["Theory"], int(r["Claim"])) in used for r in tc if r["Decision"] != "discard"), True)
+check("Q adapt needs a note", all(r["Note"] for r in tc if r["Decision"] == "adapt"), True)
+check("Q conflict after cutoff still listed", any(TBS.ruler().cmp(r["At"], "DH:30") > 0 for r in tc), True)
+def erratum_evidence(theory, stack=PURIST):
+    """§6.13: a theory's evidence items that cite an erratum row: its point, and a citation
+    that begins with the erratum row's. [(point, erratum source)]."""
+    items = [re.fullmatch(r"(\S+) \((.*)\)", e.strip()) for e in theories[theory].get("evidence", "").split(";")]
+    err = {(r["As of"], r["Citation"], r["Source"]) for _, p in stack.packages for r in p.all_rows() if p.sources.get(r["Source"]) == "erratum"}
+    return sorted({(m[1], s) for m in items if m for pt, cit, s in err if m[1] == pt and m[2].startswith(cit)})
+check("Q a theory resting on an erratum is marked", (erratum_evidence("T2"), erratum_evidence("T1")), ([("GoF:34", "gof-first-printing")], []))
+
+# --- time-travel mechanisms (§9.1, §10.24) and branches (§10.16) ------------------
 MODELS = {"dilation", "fixed", "loop", "mutable", "branching", "feedback"}
-mech = entries(EX/"worlds/star-trek/time-travel.md")
+mech = entries(pkg_dir("star-trek")/"time-travel.md")
 check("M star-trek mechanisms", sorted(mech), ["temporal-rift"])
 check("M models and free will valid", all(e.get("model") in MODELS and e.get("free-will", "everyone") in {"everyone", "traveler", "none"} for e in mech.values()), True)
 check("M spec example model valid", entries(ROOT/"spec/10-formats.md")["time-turner"]["model"], "fixed")
-check("M time-travel.md indexed", "time-travel.md" in {r["Path"] for r in table(EX/"worlds/star-trek/index.md", "## Files")}, True)
+check("M time-travel.md indexed", "time-travel.md" in {r["Path"] for r in table(pkg_dir("star-trek")/"index.md", "## Files")}, True)
 TLB = EX/"projects/the-long-way-back"
 legs = table(TLB/"bible/timelines.md", "## Legs")
 check("M every leg names a known mechanism", all(t["Mechanism"] in mech for t in legs), True)
@@ -379,27 +939,189 @@ check("M mutable rift overwrote alt-war, main live", (br["alt-war"]["Status"], b
 used = {t["Arrives"].split("@")[1] for t in legs} | {t["Departs"].split("@")[1] for t in legs}
 check("M every branch a leg uses is registered", used <= set(br), True)
 
+# --- renumbering chapters (§13.10) ---------------------------------------------------
+def first_movable(project):
+    """The lowest chapter number renumber may move: after every chapter readers have seen,
+    and after every pin another project in the workspace holds on this one."""
+    seen = [front(f)["chapter"] for f in (EX/"projects"/project/"manuscript").glob("chapter-*.md")
+            if front(f).get("status") in {"released", "early-access"}] if (EX/"projects"/project/"manuscript").exists() else []
+    pins = [chap(pin) for q in (EX/"projects").iterdir() if (q/"project.yaml").exists()
+            for p, pin in Stack.of(q.name).projects if p == project]
+    return max(seen + pins, default=0) + 1
+check("RN early-access chapter 3 keeps its id; chapter 4 may move", first_movable("the-long-way-back"), 4)
+check("RN a pinned chapter keeps its id (two-witnesses-ii pins chapter-02)", first_movable("two-witnesses"), 3)
+check("RN nothing seen or pinned: any chapter may move", first_movable("three-brothers"), 1)
+
+# --- story-dated rows (§4.11) ----------------------------------------------------
+TLBS = Stack.of("the-long-way-back")
+check("SD before its chapter, the starting state", snapshot(TLBS, "mira-oduya", position="chapter-02")["role"], "operations officer, USS Enterprise-C")
+check("SD from its chapter, the story-dated row", snapshot(TLBS, "mira-oduya", position="chapter-03")["role"], "displaced officer aboard the USS Enterprise-D")
+check("SD after the last chapter", snapshot(TLBS, "mira-oduya")["role"], "displaced officer aboard the USS Enterprise-D")
+def story_dated_ok(d):
+    """Every story-dated row cites project, has no As of, and describes the project's own entity."""
+    own = {r["Slug"] for r in table(d/"characters/_roster.md", "## Characters") if r.get("Origin", "original") == "original"} if (d/"characters/_roster.md").exists() else set()
+    rows = []
+    for f in (d/"characters").glob("[!_]*.md") if (d/"characters").exists() else []:
+        rows += [(r, front(f).get("origin") == "original") for r in table(f, "## State history")]
+    if (d/"relationships.md").exists():
+        rows += [(r, all(s in own for s in r["Pair"].split("+"))) for r in table(d/"relationships.md", "## State history")]
+    if (d/"knowledge.md").exists():
+        rows += [(r, r["Character"] in own) for r in table(d/"knowledge.md", "## Knowledge")]
+    return all(r["Source"] == "project" and not r["As of"] and mine for r, mine in rows if r.get("From chapter"))
+check("SD story-dated rows valid in every project", all(story_dated_ok(d/"bible") for d in (EX/"projects").iterdir()), True)
+
+# --- the series ruler (§4.12) and seam conflicts (§6.14) ----------------------------------
+LRB = Stack.of("lantern-road-before"); LR = LRB.ruler()
+check("SR book 1's chapters are points, to the pin", [isvalid(LR, p) for p in ("lantern-road:9", "lantern-road:12", "lantern-road:13")], [True, True, False])
+check("SR inserts before and after book 1", [LR.cmp("youth", "lantern-road:1"), LR.cmp("lantern-road:12", "after")], [-1, -1])
+check("SR the inserts are only on the later book's ruler", isvalid(Stack(["project:lantern-road@chapter-12"]).ruler(), "youth"), False)
+check("SR a self-contained stack has no ruler of its own", raises_ok(lambda: Stack.of("lantern-road").ruler(), StackError), True)
+check("SE prequel side: book 1's starting state carried back", snapshot(LRB, "ines-varga", position="chapter-01"),
+      {"eyes": "grey", "role": "apprentice lamplighter"})
+check("SE prequel side: what happens in book 1 has not happened yet", seams(LRB, "ines-varga", position="chapter-01"), set())
+check("SE sequel side: book 1's chapter 9 holds", snapshot(LRB, "ines-varga", position="chapter-06")["role"], "master lamplighter")
+check("SE sequel side raises nothing", seams(LRB, "ines-varga", position="chapter-06"), set())
+check("SR the later book's own inserts are valid points, and on its order", ([isvalid(LR, p) for p in ("youth", "after")],
+      sorted(LR.segments, key=LR.segments.get)), ([True, True], [("youth",), ("lantern-road",), ("after",)]))
+_seam_rules = seam_rules
+seam_rules = lambda stack: _seam_rules(stack) + [{"Item": "lantern-road:ines-varga.role@chapter-09", "Decision": "carry-back",
+                                                  "Divergence": "—", "Decided in": "chapter-01", "Note": ""}]
+check("SE a carried-back book-1 row holds before its anchor, not time-filtered (§7.2 step 3)",
+      snapshot(LRB, "ines-varga", position="chapter-01")["role"], "master lamplighter")
+seam_rules = _seam_rules
+check("SE patterns: exact beats pattern, later pattern wins", [seam_match("lantern-road:ines-varga.*", "lantern-road:ines-varga.role@chapter-09"),
+      seam_match("lantern-road:*.*@*", "lantern-road:ines-varga.role@chapter-09"), seam_match("two-witnesses:D*", "two-witnesses:D12")], [False, True, True])
+check("SE undecided items ahead are set aside and returned", (snapshot(S2, "mara-quill", "GoF:20"), seams(S2, "mara-quill", "GoF:20")),
+      ({}, {"two-witnesses:mara-quill.house", "two-witnesses:mara-quill.year"}))
+check("SE an undecided divergence ahead does not apply", (snapshot(S2, "cedric-diggory", "GoF:20"), seams(S2, "cedric-diggory", "GoF:20")),
+      ({"status": "alive", "house": "Hufflepuff", "role": "Hogwarts Triwizard champion"}, {"two-witnesses:D1", "two-witnesses:D2"}))
+check("SE a sequel set after book 1 raises nothing", seams(S2, "cedric-diggory"), set())
+def earlier_start(project):
+    """The seam audit's first question (§6.14): is the first chapter set before a layer's cutoff at its pin?"""
+    s = Stack.of(project); r = s.ruler(); st = pyaml(project)["setting"]
+    first = track_cutoff(project, "chapter-01", st.get("cutoff"))
+    return [p for p, pin in s.projects if r.cmp(first, anchor(p, pin)) < 0]
+check("SE the seam audit flags an earlier start", (earlier_start("lantern-road-before"), earlier_start("two-witnesses-ii")), (["lantern-road"], []))
+def value_seams(stack, entities):
+    """Value seams (§6.14): attributes the later book's stack resolves differently from the
+    earlier book, at the earlier book's cutoff at its pin."""
+    out = []
+    for p, pin in stack.projects:
+        later = Stack(stack.refs, stack.resolution)
+        for e in entities:
+            a, b = snapshot(Stack.of(p), e, position=pin), snapshot(later, e, anchor(p, pin))
+            out += [(e, k) for k in sorted(set(a) | set(b)) if a.get(k) != b.get(k)]
+    return out
+CANON = ["harry-potter", "cedric-diggory", "hermione-granger", "severus-snape"]
+check("SE same stack and mode: no value seams", value_seams(S2, CANON), [])
+VS = value_seams(Stack(S2.refs, "precedence", "two-witnesses-ii"), CANON)
+check("SE another resolution mode raises a value seam", VS, [("harry-potter", "broom")])
+def branch_ok(setting, layers):
+    """A branch stays a branch (§6.14): the later book is a branch, diverging no later."""
+    s = Stack(layers)
+    if not s.projects: return True
+    r = s.ruler()
+    for p, _ in s.projects:
+        q = pyaml(p)["setting"]
+        if q.get("follow") == "branch" and (setting.get("follow") != "branch" or r.cmp(setting["divergence_point"], q["divergence_point"]) > 0): return False
+    return True
+check("SE every project keeps its layers' branches", all(branch_ok(pyaml(p)["setting"], pyaml(p).get("layers", [])) for p in PROJECTS), True)
+NH = ["harry-potter@3.0.0", "project:no-horcruxes@chapter-01"]
+check("SE a retelling sequel to a branch is rejected", branch_ok({"cutoff": "CoS:1"}, NH), False)
+check("SE a branch sequel diverging later is rejected", branch_ok({"follow": "branch", "divergence_point": "CoS:1"}, NH), False)
+check("SE a branch sequel diverging no later is accepted", branch_ok({"follow": "branch", "divergence_point": "PS:17"}, NH), True)
+INH = Stack(["harry-potter@3.0.0", "project:second-year-tournament@chapter-03"])
+check("SE the order is inherited from a project layer", (INH.order() == pyaml("second-year-tournament")["setting"]["order"], INH.ruler().cmp("GoF:1", "CoS:1")), (True, -1))
+check("V seam decisions fit their items", all(r["Decision"] in ({"keep-earlier", "accept", "other"} if ":" not in r["Item"] else {"carry-back", "not-yet", "other"})
+      and (r["Decision"] != "other" or r["Note"]) for f in (EX/"projects").glob("*/bible/divergences.md") if has(f, "## Seam conflicts") for r in table(f, "## Seam conflicts")), True)
+
+def promote(project):
+    """§2.9 step 4: a self-contained book's rows re-cited to its own source, story-dated rows dated on its work."""
+    out = []
+    for f in (EX/"projects"/project/"bible/characters").glob("[!_]*.md"):
+        for r in table(f, "## State history"):
+            fc = r.get("From chapter", "")
+            r = {k: v for k, v in r.items() if k != "From chapter"}
+            if r["Source"] == "project": r["Source"] = project
+            if fc: r["As of"] = f"{project}:{chap(fc)}"
+            out.append((f.stem, r["Attribute"], r["Value"], r["As of"], r["Source"]))
+    return out
+check("P promotion re-cites project rows and dates story-dated ones on the book's work", sorted(promote("lantern-road")),
+      [("ines-varga", "eyes", "grey", "", "lantern-road"), ("ines-varga", "role", "apprentice lamplighter", "", "lantern-road"),
+       ("ines-varga", "role", "master lamplighter", "lantern-road:9", "lantern-road")])
+check("P the promoted rows are valid on the series ruler", all(not a or isvalid(LR, a) for *_, a, _ in promote("lantern-road")), True)
+def scene_warnings(project, scenes):
+    """§7.5: a scene with no travelers set later than its chapter's sync-point cutoff. scenes: [(chapter, world point, travelers)]."""
+    s = Stack.of(project); r = s.ruler(); st = pyaml(project)["setting"]
+    return [(c, wp) for c, wp, trav in scenes if not trav and r.cmp(wp.split("@")[0], track_cutoff(project, c, st.get("cutoff"))) > 0]
+check("F a flash-forward with no travelers is warned about", scene_warnings("the-long-way-back",
+      [("chapter-01", "TNG:3:15@main", ["mira-oduya"]), ("chapter-02", "TNG:3:14@main", []), ("chapter-03", "TNG:4:1@main", [])]), [("chapter-03", "TNG:4:1@main")])
+def promote_ruler(project, last):
+    """§2.9 step 3: the book as a work, the last segment after any eras; step 5: one sync point per chapter."""
+    segs = [(project,)]; counts = {(project,): str(last)}
+    syncs = [(f"chapter-{n:02d}", f"{project}:{n}") for n in range(1, last + 1)]
+    return segs, counts, syncs
+segs, counts, syncs = promote_ruler("lantern-road", 12)
+SER = SeriesRuler("lantern-road", "chapter-12", [])
+check("P the promoted ruler is the series ruler without later books' inserts",
+      (sorted(SER.segments, key=SER.segments.get), {s: SER.counts[s] for s in SER.segments}), (segs, counts))
+check("P the promoted project's sync points are book 1's anchors", all(anchor("lantern-road", c) == pt for c, pt in syncs), True)
+og = pyaml("lantern-road"); og["setting"]["cutoff"] = "lantern-road:3"
+check("schema cutoff on original rejected", schema("project").is_valid(og), False)
+def seam_entries(project):
+    """§10.19: the seam audit's `### S<n> — <item>` entries, and its `- pin:` line."""
+    lines = (EX/"projects"/project/"reviews/canon.md").read_text(encoding="utf-8").splitlines()
+    i = lines.index("## Seam conflicts"); body = []
+    for l in lines[i + 1:]:
+        if l.startswith("## "): break
+        body.append(l)
+    items = [l.split(" — ", 1)[1] for l in body if re.match(r"### S\d+ — ", l)]
+    return items, any(l.startswith("- pin:") for l in body)
+SI, PIN = seam_entries("lantern-road-before")
+ROWS = [r["Item"] for r in table(EX/"projects/lantern-road-before/bible/divergences.md", "## Seam conflicts")]
+check("SE the seam audit notes the earlier start", PIN, bool(earlier_start("lantern-road-before")))
+check("SE every seam entry is decided, and every decision answers an entry",
+      (all(any(seam_match(p, i) for p in ROWS) for i in SI), all(any(seam_match(p, i) for i in SI) for p in ROWS), len(SI)), (True, True, 3))
+check("T the inversion candidates table has its required columns",
+      list(table(EX/"projects/second-year-tournament/reviews/canon.md", "## Inversion candidates")[0])[:2], ["Candidate", "Addressed"])
+check("F a traveler may be set later", scene_warnings("the-long-way-back", [("chapter-03", "TNG:4:1@main", ["mira-oduya"])]), [])
+
 # --- registered columns (§10.0, §10.3) -------------------------------------------
 REQUIRED = {("timelines.md", "## Legs"): ["Traveler", "Leg", "Mechanism", "Departs", "Arrives", "Personal cutoff", "Chapter"],
             ("branches.md", "## Branches"): ["Branch", "Splits from", "At", "Cause", "Mechanism", "Status"]}
 idx = TLB/"bible/index.md"   # ## Columns is optional (§10.3)
-reg = {(c["File"], c["Table"], c["Column"]) for c in table(idx, "## Columns")} if "## Columns" in idx.read_text() else set()
+reg = {(c["File"], c["Table"], c["Column"]) for c in table(idx, "## Columns")} if has(idx, "## Columns") else set()
 for (f, h), req in REQUIRED.items():
     hdr = list(table(TLB/"bible"/f, h)[0]) if table(TLB/"bible"/f, h) else req
     check(f"C required columns in order {f} {h}", hdr[:len(req)], req)
     check(f"C added columns registered {f} {h}", {(f, h, c) for c in hdr[len(req):]} <= reg, True)
 check("C registry does not repeat a required column", any(c in REQUIRED.get((f, h), []) for f, h, c in reg), False)
 
-# --- serial buffer (§13.3, §10.19) -------------------------------------------------
-def front(p): return yaml.safe_load(p.read_text().split("---")[1])
+# --- serial buffer and early access (§13.3, §13.9, §10.18) ---------------------------
+STATUS = ["drafted", "line-edited", "final", "early-access", "released"]
 chs = sorted((front(p) for p in (TLB/"manuscript").glob("chapter-*.md")), key=lambda d: d["chapter"])
 st = [c["status"] for c in chs]
-check("S chapter statuses valid", all(s in {"drafted", "line-edited", "final", "released"} for s in st), True)
-check("S released chapters are an unbroken run from chapter 1", st[:st.count("released")] == ["released"] * st.count("released"), True)
+check("S chapter statuses valid", all(s in STATUS for s in st), True)
+check("S serial has no final status", "final" in st, False)
+rank = lambda s: 2 if s == "released" else 1 if s == "early-access" else 0
+check("S released, then early access, each an unbroken run from chapter 1", all(rank(a) >= rank(b) for a, b in zip(st, st[1:])), True)
 check("S every released chapter has a release date", all(("released" in c) == (c["status"] == "released") for c in chs), True)
-check("S buffer depth", sum(s != "released" for s in st), 2)
-def can_release(n): return n == 1 or st[n - 2] == "released"
+check("S every early-access chapter has its date", all(("early-access" in c) for c in chs if c["status"] in ("early-access",)), True)
+check("S buffer depth (not yet released)", sum(s != "released" for s in st), 2)
+check("S early-access depth", st.count("early-access"), 1)
+def can_release(n): return st[n - 1] in ("line-edited", "early-access") and (n == 1 or st[n - 2] == "released")
+def can_early(n): return st[n - 1] == "line-edited" and (n == 1 or st[n - 2] in ("early-access", "released"))
 check("S may release chapter 3 (next in order)", can_release(3), True)
 check("S may not release chapter 4 before 3", can_release(4), False)
+check("S may not send chapter 4 to early access (still drafted)", can_early(4), False)
+st4 = st[:]; st4[3] = "line-edited"; st, keep = st4, st
+check("S line-edited chapter 4 may go to early access after 3", can_early(4), True); st = keep
+rev = table(TLB/"revisions.md", "## Revisions")
+check("S revision audiences valid", all(r["Audience"] in {"early-access", "public"} for r in rev), True)
+check("S early-access revisions are for early-access or released chapters", all(st[chap(r["Chapter"]) - 1] in ("early-access", "released") for r in rev if r["Audience"] == "early-access"), True)
+check("S every revision has a reader note", all(r["Reader note"] for r in rev), True)
+fb = sorted((TLB/"references/feedback").glob("chapter-*/*.md"))
+check("S feedback filed per chapter and reader", [(p.parent.name, p.stem) for p in fb], [("chapter-03", "reader-a")])
+check("S feedback only on chapters readers have", all(st[chap(p.parent.name) - 1] in ("early-access", "released") for p in fb), True)
 print("\nFAILURES:", fails)
 sys.exit(1 if fails else 0)

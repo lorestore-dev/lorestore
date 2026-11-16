@@ -1,18 +1,7 @@
-spec_version: "0.1"
+spec_version: "0.2"
 id: harry-potter
+kind: base
 name: "Harry Potter"
-version: 2.1.0
+version: 3.0.0
 status: locked
-
-canon_basis:
-  primary: books
-  also_canon: []
-  excluded: [films]
-
-canon_profiles:
-  book-purist:  { order: [books] }
-  interpretive: { order: [books, theory] }
-  enriched:     { order: [books, fanon-hp, fanfic-example] }
-  enhanced:     { order: [books, fanon-hp, fanfic-example], resolution: recency }
-
-active_profile: book-purist
+relies-on: []

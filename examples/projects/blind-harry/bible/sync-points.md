@@ -1,6 +1,6 @@
-# Canon track
+# Sync points
 
-## Track
+## Sync points
 | From chapter | Cutoff |
 | ------------ | ------ |
 | chapter-01   | PS:1   |

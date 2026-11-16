@@ -1,6 +1,6 @@
 # Canon review: divergence audit
 
-Audit of canon ahead along the canon track (`PS:1` to `PS:17`), against D1 (Harry is
+Audit of canon ahead through the sync points (`PS:1` to `PS:17`), against D1 (Harry is
 blind). The author decides each conflict; this review only sets out the options.
 
 ## Findings

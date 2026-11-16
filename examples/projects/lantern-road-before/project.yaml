@@ -1,0 +1,16 @@
+spec_version: "0.2"
+id: lantern-road-before
+name: "Before the Road"
+workflow: novel
+gates: milestones
+seed: "Ines's first winter as an apprentice, told beside her last winter as a master: two halves that meet at the road."
+
+layers:                         # from the base up
+  - project:lantern-road@chapter-12   # book 1, read to the end
+
+setting:
+  type: established
+  fidelity: flexible
+  fidelity_notes: "A split frame: chapters 1 to 5 are set before book 1, chapter 6 on after it."
+  cutoff: "youth"
+  temporal_model: linear

@@ -3,6 +3,359 @@
 This log records the design decisions behind the spec, most recent first. Each entry
 says what was unclear or contradictory, what was decided, and where the rule now lives.
 
+## 0.2: layered packages
+
+**D104. Book 1's story-dated rows are anchored, not time-filtered.** §4.12 dated a
+self-contained book's story-dated rows `<id>:<n>` on the series ruler, and §7.2's time
+filter then dropped any ahead of the cutoff before the seam step saw them, so a later
+book set before book 1 could never carry one back, though §6.14 treats them as items. The
+as-of now only orders them: like the book's timeless rows, they are anchored items,
+held ahead of their anchor only when the author carries them back. → §4.12, §7.2
+
+**D103. The series ruler's own segments count everywhere.** The valid-point rule and the
+project-order rule named only the base's segments and an official package's inserts, so
+a later book's own inserts (`youth`, the cutoff of `lantern-road-before`) were not valid
+points by the letter of §4.2. Both rules now cover a project layer's work and the inserts
+of the project layers and the project itself; adding or removing one also calls for a
+new project order, and an inserted work may not repeat any work on the ruler. → §4.2,
+§4.10, §6.8
+
+**D102. An original project has no layers.** The schema required layers of an established
+project but let an original one have them too, which nothing could serve: an original
+setting has no cutoff or sync points to read packages at (D98), no ledger to record a
+change to them (W3), and no canon-keeper, and a follow-up to an earlier book is already
+established (D90). `setting.type` and `layers` now always agree, in the schema and in
+§6.1; the field stays, since the overlays and the curator key on it. A project that uses a
+world loosely is established with `fidelity: au`. → §6.1, §14.2
+
+**D101. Errata replace source conflicts.** A source conflict needed two sources tying
+within one package, and the only real case was an error the source later corrected:
+*Goblet of Fire*'s first printings. That is not the author's to decide. A package now
+records one intended value per attribute, tier, and point: the corrected text, with the
+error kept under a new tier, `erratum`, which never resolves (like `theory`); the fan
+consensus in a fanon package; and a deliberate revision or recut as its own package.
+Two rows that still tie are an extraction error, which the merger flags for a human. The
+canon-keeper flags prose relying on an erratum as **erratum use**, a fix item, and marks
+erratum evidence in a theory audit. Source conflicts are removed: the ledger table, the
+marker, the snapshot step, and the author-only decision. This supersedes D77 and the
+tie and `Layer` parts of D95. The seam conflicts section becomes §6.14.
+→ §1.6, §2.3, §4.4, §5.2, §6.9, §6.13, §7.2, §10.8, §12.3, §12.4, §12.13
+
+**D100. The retelling audit runs for every logged divergence.** The list of decisions
+that re-run the divergence audit omitted a source conflict decided `other` and a seam
+conflict decided `keep-earlier` or `other`, which also log divergences. → §6.6
+
+**D99. Promotion writes the ruler and establishes the project.** No step of §2.9 wrote
+the new base's `canon-timeline.md` when the book had no eras. Promotion now writes the
+book as a work, after any eras, and the promoted project becomes established, with one
+sync point per chapter on that work. → §2.9
+
+**D98. A self-contained project's cutoff.** Nothing said what `X` was for a
+self-contained project with a ruler of eras. It is the end of the ruler: the story is
+set after its backstory, so `setting.cutoff` is invalid in an original setting (also in
+the schema). A materialized snapshot in a series begun by a self-contained book is
+named by the first book's id. → §4.7, §7.1, §7.6, §10.1
+
+**D97. Review formats for inversion candidates and the seam audit.** The order audit's
+`## Inversion candidates` table and the seam audit's `## Seam conflicts` entries were
+used but never defined. → §10.19
+
+**D96. Frames: the world point is the scene's cutoff.** Nothing said how a scene's world
+point relates to its chapter's sync point. Within a scene the world point is `X`; the
+sync point covers everything outside scenes and is the drafter's starting point. A host
+SHOULD warn when a scene with no travelers is set later than its sync point. Snapshot
+and composed-bible headers now record the project order, its source if inherited, the
+sync points, the world point, and seam decisions. → §7.1, §7.5, §7.6
+
+**D95. Quotations: ties, layers, and project lines.** Two sources tying on a quotation's
+`Speaker` or `Line` were not a source conflict; they now are, recorded under the
+quotation's qualified id. Every Source conflicts row gains a `Layer` column, so a
+decision cannot match another package's source of the same id. A project keeps no
+`quotations.md`: its lines stay in its manuscript, which a later book reads through
+`manuscript/@<project>/…`. Promotion re-cites `project` rows to the new source. A
+quotation MAY have several rows. → former 6.14, §10.8, §10.13, §2.6, §2.9
+
+**D94. A stack change proposes a new order.** Adding or removing an official package
+silently broke `setting.order`. The host now refuses to run, proposes an order with each
+new segment after its predecessor on the new ruler, and the author accepts or edits it
+before the order audit runs again. → §6.8
+
+**D93. Inversion candidates.** The order check compared rows of one attribute only, so a
+dependency across attributes (the Firebolt in the first task) went unflagged. The host
+SHOULD list, for each pair of segments the order swaps, every entity with rows in both,
+and the order audit MUST address each. → §6.8, §12.13, §14.1
+
+**D92. A series is promoted after two books.** Every book stacked as a project layer
+adds a ledger, sync points, and seam decisions that each later book must carry. Once a
+project stacks two or more project layers, the host SHOULD suggest promoting the
+earlier books into a package: a base for a self-contained series, a `fanfic` package
+for an established one. Promotion dates each row at its anchor, so the seams become
+ordinary dates. → §2.9
+
+**D91. Seam conflicts: prequels and split frames.** A later book could be set before
+the earlier one, or partly before and partly after, and settings alone cannot tell a
+prequel from a wrong pin. Everything an earlier book brings in is now anchored where
+that book established it. At a chapter set before the anchor, the item is ahead, and
+the author decides: carry back, not yet, or other, by item or by pattern. A seam audit
+(E1b) first checks the pin, then raises the items ahead and any value seam, where the
+later book's stack resolves a canon attribute differently. The decisions are a sixth
+author-only type, recorded in a Seam conflicts table and inherited as of the pin. A
+branch's sequel MUST be a branch diverging no later, and a later book with no order
+inherits its layer's. → §6.14, §7.2, §10.8, §13.4
+
+**D90. The series ruler.** D85 left a sequel to a self-contained book with no ruler,
+so it could not be set before or after book 1. Book 1's manuscript is now a work on
+the ruler of every later book, counted to the pin, after any eras book 1 defined. Its
+story-dated rows are dated on it. Later books insert their own segments before or after
+it (`After: —` for before everything), and then set cutoffs and sync points as over a
+base. → §4.12, §6.3, §7.1
+
+**D89. `adopt` reconstructs the whole bible.** Adopting a self-contained story never
+wrote relationships, the voice guide, or knowledge; adopting into a stack never wrote
+the project's own places and systems; no step checked the imported chapters' internal
+consistency; nothing audited the canon still ahead once the walk ended; and P8 used a
+double repeat that §11.7 does not allow. `adopt` now has a reconstruct phase with
+P4a and P4b, P5 for the project's own additions in a stack, and a per-chapter phase
+with a continuity step (P8a). When the walk ends, an established project runs E1a and
+E2a–E2b for the canon ahead. → §13.8
+
+**D88. Serial arcs run the established-world audits.** The overlay hooked only into the
+foundation, so a serial's later arcs logged no planned divergences, and their new sync
+points were never audited. E6 now logs each later arc's planned divergences after A1,
+and E6a and E6b audit and log what the arc's new sync points reach after A2, gated for
+the author. → §13.3, §13.4
+
+**D87. Earlier books' decisions carry over.** Only source-conflict decisions were said to
+bind a sequel, and not as of the pin. Now an earlier book's Hidden canon and Source
+conflicts rows decided at or before the pin, and the Theory conflicts of the theories
+its divergences in force adopt, all bind the later book, and the later ledger wins
+where two decide the same question. → §6.4, §6.12, §6.13, former 6.14, §7.2, §12.10
+
+**D86. Renumbering chapters.** Chapter ids are referenced from sync points, the ledger,
+story-dated rows, the story ledgers, revisions, feedback, and other projects' pins, but
+nothing said what happens when the outline inserts or moves a chapter. A deterministic
+`renumber` skill now rewrites every chapter id in the project in one step. It refuses
+to move a chapter readers have seen, or one at or before another project's pin. →
+§3.3, §11.10, §13.10, §14.2
+
+**D85. An established project needs a layer.** A world known only from `references/`
+had no ruler, so no cutoff, and no step wrote its curated files. It is now built into a
+package first, by extraction or promotion, and `references/` is background only. An
+established project MUST have a package or project layer (now also in the schema). A
+sequel to a self-contained book has no ruler unless that book defined one: it sets no
+cutoff, divergence point, order, or sync points, and its project layers' pins bound it.
+The §6.4 example's D2, a divergence on an original character, is now Hermione
+befriending Mara, the case §6.2 names. → §6.1, §6.3, §6.4, §7.1, §12.13, §14.2
+
+**D84. Story-dated rows, and a project's own additions in a stack.** Nothing recorded
+what the manuscript does to a project's own entities: the chronicler wrote only story
+ledgers, so an original character who changed in chapter 7 had the same snapshot in
+chapter 9, and ruler points could not date it, since the change happens on the story's
+clock. A project's rows about its own entities may now carry a `From chapter`. Such a
+row cites `project`, leaves `As of` empty, is visible from its chapter on, and sorts
+after every ruler point. The chronicler appends these rows to original characters'
+sheets, `relationships.md`, and `knowledge.md`. Changes to canon entities stay
+divergences. Projects with a stack also had no step for their own places, systems,
+relationships between original characters, or their knowledge: steps 3, 6, and 7 were
+skipped, and E1 replaced step 3. Those steps now run in such projects for the project's
+own additions only, and E1 runs after step 2. → §4.7, §4.11, §2.7, §3.3, §7.2, §10.5,
+§12.6, §12.7, §12.8, §12.11, §13.1, §13.4, §14.2
+
+**D83. Author markers block the chapter.** The showrunner and `novel` said every TODO is
+resolved before continuity runs, but `hidden canon` and `source conflict` markers wait
+for the author, who may take a long time. Only `needs bible` markers must clear before
+continuity. The other two count as pending decide items: the chapter goes on through
+the chronicler and continuity, and its step-14 gate waits for the author. →
+§11.8, §12.2, §13.1, §14.1
+
+**D82. Consistency after D78–D81.** Stale text fixed:
+- the project order permutes the stack's segments, inserted ones included, not only
+  the base's;
+- §5.5 no longer calls fanon a lower tier;
+- the ledger has up to five tables, not two;
+- the bridge is base-qualified, and universe Overrides qualify slugs by base;
+- the workflow `context` is `package`, not `world`;
+- `compose` runs before step 1, where the architect first reads the composed bible;
+- the canon-keeper runs outside established projects for frames checks.
+
+§1.6 also gains the terms divergence conflict, order inversion, and source conflict. →
+§1.6, §5.1, §5.5, §6.4, §6.8, §10.8, §10.14, §11.7, §12.13, §13.4, §14.2
+
+**D81. Every divergence is audited.** The divergence audit ran for planned divergences
+and for emergent ones logged at E5, but not for the divergences that carry out an
+author's decisions, though a resolution can reach further than what it resolves; and
+nothing said it covered an earlier book's divergences, which reach into a sequel's
+canon. Now every divergence in force is audited, the project layers' included, and the
+audit re-runs whenever a divergence is logged, until it finds nothing new. Hosts SHOULD
+also list **reach candidates**, the canon rows on the attributes a divergence
+overrides that it meets ahead, which the canon-keeper must address. The list is a floor
+the checker can test; the audit still reads ahead for conflicts on other attributes.
+→ §6.6, §6.11, §12.13, §13.4, §14.1
+
+**D80. Adherence settings, sync points, and ruler points.** `canon.md`, the adherence
+contract, mostly restated `project.yaml`: the divergence point and fidelity were already
+settings, the scope is the stack and cutoff, and original additions are marked in the
+roster. It also put the curator in charge of what is the author's call. The file is
+gone. `project.yaml` holds the adherence settings, with two new keys: `fidelity_notes`
+for latitude of the project's own, and `order`, the project order, which moves out of
+the track because reordering is the author's decision. The architect still maintains
+the chapter-to-cutoff map, which grows as chapters are planned, so it stays a file,
+renamed `sync-points.md`. Canon points are now **ruler points**, since they are
+addresses on the ruler, not claims about canon; `canon_point`, `canon_points`, and
+`canon_mode` become `cutoff`, `cutoffs`, and `follow` (not `mode`, which would read as
+the resolution mode). In the established-world overlay,
+E1 is now the architect's sync points and E1a the order audit; step P5 runs only in
+self-contained projects. §10.17 is removed and later §10 sections renumbered.
+→ §1.6, §2.2, §3.3, §4.2, §6.3, §6.7, §6.8, §6.11, §7.1, §10.1, §10.21, §12.6, §12.7,
+§12.13, §13.4, §13.8, §14.2
+
+**D79. The base is `base`, not `canon`.** A base lived in `worlds/<fandom>/canon/`, with
+`kind: canon`, so the layout itself called it canon, when what counts as canon is each
+project's decision. Its folder is now `worlds/<fandom>/base/` and its kind `base`, both
+named for its place at the bottom of the stack. Its id stays the bare `<fandom>`.
+→ §1.6, §2.2, §2.3, §2.9, §5.2, §5.3, §10.2
+
+**D78. Position words.** "Lowest precedence first" described the stack, but under
+`fill` the lowest layer wins, so the phrase was wrong for one mode in three. And tiers
+ran the other way from layers: the base was the lowest layer but held the highest
+tiers. Now **lower** and **higher** mean position only, nearer the base or nearer the
+project, and never which row wins; the mode decides that. Tiers are ordered the same
+way, so `primary` is the lowest tier, and within one layer the lowest tier wins. This
+changes no result. **Earlier** and **later** describe only a row's as-of, never a layer.
+→ §1.6, §2.2, §4.10, §5.2, §5.4, §7.2, §10.1, §14.3
+
+**D77. Source conflicts are the author's.** Two sources in one layer, of one tier, can
+set an attribute at the same point to different values: two editions of *Goblet of
+Fire* disagree about the order of the echoes in the graveyard. Resolution had no rule
+for the tie, so a host would have picked one arbitrarily. Such a tie is now a **source
+conflict**: the snapshot leaves the attribute unresolved and returns the tied rows, and
+the author decides, under every gate policy, which source to follow or what else to do.
+The curator records the decision in a new Source conflicts table in the ledger, and
+later books inherit it. A package never resolves the tie, which keeps the registry
+neutral. → §6.9, §6.11, former 6.14, §7.2, §10.8, §10.18, §10.19, §11.8, §11.9, §12.2,
+§12.7, §12.10, §12.13, §13.8, §14.1, §14.2
+
+**D76. Quotations resolve across layers.** The films often give a line from the books
+to another character (in *Prisoner of Azkaban*, Ron's stand against Black goes to
+Hermione), but a quotation's `ID` was a key, so a films package could only add a
+competing quotation. A higher layer now gives a lower package's quotation a row by
+qualifying the ID, `<package-id>:<ID>`, and `Speaker` and `Line` resolve by the
+project's mode like attributes. With the films stacked, `precedence` gives the line to
+Hermione and `fill` keeps it Ron's. → §2.7, §5.4, §10.13, §14.2
+
+**D75. Official works outside the base.** Star Trek's animated series is official, but
+whether it is canon is disputed, and with `excluded` sources gone it had nowhere to go.
+The spec should not settle such disputes, so a new package kind, `official`, holds
+`secondary-official` material whose canon status is disputed. The base keeps only what
+is not in dispute, and each project decides by its stack and resolution mode. An official package with works of its own **inserts** their
+segments into the base's ruler with an `## Insert` table, each after a named segment;
+the base's ruler never changes. Points on an inserted work are valid only with the
+package in the stack. The example is `star-trek/animated`, inserted after TOS season 3.
+→ §2.3, §4.2, §4.10, §5.2, §5.3, §10.4, §13.6, §14.2
+
+**D74. Fill resolution.** With layers listed lowest first, `precedence` lets a fan
+layer override canon, and the old enriched behaviour (fan rows only fill gaps) could no
+longer be expressed. A third mode, `fill`, picks the lowest layer with a row: canon
+stands wherever it speaks, and higher layers supply only what it leaves blank. This is
+how an author makes a thinly drawn canon character, such as Daphne Greengrass, their own
+without contradicting canon. → §5.4, §7.1, §7.2, §10.1
+
+**D73. Adopting an existing story.** Authors bring work written before they used
+LoreStore, sometimes already published, and the workflows only built a bible before the
+prose. A new `adopt` chain runs once: the chapters are imported with their real
+statuses, the architect and character-designer reconstruct premise, outline, and cast,
+the curator writes the adherence contract, and then the chapters are walked in order,
+with the chronicler backfilling the ledgers and the canon-keeper surfacing departures
+from canon as emergent divergences for the author. Adoption never rewrites a chapter.
+The project then continues in its own workflow. → §13.8
+
+**D72. Early access, revisions, and human feedback.** Authors share chapters with beta
+readers and patrons before release, and the spec had no state between finished and
+released. A new status, `early-access`, is set only by the author (through the
+`release` skill), in order, in any workflow. An early-access chapter stays editable,
+and every change to it is logged in `revisions.md`, which gains `Audience` and `Date`,
+with a reader note. Human readers' notes go in `references/feedback/chapter-NN/
+<reader>.md`; the beta-reader folds them into its priorities marked `(human: …)`. →
+§10.18, §10.19, §10.22, §10.25, §11.8, §11.10, §12.2, §12.11, §12.18, §13.9, §14.2
+
+**D71. Theories are numbered claims, adopted through the ledger.** Theories were opt-in
+by profile, so a theory could only be on or off, with no record of how well it fit the
+story. Theories now live in a `theories` package as numbered claims. A project adopts
+some or all of a theory's claims as a divergence whose `Basis` names them. Before that,
+the canon-keeper lists every piece of evidence in the stack, at any point, that
+contradicts a claim: a **theory conflict**. The author alone decides to keep, adapt, or
+discard each one, and the curator records the decisions in a Theory conflicts table.
+Theory rows never resolve into state. Theory conflicts join the author-only decisions.
+→ §6.9, §6.13, §10.8, §10.13, §11.8, §12.5, §12.13, §13.4
+
+**D70. The composed bible.** With several layers, an agent would have to know where each
+package lives and merge their files itself. The `compose` skill now builds
+`derived/bible/`: the union of every layer's files, each row tagged with its `Layer`.
+It is a union, not a resolution, and a rebuildable cache. Agents in project context read
+`bible/…` through it. → §7.6, §2.6, §11.6, §11.10, §13.4
+
+**D69. Universes are layers.** A universe was a separate kind of thing that a project
+named in its own field, with per-world profiles. It is now a layer that relies on two or
+more bases, stacked above them. More than one base in a stack requires a universe.
+Cutoffs and divergence points are keyed by base, and world-layer paths are qualified
+`bible/@<base-id>/…`. → §8, §2.2, §7.4, §10.1, §10.2.1
+
+**D68. Project layers, relisted.** A sequel had no way to inherit the earlier book's
+divergences and original cast. A project can now stack another project as a read-only
+layer, `project:<id>@chapter-NN`, whose ledger applies as of that chapter, before the
+project's own, and transitively through its own project layers. Its package layers are
+not inherited: the sequel relists each one, at the same major version and the same or a
+later version, so every package pin is visible in one file. The host warns when a
+project used as a layer changes at or before its pinned chapter. → §2.2, §6.4, §7.1,
+§14.2
+
+**D67. Adaptations get their own tier and timecodes.** Films and other adaptations were
+either canon or excluded, with no way to place a film scene against the book it adapts.
+`adaptation` is a new tier, between secondary-official and fanon. An adaptation package
+maps its works onto the base's ruler in an `## Adapts` table, and its facts are dated
+`book:chapter:scene+<film-timecode>`. The book path decides order; the timecode orders
+only rows at the same path, with untimed rows first. A timecode is valid only if an
+adaptation in the stack covers the path. A film that takes scenes out of the book's
+order, as the *Deathly Hallows* films do with chapter 24, has one `Adapts` row per
+contiguous range. → §4.2, §4.9, §5.2, §10.4
+
+**D66. Union across layers, and extension sheets.** It was unclear how a fanon package
+could add a house to a canon character without editing the base. A layer adds keys but
+never redefines a lower layer's. To add rows to a lower layer's entity, a package uses
+an **extension sheet**, with `extends: <package-id>`. Projects cannot hold extension
+sheets; they change lower layers only through the ledger, and may add entities of
+their own. → §2.7, §10.5, §12.4
+
+**D65. Resolution is the project's choice.** Profiles lived in the world package and
+mixed two questions: which sources are active, and how they combine. The stack now
+answers the first, and the project's `resolution` the second. `precedence`: the highest
+layer with a row wins, then the higher tier within it, then the latest as-of.
+`recency`: the latest as-of wins, with ties going to the higher layer, then the higher
+tier. Ledgers apply after resolution. Profiles, `active_profile(s)`, `canon_basis`, and
+the `excluded` source flag are removed; a same-fandom package not in the stack is a
+source leak. → §5, §7, §10.1, §10.2, §14.2
+
+**D64. Pure bases.** A world package mixed books, films, fanon, and fan works in one
+registry, so every project paid for the whole fandom. A fandom's canon package (its
+**base**) now holds only canon-tier sources, and everything else moves to its own
+package. Each package's manifest has a `kind` and pins what it relies on. It is renamed
+from `world-config.yaml` to `package.yaml`, since it now describes any package, and to
+match `project.yaml` and `universe.yaml`. For the same reason, the `world-index` skill
+is renamed `indexer`.
+The Harry Potter base is 3.0.0 and the Star Trek base 2.0.0. → §2.3, §5.1, §5.3, §10.2
+
+**D63. Folders by fandom.** Several packages per fandom needed a layout. Packages live
+under `worlds/<fandom>/`: the base in `canon/` with the bare id `<fandom>`, other
+packages at `<fandom>/<package>`, and fan works at `<fandom>/fanfic/<work>`. Extraction
+workspaces mirror the same paths. → §2.1, §2.3, §2.4
+
+**D62. Canon is layered.** A project read exactly one world, through a profile, so it
+could not combine an adaptation with fan conventions, build on an earlier book, or
+cross over without special cases. A project now lists its **layers**, lowest
+precedence first: packages, universes, and other projects. Each package pins the
+packages it relies on, and a stack MUST list them below it. The host MUST NOT add a
+missing layer. `spec_version` is `"0.2"`. → §1, §2.2, §3, §10.1
+
 ## 0.1: review round 9
 
 **D61. Time travel declares its mechanisms.** The frames module handled a fixed loop
@@ -17,7 +370,7 @@ or abandoned branches for `mutable` and `loop`, ripples for `feedback`. Legs and
 branches name their mechanism, and branches gain a `Status`. A self-contained project
 writes its own `time-travel.md`. The `the-long-way-back` example's paradox X1 is
 removed, because remembering an overwritten branch is now part of a traveler's own
-frame. → §9.1, §10.16, §10.25, §3.3, §6.9, §7.5, §12.11, §12.13, §13.5
+frame. → §9.1, §10.16, §10.24, §3.3, §6.9, §7.5, §12.11, §12.13, §13.5
 
 **D60. Added columns are registered.** Tables could already carry extra columns, but
 agents had no way to learn what they meant. `index.md` gains an optional `## Columns`
@@ -32,7 +385,7 @@ whenever they choose. The buffer has no size limit, which covers authors who sta
 months ahead and authors bringing in work written before they used LoreStore.
 Unreleased chapters are revisable as in `novel`; only released ones are fixed forward.
 Releasing is always the author's call, even under `gates: none`, because it cannot be
-undone. → §13.3, §10.19, §10.24, §12.2, §14.2
+undone. → §13.3, §10.18, §10.23, §12.2, §14.2
 
 **D58. Sapient peoples and fauna are kept apart.** It was unclear whether `species.md`
 held only sapient peoples or every kind of creature, since Star Trek's species and Harry
@@ -73,7 +426,7 @@ and are unchanged. → README, §1.1
 prose is listed under `## Leftover markers` in its review, which is present even when
 empty, and put first in its priorities. The showrunner routes each one as usual. This is
 a late safety net: markers should have been resolved before continuity runs (step 11).
-→ §12.18, §10.20, §11.9
+→ §12.18, §10.19, §11.9
 
 ## 0.1: review round 7
 
@@ -91,7 +444,7 @@ a late safety net: markers should have been resolved before continuity runs (ste
   `## Hidden canon` ledger table, so it is not raised again.
 
 Example: Snape's love for Lily (`As of DH:33`, `True from PS`) is revealed early in the
-`no-horcruxes` branch. → §4.4, §6.12, §7.2, §10.6, §10.8, §10.19, §11.8, §11.9, §12
+`no-horcruxes` branch. → §4.4, §6.12, §7.2, §10.6, §10.8, §10.18, §11.8, §11.9, §12
 
 ## 0.1: review round 6
 
@@ -110,7 +463,7 @@ its divergence point still happens:
 `setting.divergence_point` (`divergence_points` for universes) makes the point
 machine-readable; a branch requires it. `fidelity` is unchanged and independent. The
 new examples are `no-horcruxes` (a branch) and `blind-harry` (a retelling).
-→ §6.6, §6.9, §6.11, §7.1, §10.1, §10.20, §11.8, §12, §13.4, §14
+→ §6.6, §6.9, §6.11, §7.1, §10.1, §10.19, §11.8, §12, §13.4, §14
 
 ## 0.1: review round 5
 
@@ -128,7 +481,7 @@ installments as they are written:
 - **Under `revisable`,** each change is re-released and logged in `revisions.md`, with a
   reader note, by the chronicler.
 - **Arcs** are headings in the outline. A new repeat kind, `per-arc`, is added.
-→ §13.3, §10.1, §10.8, §10.19, §10.23, §10.24, §11.10, `schemas/`
+→ §13.3, §10.1, §10.8, §10.18, §10.22, §10.23, §11.10, `schemas/`
 
 ## 0.1: review round 4
 
@@ -145,7 +498,7 @@ is a story problem, and only the author can say how the story handles it. Now:
   that the author resolves. Agents track them and draft what the author decides.
 
 In the example, the author substitutes Dumbledore for Sirius as Harry's correspondent,
-and removes Cedric's PoA appearances. → §6.8, §6.9, §10.20, §11.8, §13.4, §14.1
+and removes Cedric's PoA appearances. → §6.8, §6.9, §10.19, §11.8, §13.4, §14.1
 
 ## 0.1: review round 3
 
@@ -178,7 +531,7 @@ in the project. For example, moving *Goblet of Fire* to second year means Harry 
 met Sirius during the Tournament. The reordering is logged as a divergence. Where canon
 rows now precede the canon they depend on (order inversions), the host reports them and
 the curator covers each with a divergence. A new optional `Until` column lets such a
-divergence end when the story catches up. → §6.8, §10.8, §10.22
+divergence end when the story catches up. → §6.8, §10.8, §10.21
 
 **D48. The merger keeps confirmations as rows.** Folding a later confirmation into
 the citation of the earliest row lost information that a reordered project needs. For

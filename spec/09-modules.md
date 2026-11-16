@@ -1,8 +1,8 @@
 # 9. Optional modules
 
-Modules are dormant unless a project enables them in `project.yaml`. A world package
-MAY ship a module's world-layer files (`game-system.md`, `languages.md`) whether or not
-a given project uses them.
+Modules are dormant unless a project enables them in `project.yaml`. A package MAY
+ship a module's world-layer files (`game-system.md`, `languages.md`) whether or not a
+given project uses them.
 
 | Module        | Enabled by                        | World-layer files            | Story-layer files              |
 | ------------- | --------------------------------- | ---------------------------- | ------------------------------ |
@@ -15,7 +15,7 @@ a given project uses them.
 Frames separate two kinds of time:
 
 - the **world frame**: where and when a scene happens, written
-  `<canon-point>@<branch>` (for example `PoA:21@main`, or down to scene and timecode,
+  `<ruler-point>@<branch>` (for example `PoA:21@main`, or down to scene and timecode,
   `TNG:3:15:7+00:31:10@alt-war`);
 - each traveler's **personal frame**: the cutoff they carry with them, which is how
   much they know.
@@ -23,9 +23,9 @@ Frames separate two kinds of time:
 Three files carry the module:
 
 - `time-travel.md` (world layer) declares **how time travel works**: one entry per
-  mechanism, with its model, reach, and limits (format: §10.25). It is canon like any
-  other world rule. A world package ships it when its canon has time travel, and a
-  self-contained project writes its own.
+  mechanism, with its model, reach, and limits (format: §10.24). It is canon like any
+  other world rule. A base ships it when its canon has time travel. Any higher layer,
+  including a project, MAY add mechanisms of its own, as new entries (§2.7).
 - `branches.md` (story layer) registers world-lines (branches), with each one's status,
   and keeps the **paradox ledger**.
 - `timelines.md` (story layer) records each traveler's legs: the mechanism used, where
@@ -84,7 +84,7 @@ divergence (§6.2), logged in the ledger as usual.
 A Time-Turner copy of Harry is neither: it is the same person at a different personal
 time, and stays on one sheet.
 
-Each scene in a frames project declares its world point and its travelers (§10.19). The
+Each scene in a frames project declares its world point and its travelers (§10.18). The
 snapshot resolves natives at the world point and travelers at their personal cutoffs
 (§7.5). The canon-keeper checks **each character against their own frame**, and each
 trip against its mechanism:
@@ -109,11 +109,11 @@ statuses, ripples, and paradox decisions made by a human or the showrunner.
 - `game-system.md` holds **the System's rules**: stats, levels, skills, inventory, and
   quests. It is a catalog, like `magic/` (§10.11).
 - `game-state.md` holds **the protagonist's live state**, recorded per chapter and
-  append-only (§10.18).
+  append-only (§10.17).
 
 The continuity-editor checks the game state for consistency:
 
-- **monotonic levelling**: no level goes backwards without a stated cause;
+- **monotonic leveling**: no level goes backwards without a stated cause;
 - **inventory balance**: no item appears from nowhere or disappears without trace;
 - **quest progression**: quests move only forward through their stages;
 - **stat arithmetic**: totals match their components.

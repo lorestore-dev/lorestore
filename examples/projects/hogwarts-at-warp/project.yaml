@@ -1,17 +1,17 @@
-spec_version: "0.1"
+spec_version: "0.2"
 id: hogwarts-at-warp
 name: "Hogwarts at Warp"
 workflow: short-story
 gates: milestones
 seed: "A Hogwarts sixth-year stows away on the Enterprise-D, and her wand is the one thing the ship's sensors cannot see."
 
-universe:
-  id: wizards-and-warp
-  version: 1.1.0
+layers:                         # from the base up
+  - harry-potter@3.0.0
+  - star-trek@2.0.0
+  - universe:wizards-and-warp@2.0.0
 
 setting:
   type: established
   fidelity: au
-  canon_points:    { harry-potter: "HBP:7", star-trek: "TNG:4:1" }
-  active_profiles: { harry-potter: book-purist, star-trek: canon-only }
+  cutoffs:    { harry-potter: "HBP:7", star-trek: "TNG:4:1" }
   temporal_model: linear
