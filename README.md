@@ -5,7 +5,7 @@ fictional world, and the stories set in it, are stored as small markdown and YAM
 how facts are dated, sourced, and resolved; how a story forks from canon without
 editing it; and how a team of narrow AI agents reads and writes those files.
 
-**Status:** draft, spec version `0.2`. Breaking changes are still expected.
+**Status:** draft, spec version `0.3`. Breaking changes are still expected.
 
 ## Reading order
 

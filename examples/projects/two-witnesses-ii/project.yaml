@@ -1,4 +1,4 @@
-spec_version: "0.2"
+spec_version: "0.3"
 id: two-witnesses-ii
 name: "Two Witnesses II: The Ministry Year"
 workflow: novel
@@ -6,9 +6,9 @@ gates: milestones
 seed: "The year after the graveyard. The Ministry has two witnesses to discredit, and one of them is a Hufflepuff prefect everyone trusts."
 
 layers:                         # from the base up
-  - harry-potter@3.2.0
-  - harry-potter/fanon@1.0.2
-  - harry-potter/fanfic/example@1.2.1
+  - harry-potter@3.2.1
+  - harry-potter/fanon@1.0.3
+  - harry-potter/fanfic/example@1.2.2
   - project:two-witnesses@chapter-02   # book 1, read through chapter 2
 resolution: recency
 

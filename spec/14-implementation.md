@@ -57,6 +57,15 @@ summarizes the contracts the rest of the spec defines.
 16. **Stay model-agnostic.** The same workflow must run against a cloud API, a local
     model in a loop, or a human with the files, without changing the agents or the
     store.
+17. **Keep material apart from instructions** (§11.12). Pass what an agent reads to it
+    as content, marked off from its agent file and the step's request, never merged
+    into them. Treat a package, universe, or project layer from outside the author's
+    workspace, source texts, and human feedback as untrusted: before an agent first
+    reads one, SHOULD show the author any text in it that reads as an instruction to an
+    agent.
+18. **Check spec versions** (§10.0). Refuse a stack with a manifest whose
+    `spec_version` the host does not support, and read each directory by its own
+    version's rules.
 
 ## 14.2 Validation
 

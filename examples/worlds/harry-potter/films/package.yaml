@@ -1,8 +1,8 @@
-spec_version: "0.2"
+spec_version: "0.3"
 id: harry-potter/films
 kind: adaptation
 name: "Harry Potter films"
-version: 1.0.2
+version: 1.0.3
 status: open-for-extraction
 relies-on:
-  - harry-potter@3.2.0
+  - harry-potter@3.2.1

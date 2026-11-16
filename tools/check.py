@@ -60,7 +60,7 @@ bad = pyaml("hogwarts-at-warp"); bad["setting"]["cutoff"] = "HBP:7"
 check("schema rejects cutoff beside a universe layer", schema("project").is_valid(bad), False)
 bad = pyaml("two-witnesses"); bad["setting"]["cutoffs"] = {"harry-potter": "GoF:37"}
 check("schema rejects cutoffs without a universe layer", schema("project").is_valid(bad), False)
-for ref, ok in [("harry-potter@3.2.0", True), ("harry-potter/fanfic/example@1.2.1", True), ("universe:wizards-and-warp@2.0.2", True),
+for ref, ok in [("harry-potter@3.2.1", True), ("harry-potter/fanfic/example@1.2.2", True), ("universe:wizards-and-warp@2.0.3", True),
                 ("project:two-witnesses@chapter-02", True), ("harry-potter", False), ("project:two-witnesses@1.0.0", False),
                 ("harry-potter/a/b/c@1.0.0", False), ("fanon-hp@latest", False)]:
     d = pyaml("blind-harry"); d["layers"] = [ref]
@@ -70,7 +70,7 @@ d = pyaml("two-witnesses"); d["resolution"] = "newest"; check("schema rejects un
 d = pyaml("two-witnesses"); d["setting"]["active_profile"] = "enhanced"; check("schema rejects 0.1 active_profile", schema("project").is_valid(d), False)
 d = load(EX/"worlds/harry-potter/fanon/package.yaml"); d["relies-on"] = []
 check("schema non-base package must rely on something", schema("package").is_valid(d), False)
-d = load(EX/"worlds/harry-potter/base/package.yaml"); d["relies-on"] = ["star-trek@2.1.0"]
+d = load(EX/"worlds/harry-potter/base/package.yaml"); d["relies-on"] = ["star-trek@2.1.1"]
 check("schema base package relies on nothing", schema("package").is_valid(d), False)
 d = load(EX/"worlds/harry-potter/fanfic/example/package.yaml"); d["id"] = "harry-potter/example"
 check("schema fanfic id under <fandom>/fanfic/", schema("package").is_valid(d), False)
@@ -78,6 +78,10 @@ ser = pyaml("the-long-way-back")
 check("schema serial project, default release policy", (ser["workflow"], "serial" in ser, schema("project").is_valid(ser)), ("serial", False, True))
 ser["serial"] = {"released": "revisable"}; check("schema serial revisable accepted", schema("project").is_valid(ser), True)
 ser["serial"] = {"released": "frozen"}; check("schema serial unknown policy rejected", schema("project").is_valid(ser), False)
+for name, doc in [("project", pyaml("two-witnesses")), ("package", load(EX/"worlds/harry-potter/base/package.yaml")), ("universe", load(EX/"universes/wizards-and-warp/universe.yaml"))]:
+    check(f"schema {name}: spec version 0.3", doc["spec_version"], "0.3")
+    doc["spec_version"] = "0.2"; check(f"schema {name}: a 0.2 manifest is not 0.3", schema(name).is_valid(doc), False)
+check("schema: this document is version 0.3", "This document is version `0.3`." in (ROOT/"spec/10-formats.md").read_text(), True)
 nov = pyaml("two-witnesses"); nov["serial"] = {"released": "locked"}
 check("schema serial block on novel rejected", schema("project").is_valid(nov), False)
 
@@ -531,12 +535,12 @@ def hidden(stack, entity, cutoff, base=None):
     return {r["Attribute"] for r in stack.layer_rows(entity, base) if r.get("True from")
             and ruler.cmp(r["True from"], cutoff) <= 0 < ruler.cmp(r["As of"], cutoff)}
 
-PURIST  = Stack(["harry-potter@3.2.0"])
-ENRICH  = Stack(["harry-potter@3.2.0", "harry-potter/fanon@1.0.2", "harry-potter/fanfic/example@1.2.1"])
+PURIST  = Stack(["harry-potter@3.2.1"])
+ENRICH  = Stack(["harry-potter@3.2.1", "harry-potter/fanon@1.0.3", "harry-potter/fanfic/example@1.2.2"])
 ENHANCE = Stack(ENRICH.refs, "recency")
 FILL    = Stack(ENRICH.refs, "fill")
-TREK    = Stack(["star-trek@2.1.0"])
-TAS     = Stack(["star-trek@2.1.0", "star-trek/animated@1.0.1"])
+TREK    = Stack(["star-trek@2.1.1"])
+TAS     = Stack(["star-trek@2.1.1", "star-trek/animated@1.0.2"])
 HP, ST = PURIST.ruler(), TREK.ruler()
 g = lambda s, e, c, a, **k: snapshot(s, e, c, **k).get(a)
 
@@ -556,7 +560,7 @@ check("3 broom fill PS:10: the base has a row, so it stands", g(FILL, "harry-pot
 check("3 broom fill PoA:10: the base's (unset) stands", g(FILL, "harry-potter", "PoA:10", "broom"), None)
 check("3 broom fill PoA:11", g(FILL, "harry-potter", "PoA:11", "broom"), "Firebolt")
 check("3 glasses fill: canon's round stands", g(FILL, "harry-potter", "GoF:37", "glasses"), "round")
-FILMS = Stack(["harry-potter@3.2.0", "harry-potter/films@1.0.2"])
+FILMS = Stack(["harry-potter@3.2.1", "harry-potter/films@1.0.3"])
 check("3 quote: the books give the line to Ron", quote(PURIST, "harry-potter", "q1", "GoF:1"), "ron-weasley")
 check("3 quote: precedence with the films gives it to Hermione", quote(FILMS, "harry-potter", "q1", "GoF:1"), "hermione-granger")
 check("3 quote: recency, same point, the higher layer", quote(Stack(FILMS.refs, "recency"), "harry-potter", "q1", "GoF:1"), "hermione-granger")
@@ -601,8 +605,8 @@ check("12 universe stack has two bases", sorted(HW.bases), ["harry-potter", "sta
 check("12 harry broom", g(HW, "harry-potter", None, "broom", base="harry-potter"), "Firebolt")
 check("12 picard", g(HW, "jean-luc-picard", None, "status", base="star-trek"), "captain of the USS Enterprise-D")
 check("12 each base has its own ruler", (HW.ruler("harry-potter").base.id, HW.ruler("star-trek").base.id), ("harry-potter", "star-trek"))
-raises("12 two bases without a universe rejected", lambda: Stack(["harry-potter@3.2.0", "star-trek@2.1.0"]), StackError)
-raises("12 universe below its bases rejected", lambda: Stack(["universe:wizards-and-warp@2.0.2", "harry-potter@3.2.0", "star-trek@2.1.0"]), StackError)
+raises("12 two bases without a universe rejected", lambda: Stack(["harry-potter@3.2.1", "star-trek@2.1.1"]), StackError)
+raises("12 universe below its bases rejected", lambda: Stack(["universe:wizards-and-warp@2.0.3", "harry-potter@3.2.1", "star-trek@2.1.1"]), StackError)
 u = load(EX/"universes/wizards-and-warp/universe.yaml")
 check("V universe pins", sorted(u["relies-on"]), sorted(f"{b}@{Package(b).cfg['version']}" for b in ["harry-potter", "star-trek"]))
 check("V universe offsets name its bases", set(u["offsets"]) <= {d.split("@")[0] for d in u["relies-on"]}, True)
@@ -639,7 +643,7 @@ check("I spock without the package: no pet (a source leak if used)", g(TREK, "sp
 check("I animated is an official package of secondary-official sources", (Package("star-trek/animated").kind, set(Package("star-trek/animated").sources.values())), ("official", {"secondary-official"}))
 
 # --- adaptation timecodes (§4.9) ---------------------------------------------------
-FILMS = Stack(["harry-potter@3.2.0", "harry-potter/films@1.0.2"]); HF = FILMS.ruler()
+FILMS = Stack(["harry-potter@3.2.1", "harry-potter/films@1.0.3"]); HF = FILMS.ruler()
 for pt, want in [("PS:6:2+00:41:10", True), ("PS:6+00:41:10", True), ("PS+00:41:10", False), ("CoS:1+00:01:00", False), ("PS:6:2", True)]:
     check(f"A valid with films {pt}", isvalid(HF, pt), want)
 check("A timecode needs the films layer", isvalid(HP, "PS:6:2+00:41:10"), False)
@@ -883,7 +887,7 @@ def extensions_ok(stack):
         seen[p.id] = {r["Slug"] for r in p.roster()}
     return True
 check("V extension sheets extend a lower layer", extensions_ok(ENRICH), True)
-raises("V fanon below its base rejected", lambda: Stack(["harry-potter/fanon@1.0.2", "harry-potter@3.2.0"]), StackError)
+raises("V fanon below its base rejected", lambda: Stack(["harry-potter/fanon@1.0.3", "harry-potter@3.2.1"]), StackError)
 raises("V wrong package pin rejected", lambda: Stack(["harry-potter@2.1.0"]), StackError)
 
 # --- packages: kinds, ids, sources, points ------------------------------------------
@@ -1040,11 +1044,11 @@ def branch_ok(setting, layers):
         if q.get("follow") == "branch" and (setting.get("follow") != "branch" or r.cmp(setting["divergence_point"], q["divergence_point"]) > 0): return False
     return True
 check("SE every project keeps its layers' branches", all(branch_ok(pyaml(p)["setting"], pyaml(p).get("layers", [])) for p in PROJECTS), True)
-NH = ["harry-potter@3.2.0", "project:no-horcruxes@chapter-01"]
+NH = ["harry-potter@3.2.1", "project:no-horcruxes@chapter-01"]
 check("SE a retelling sequel to a branch is rejected", branch_ok({"cutoff": "CoS:1"}, NH), False)
 check("SE a branch sequel diverging later is rejected", branch_ok({"follow": "branch", "divergence_point": "CoS:1"}, NH), False)
 check("SE a branch sequel diverging no later is accepted", branch_ok({"follow": "branch", "divergence_point": "PS:17"}, NH), True)
-INH = Stack(["harry-potter@3.2.0", "project:second-year-tournament@chapter-03"])
+INH = Stack(["harry-potter@3.2.1", "project:second-year-tournament@chapter-03"])
 check("SE the order is inherited from a project layer", (INH.order() == pyaml("second-year-tournament")["setting"]["order"], INH.ruler().cmp("GoF:1", "CoS:1")), (True, -1))
 check("V seam decisions fit their items", all(r["Decision"] in ({"keep-earlier", "accept", "other"} if ":" not in r["Item"] else {"carry-back", "not-yet", "other"})
       and (r["Decision"] != "other" or r["Note"]) for f in (EX/"projects").glob("*/bible/divergences.md") if has(f, "## Seam conflicts") for r in table(f, "## Seam conflicts")), True)

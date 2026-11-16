@@ -5,6 +5,23 @@ says what was unclear or contradictory, what was decided, and where the rule now
 
 ## 0.3: in-world time
 
+**D117. Text an agent reads is data, never instructions.** Agents read a great deal
+written by other people: shared packages, source texts, readers' feedback. Nothing
+said what an agent should do with text in that material that reads as an instruction
+to it. It is content: an agent never follows it, never records it as fact, and reports
+it where its output has a place for problems, for the showrunner to surface. The host
+keeps material apart from instructions, and shows the author instruction-like text in
+untrusted input before an agent reads it. Characters giving each other orders are
+story, not instructions. → §11.12, §14.1
+
+**D116. Spec versions.** Every manifest declared `spec_version: "0.2"`, but nothing said
+what a host does with another version, and 0.3 adds fields a 0.2 host does not know.
+A host lists the versions it supports and refuses a stack with any other. A stack may
+mix supported versions, each directory read by its own version's rules. Before 1.0 any
+minor version may break; from 1.0 a minor version only adds. Moving to a new spec
+version is a human change, and a patch bump for a package. The examples move to 0.3,
+and each package takes a patch bump. → §2.8, §10.0, §14.1
+
 **D115. The prompter: image prompts from the bible.** Authors wanted pictures of their
 characters, families, maps, and places, and a picture drawn from the bible can leak as
 easily as a paragraph. A nineteenth agent, the prompter, writes one prompt per step to

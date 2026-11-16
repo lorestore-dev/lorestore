@@ -139,14 +139,14 @@ packages/
     ├── fanon/                # id harry-potter/fanon
     └── fanfic/
         └── <work>/           # id harry-potter/fanfic/<work>
-            ├── package.yaml  # version: 1.2.1
+            ├── package.yaml  # version: 1.2.2
             ├── index.md
             ├── sources.md
             └── …
 ```
 
 Every published version is kept as a Git tag, `<id>@<version>` (for example
-`harry-potter@3.2.0` or `harry-potter/fanon@1.0.2`). The tag is exactly the pin a project
+`harry-potter@3.2.1` or `harry-potter/fanon@1.0.3`). The tag is exactly the pin a project
 writes in its `layers:` (§2.2), so a project names a registry package by its bare id
 and version, with no registry prefix, and a host fetches that pin by checking out the
 tag.

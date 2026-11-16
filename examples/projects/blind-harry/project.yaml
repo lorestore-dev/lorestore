@@ -1,4 +1,4 @@
-spec_version: "0.2"
+spec_version: "0.3"
 id: blind-harry
 name: "By Sound and Feel"
 workflow: novel
@@ -6,7 +6,7 @@ gates: milestones
 seed: "The curse that rebounds at Godric's Hollow takes Harry's sight. Year one, retold."
 
 layers:                         # from the base up
-  - harry-potter@3.2.0
+  - harry-potter@3.2.1
 
 setting:
   type: established

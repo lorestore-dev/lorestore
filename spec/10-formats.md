@@ -8,6 +8,22 @@ below are what tools rely on.
 
 **Manifests** are YAML 1.2. Each has a JSON Schema in [`schemas/`](../schemas/).
 
+**Spec versions.** Every manifest (`project.yaml`, `package.yaml`, `universe.yaml`)
+declares `spec_version`: the `<major>.<minor>` of this specification whose rules its
+directory follows. This document is version `0.3`.
+
+- A host MUST list the spec versions it supports, and MUST refuse a stack that holds a
+  manifest of any other version, naming it.
+- One stack MAY mix versions that the host supports. The host reads each directory by
+  the rules of its own version: a feature that version lacks is absent there (a `0.2`
+  base has no calendar).
+- Before `1.0`, any minor version may break the one before it, so a host supports each
+  version deliberately. From `1.0` on, a minor version only adds, and a host that
+  supports `1.n` reads every `1.m` with `m` up to `n`.
+- Moving a directory to a new spec version is a human change: set `spec_version` and
+  make the changes that `DECISIONS.md` lists for the versions in between. In a package,
+  it bumps the version (§2.8).
+
 **Structured markdown** uses two forms:
 
 - **Tables.** A table is identified by the `##` heading it sits under and by its
@@ -49,7 +65,7 @@ this chapter requires front matter, its keys are listed.
 Schema: [`schemas/project.schema.json`](../schemas/project.schema.json).
 
 ```yaml
-spec_version: "0.2"
+spec_version: "0.3"
 id: two-witnesses
 name: "Two Witnesses"
 workflow: novel                 # novel | short-story | serial
@@ -61,9 +77,9 @@ parameters:
   target_length: 90000          # words
 
 layers:                         # from the base up; absent or empty = self-contained
-  - harry-potter@3.2.0
-  - harry-potter/fanon@1.0.2
-  - harry-potter/fanfic/example@1.2.1
+  - harry-potter@3.2.1
+  - harry-potter/fanon@1.0.3
+  - harry-potter/fanfic/example@1.2.2
 resolution: recency             # precedence (default) | recency | fill
 
 setting:
@@ -121,14 +137,14 @@ Schema: [`schemas/package.schema.json`](../schemas/package.schema.json).
 Every package has one, in the package's folder:
 
 ```yaml
-spec_version: "0.2"
+spec_version: "0.3"
 id: harry-potter/fanon          # <fandom> | <fandom>/<package> | <fandom>/fanfic/<work>
 kind: fanon                     # base | official | adaptation | fanon | fanfic | theories
 name: "Harry Potter fanon"
 version: 1.0.0
 status: open-for-extraction     # open-for-extraction | locked
 relies-on:                      # pinned; empty for a base package
-  - harry-potter@3.2.0
+  - harry-potter@3.2.1
 ```
 
 - `id` MUST match the package's folder (§2.3). A `base` package's id is the bare fandom
