@@ -93,6 +93,12 @@ deciding what happens next when the happy path forks.
     number scenes as §4.2 defines them.
   - Record `True from` whenever the unit reveals backstory: when a fact became true
     before the point that reveals it (§4.4).
+  - In a world with a calendar (§4.13), record in-world dates as precisely as the source
+    gives them, and no more: the unit's own date, an `In-world` date for backstory,
+    `born` and `died`, and past events as entities of `history.md`. Convert dates
+    written in the work's notation to the calendar's form, keeping the original in the
+    citation. Flag a fact that contradicts a date (a flashback, a prophecy) under
+    `## Needs a human`.
   - Name every character through the roster. File facts under a **reveal alias's**
     surface slug until the reveal (§10.9). Give canon-distinct **versions** their own
     slug. List unknown names under `## New names`, with a proposed slug that the facts
@@ -127,7 +133,10 @@ deciding what happens next when the happy path forks.
     with the error as an erratum, the fan consensus, or a separate package.
   - **Validate:** points against the ruler, sources against the registry, slugs against
     the roster, and that `True from` is not later than `As of`. Carry `True from` through
-    unchanged. Invalid rows go to `## Unresolved conflicts`.
+    unchanged. Check dates against the calendar and for chronology contradictions
+    (§4.13). Invalid rows go to `## Unresolved conflicts`. A human settles a
+    contradiction by correcting the row or accepting it, with the source's citation;
+    the merger then writes the acceptance in the target's `## Accepted` table.
   - **Roster target:** accept `New names` that are unambiguous; record a proposed slug
     that duplicates an existing character as an alias of the existing slug, so that the
     other mergers map it.
@@ -204,6 +213,10 @@ Three modes. The workflow step selects one.
     breaks later plotting.
   - Build factions as engines of conflict; give recurring locations a sensory signature
     and a dramatic function.
+  - **Ruler:** write the `## Dates` table from what the source states, and from the
+    extraction records' `date` fields when F0 re-runs (§13.6). **Inventor:** in a world
+    with a calendar, date its past in `history.md`, and date the eras of its ruler, if
+    it has one (§4.13).
   - **Curator:** do not invent. Log divergences and their consequences in
     `divergences.md` (§6.4) when planned during foundation, or when the showrunner or a
     human accepts an emergent one. Mark consequences absorbed when the chronicler or
@@ -332,7 +345,10 @@ snapshot, and the reviewers can rely on them.
 - **Duties:** flag **manuscript vs. bible**, **manuscript vs. manuscript**, and
   **drift** (spelling or terminology); for LitRPG, check the game-state invariants
   (§9.2); rank by severity (a reader-breaking contradiction outranks a minor slip, which
-  outranks cosmetic drift).
+  outranks cosmetic drift). In a world with a calendar, raise the date warnings of
+  §4.13: events outside a participant's lifetime, ages that the dates rule out, and
+  story events dated before the cutoff's date. Each is the author's to decide, because
+  a flashback or an unreliable narrator can be deliberate.
 - **Guardrails:** internal consistency only (fidelity to the source is the
   canon-keeper's job); report, never rewrite or edit the bible; distinguish a genuine
   contradiction from a deliberate mystery or an unreliable narrator.

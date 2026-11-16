@@ -14,7 +14,7 @@ editing it; and how a team of narrow AI agents reads and writes those files.
 | 1  | [Overview](spec/01-overview.md)                     | Purpose, principles, the golden rule, terms                          |
 | 2  | [Layout](spec/02-layout.md)                         | Layers and stacks, packages, projects; path resolution; versioning   |
 | 3  | [Layers](spec/03-layers.md)                         | The write boundary, and the catalog of every file and its writer     |
-| 4  | [Temporal model](spec/04-temporal.md)               | The ruler, ruler points, append-only state histories                 |
+| 4  | [Temporal model](spec/04-temporal.md)               | The ruler, ruler points, append-only state histories, in-world dates |
 | 5  | [Sources](spec/05-sources.md)                       | The source registry, tiers, resolution across layers                 |
 | 6  | [Divergence](spec/06-divergence.md)                 | Adherence settings, the divergence ledger, classifications           |
 | 7  | [Snapshot](spec/07-snapshot.md)                     | The query: what is true as of X, in stack S; the composed bible      |
@@ -49,7 +49,7 @@ agree. It validates every example manifest against the JSON schemas, then runs a
 reference implementation of the snapshot algorithm (§7) and compares each result with
 the expected answers in [examples/README.md](examples/README.md). It covers ruler-point
 parsing and ordering (§4.2), sync points and the project order (§6.7–6.8), branch and
-retelling modes (§6.6), and hidden truths (§4.4, §6.12).
+retelling modes (§6.6), hidden truths (§4.4, §6.12), and in-world dates (§4.13).
 
 ```
 pip install -r tools/requirements.txt

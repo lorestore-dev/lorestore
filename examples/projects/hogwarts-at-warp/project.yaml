@@ -6,9 +6,9 @@ gates: milestones
 seed: "A Hogwarts sixth-year stows away on the Enterprise-D, and her wand is the one thing the ship's sensors cannot see."
 
 layers:                         # from the base up
-  - harry-potter@3.0.0
-  - star-trek@2.0.0
-  - universe:wizards-and-warp@2.0.0
+  - harry-potter@3.1.0
+  - star-trek@2.1.0
+  - universe:wizards-and-warp@2.0.1
 
 setting:
   type: established

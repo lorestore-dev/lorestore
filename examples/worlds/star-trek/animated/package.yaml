@@ -2,7 +2,7 @@ spec_version: "0.2"
 id: star-trek/animated
 kind: official
 name: "Star Trek: The Animated Series"
-version: 1.0.0
+version: 1.0.1
 status: open-for-extraction
 relies-on:
-  - star-trek@2.0.0
+  - star-trek@2.1.0

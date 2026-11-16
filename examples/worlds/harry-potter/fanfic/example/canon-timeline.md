@@ -12,3 +12,8 @@ The fan work is set after the books end, so it inserts its own work after
 | Segment | After | Title                    | Children | Notes                     |
 | ------- | ----- | ------------------------ | -------- | ------------------------- |
 | FIC     | DH    | The placeholder fan work | 24       | Set after the books end   |
+
+## Dates
+| Node | Date   | Notes                      |
+| ---- | ------ | -------------------------- |
+| FIC  | 1998.. | Begins after the last book |

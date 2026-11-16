@@ -2,9 +2,9 @@ spec_version: "0.2"
 id: wizards-and-warp
 kind: universe
 name: "Wizards and Warp"
-version: 2.0.0
+version: 2.0.1
 relies-on:
-  - harry-potter@3.0.0
-  - star-trek@2.0.0
+  - harry-potter@3.1.0
+  - star-trek@2.1.0
 offsets: { harry-potter: "+373y", star-trek: "+0y" }
 bridge: bridge.md

@@ -41,6 +41,7 @@ this chapter requires front matter, its keys are listed.
 | source      | a source id registered in the row's own package's `sources.md` (§5.1), or a reserved id |
 | citation    | free text that locates the evidence, for example `PS ch.6` or `TNG "Q Who"` |
 | chapter     | a manuscript chapter id, `chapter-<NN>`                                     |
+| date        | an in-world date in the stack's calendar, such as `1991-07-31`, `..1991`, or `~1975` (§4.13) |
 
 ## 10.1 `project.yaml`
 
@@ -59,9 +60,9 @@ parameters:
   target_length: 90000          # words
 
 layers:                         # from the base up; absent or empty = self-contained
-  - harry-potter@3.0.0
-  - harry-potter/fanon@1.0.0
-  - harry-potter/fanfic/example@1.1.0
+  - harry-potter@3.1.0
+  - harry-potter/fanon@1.0.1
+  - harry-potter/fanfic/example@1.2.0
 resolution: recency             # precedence (default) | recency | fill
 
 setting:
@@ -87,7 +88,9 @@ modules:
   (the base's, or the series ruler, §4.12), inserted segments included, each once
   (§6.8). Absent means the ruler's order. An original setting has no layers (§6.1), and
   `fidelity`, `fidelity_notes`, `follow`, `divergence_point`, `cutoff`, and `order`, and
-  their universe maps, are invalid in it (§4.7).
+  their universe maps, are invalid in it (§4.7). An original project MAY declare
+`calendar` and `notation` (§4.13), at the top level, as a base does (§10.2). They are
+invalid in an established project, which dates in its stack's calendar.
 
 A serial project (`workflow: serial`) MAY add:
 
@@ -121,7 +124,7 @@ name: "Harry Potter fanon"
 version: 1.0.0
 status: open-for-extraction     # open-for-extraction | locked
 relies-on:                      # pinned; empty for a base package
-  - harry-potter@3.0.0
+  - harry-potter@3.1.0
 ```
 
 - `id` MUST match the package's folder (§2.3). A `base` package's id is the bare fandom
@@ -129,6 +132,13 @@ relies-on:                      # pinned; empty for a base package
 - `relies-on` lists `<package-id>@<version>` pins. Every entry MUST appear below the
   package in any stack that uses it (§2.2).
 - The tiers a package may register depend on its kind (§2.3, §5.2).
+- A `base` package MAY declare its world's calendar (§4.13): `calendar: iso`, with an
+  optional `notation`, or a custom calendar. Both keys are invalid in every other kind.
+
+```yaml
+calendar: iso
+notation: gregory               # optional; a BCP 47 calendar identifier, iso only
+```
 
 ### 10.2.1 `universe.yaml`
 
@@ -238,6 +248,27 @@ A later book in a series begun by a self-contained book (§4.12) has the same tw
 in its own `bible/canon-timeline.md`. Its `After` may also name the work of a project
 layer.
 
+Any `canon-timeline.md` except an adaptation's MAY add a `## Dates` table, which dates
+its own nodes in-world (§4.13), and an `## Accepted` table (§10.5) for the dates that
+contradict their parents on purpose:
+
+```markdown
+## Dates
+| Node | Date       | Notes                                     |
+| ---- | ---------- | ----------------------------------------- |
+| PS   | 1991..1992 |                                           |
+| PS:1 | 1981-11    | The night Harry is left with the Dursleys |
+
+## Accepted
+| Check          | Subject | Reason                                                | Citation |
+| -------------- | ------- | ----------------------------------------------------- | -------- |
+| outside-parent | PS:1    | The first chapter is set ten years before the rest    | PS ch.1  |
+```
+
+- `Node`: a path on one of the file's own works (the base's, or the works the file
+  inserts), with no timecode. A node appears at most once.
+- `Date`: a date (§10.0).
+
 ## 10.5 State histories
 
 **Single-entity files** (a character sheet) hold one table:
@@ -298,6 +329,45 @@ origin: canon          # canon | original | crossover
 | Attribute | Value | As of | Source | Citation |
 ```
 
+**In-world dates** (§4.13). Any state-history table above MAY add an `In-world`
+column, after `True from`: a date (§10.0), on which the fact became true. The optional
+columns come in the order `True from`, `In-world`, `From chapter`, and any of them MAY
+be left out. A row whose attribute is `born`, `died`, or an event's `date` leaves
+`In-world` empty.
+
+**`history.md`** (world history, §4.13) is a multi-entity state history whose entities
+are events:
+
+```markdown
+## State history
+| Entity               | Attribute    | Value                                          | As of | Source | Citation |
+| -------------------- | ------------ | ---------------------------------------------- | ----- | ------ | -------- |
+| grindelwald-defeated | date         | 1945                                           | PS:6  | books  | PS ch.6  |
+| grindelwald-defeated | summary      | Dumbledore defeats the dark wizard Grindelwald | PS:6  | books  | PS ch.6  |
+| grindelwald-defeated | participants | albus-dumbledore; gellert-grindelwald          | PS:6  | books  | PS ch.6  |
+```
+
+`Entity` is an event id (§10.0). Every event MUST have a `date` row; `date`, `summary`,
+and `participants` (slugs) are reserved, and other attributes are free.
+
+**`## Accepted`** excuses a chronology contradiction that the story means (§4.13). It
+MAY follow the table it excuses, in `canon-timeline.md` or in any state-history file:
+
+```markdown
+## Accepted
+| Check     | Subject | Reason                                           | Citation |
+| --------- | ------- | ------------------------------------------------ | -------- |
+| born-died | born    | Born in 2051, she travels back and dies in 1990  | EP:4     |
+```
+
+- `Check`: `outside-parent`, `in-world-after`, or `born-died`.
+- `Subject`: for `outside-parent`, the node. Otherwise the row's key: its attribute in
+  a single-entity file, or `<entity>.<attribute>` in a multi-entity one (the `born`
+  attribute, for `born-died`).
+- `Reason`: free text, required.
+- `Citation`: required in a package, where the acceptance records what the source does.
+  In a project, it MAY be empty.
+
 An original character (`origin: original`) uses project-defined sources. Its rows MAY
 leave `As of` empty, and use `Source: project`.
 
@@ -351,7 +421,9 @@ text: texts/ps/ch06.md
 - `Entity`: the slug or entity id (empty for a single-entity target).
 - `Change`: `new`, `change`, or `confirm`.
 - `True from` (optional): when the fact became true, if the passage reveals backstory
-  (§4.4).
+  (§4.4). An `In-world` column (optional) MAY follow it, with the date (§4.13).
+- The front matter MAY add `date`: the in-world date of the unit, if the source gives
+  it, for the ruler's `## Dates` (§13.6).
 - `Rank`: 1 (most important) to 5.
 
 ## 10.7 `sources.md`
@@ -582,7 +654,8 @@ source `bridge`. `As of` in crossover canon is a ruler point qualified by world
 ```
 
 Rows are in manuscript order. `Story time` is free text (an in-world date or "three
-days later"). `Entities` lists the slugs involved.
+days later"). `Entities` lists the slugs involved. In a stack with a calendar, a `Date`
+column MAY follow `Story time`, holding the event's date (§4.13) when it is known.
 
 ## 10.16 `timelines.md` and `branches.md` (frames)
 

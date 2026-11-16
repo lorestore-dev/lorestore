@@ -102,6 +102,14 @@ is defined.
 | A Seam conflicts row whose item matches no item of an earlier book, a decision that does not fit its item, `other` with no note, or `keep-earlier` or `other` with no divergence | §10.8 |
 | A chapter uses an earlier book's item that is ahead of it, with no seam decision | §6.14 |
 | A row's `True from` is later than its `As of`, or not a valid ruler point        | §4.4      |
+| A calendar that breaks §4.13 (no era, an era counting down that is not first or is last, an era counting up with no `years` that is not last, a month of no days), or a `calendar` or `notation` in a package that is not a base or a project that is not original, or a `notation` with a custom calendar | §4.13 |
+| A date that does not parse, or names an era, month, or day its calendar lacks, or a range whose first date is after its second | §4.13 |
+| A date in `## Dates`, `In-world`, or a timeline `Date` where the stack has no calendar | §4.13 |
+| A `## Dates` node that is not on the file's own works, or appears twice; or a `## Dates` table in an adaptation | §10.4 |
+| An event in `history.md` with no `date` row                                      | §4.13     |
+| A chronology contradiction (`outside-parent`, `in-world-after`, `born-died`) with no `## Accepted` row for it in a layer that holds one of its rows or nodes | §4.13 |
+| An `## Accepted` row with an unknown check, a subject the file does not hold, no reason, or, in a package, no citation | §10.5 |
+| A universe offset between bases that do not declare the same calendar, or in a unit the calendar lacks | §8.1 |
 | A story-dated row (`From chapter`) that has an `As of`, cites a source other than `project`, or describes an entity the project does not define | §4.11 |
 | A Hidden canon decision of `reveal-early` with no divergence, or `other` with no note | §10.8 |
 | A divergence's `Basis` cites a theory not in the stack, an unknown claim, or a discarded claim, or omits a kept or adapted one | §6.13 |
@@ -124,7 +132,8 @@ A host SHOULD also warn when a project used as a layer changes at or before its 
 chapter (§2.2), when the composed bible or a materialized snapshot is
 stale (§7.6), when a project's sync points go backwards
 (§6.7), when a scene with no travelers is set later than its chapter's sync point
-(§7.5), when timecodes in one episode or film
+(§7.5), when a story event's date falls outside the lifetime of an entity it lists, or
+before its chapter's cutoff date (§4.13), when timecodes in one episode or film
 contradict its scene order (§4.2), when a table has an added column that `index.md`
 does not register (§10.0), and when the author releases a serial chapter that is not
 ready, or sends one to early access that is not `line-edited` (§13.3, §13.9).

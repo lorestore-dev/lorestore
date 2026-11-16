@@ -10,7 +10,7 @@ parameters:
   target_length: 120000
 
 layers:                         # from the base up
-  - harry-potter@3.0.0
+  - harry-potter@3.1.0
 
 setting:
   type: established

@@ -4,7 +4,8 @@ Validates the example workspace in examples/ against the JSON schemas, and runs 
 reference implementation of layer stacks (§2.2), the snapshot algorithm (§7), canon
 points and adaptation timecodes (§4.2, §4.9), sync points and the project order
 (§6.7-6.8), branch and retelling modes (§6.6), hidden truths (§4.4, §6.12), theory
-conflicts (§6.13), and chapter statuses (§10.18), comparing each result with the
+conflicts (§6.13), in-world dates and world history (§4.13), and chapter statuses
+(§10.18), comparing each result with the
 expected answers in examples/README.md.
 
 Usage:
@@ -58,7 +59,7 @@ bad = pyaml("hogwarts-at-warp"); bad["setting"]["cutoff"] = "HBP:7"
 check("schema rejects cutoff beside a universe layer", schema("project").is_valid(bad), False)
 bad = pyaml("two-witnesses"); bad["setting"]["cutoffs"] = {"harry-potter": "GoF:37"}
 check("schema rejects cutoffs without a universe layer", schema("project").is_valid(bad), False)
-for ref, ok in [("harry-potter@3.0.0", True), ("harry-potter/fanfic/example@1.1.0", True), ("universe:wizards-and-warp@2.0.0", True),
+for ref, ok in [("harry-potter@3.1.0", True), ("harry-potter/fanfic/example@1.2.0", True), ("universe:wizards-and-warp@2.0.1", True),
                 ("project:two-witnesses@chapter-02", True), ("harry-potter", False), ("project:two-witnesses@1.0.0", False),
                 ("harry-potter/a/b/c@1.0.0", False), ("fanon-hp@latest", False)]:
     d = pyaml("blind-harry"); d["layers"] = [ref]
@@ -68,7 +69,7 @@ d = pyaml("two-witnesses"); d["resolution"] = "newest"; check("schema rejects un
 d = pyaml("two-witnesses"); d["setting"]["active_profile"] = "enhanced"; check("schema rejects 0.1 active_profile", schema("project").is_valid(d), False)
 d = load(EX/"worlds/harry-potter/fanon/package.yaml"); d["relies-on"] = []
 check("schema non-base package must rely on something", schema("package").is_valid(d), False)
-d = load(EX/"worlds/harry-potter/base/package.yaml"); d["relies-on"] = ["star-trek@2.0.0"]
+d = load(EX/"worlds/harry-potter/base/package.yaml"); d["relies-on"] = ["star-trek@2.1.0"]
 check("schema base package relies on nothing", schema("package").is_valid(d), False)
 d = load(EX/"worlds/harry-potter/fanfic/example/package.yaml"); d["id"] = "harry-potter/example"
 check("schema fanfic id under <fandom>/fanfic/", schema("package").is_valid(d), False)
@@ -113,7 +114,8 @@ def entity_rows(d, entity):
     f = d/"characters"/f"{entity}.md"
     out = table(f, "## State history") if f.exists() else []
     if (d/"relationships.md").exists(): out += [r for r in table(d/"relationships.md", "## State history") if r["Pair"] == entity]
-    if (d/"species.md").exists(): out += [r for r in table(d/"species.md", "## State history") if r["Entity"] == entity]
+    for multi in ("species.md", "history.md"):
+        if (d/multi).exists(): out += [r for r in table(d/multi, "## State history") if r["Entity"] == entity]
     if (d/"knowledge.md").exists():
         out += [dict(r, Attribute=r["Secret"], Value=r["State"]) for r in table(d/"knowledge.md", "## Knowledge") if r["Character"] == entity]
     return out
@@ -528,12 +530,12 @@ def hidden(stack, entity, cutoff, base=None):
     return {r["Attribute"] for r in stack.layer_rows(entity, base) if r.get("True from")
             and ruler.cmp(r["True from"], cutoff) <= 0 < ruler.cmp(r["As of"], cutoff)}
 
-PURIST  = Stack(["harry-potter@3.0.0"])
-ENRICH  = Stack(["harry-potter@3.0.0", "harry-potter/fanon@1.0.0", "harry-potter/fanfic/example@1.1.0"])
+PURIST  = Stack(["harry-potter@3.1.0"])
+ENRICH  = Stack(["harry-potter@3.1.0", "harry-potter/fanon@1.0.1", "harry-potter/fanfic/example@1.2.0"])
 ENHANCE = Stack(ENRICH.refs, "recency")
 FILL    = Stack(ENRICH.refs, "fill")
-TREK    = Stack(["star-trek@2.0.0"])
-TAS     = Stack(["star-trek@2.0.0", "star-trek/animated@1.0.0"])
+TREK    = Stack(["star-trek@2.1.0"])
+TAS     = Stack(["star-trek@2.1.0", "star-trek/animated@1.0.1"])
 HP, ST = PURIST.ruler(), TREK.ruler()
 g = lambda s, e, c, a, **k: snapshot(s, e, c, **k).get(a)
 
@@ -553,7 +555,7 @@ check("3 broom fill PS:10: the base has a row, so it stands", g(FILL, "harry-pot
 check("3 broom fill PoA:10: the base's (unset) stands", g(FILL, "harry-potter", "PoA:10", "broom"), None)
 check("3 broom fill PoA:11", g(FILL, "harry-potter", "PoA:11", "broom"), "Firebolt")
 check("3 glasses fill: canon's round stands", g(FILL, "harry-potter", "GoF:37", "glasses"), "round")
-FILMS = Stack(["harry-potter@3.0.0", "harry-potter/films@1.0.0"])
+FILMS = Stack(["harry-potter@3.1.0", "harry-potter/films@1.0.1"])
 check("3 quote: the books give the line to Ron", quote(PURIST, "harry-potter", "q1", "GoF:1"), "ron-weasley")
 check("3 quote: precedence with the films gives it to Hermione", quote(FILMS, "harry-potter", "q1", "GoF:1"), "hermione-granger")
 check("3 quote: recency, same point, the higher layer", quote(Stack(FILMS.refs, "recency"), "harry-potter", "q1", "GoF:1"), "hermione-granger")
@@ -598,8 +600,8 @@ check("12 universe stack has two bases", sorted(HW.bases), ["harry-potter", "sta
 check("12 harry broom", g(HW, "harry-potter", None, "broom", base="harry-potter"), "Firebolt")
 check("12 picard", g(HW, "jean-luc-picard", None, "status", base="star-trek"), "captain of the USS Enterprise-D")
 check("12 each base has its own ruler", (HW.ruler("harry-potter").base.id, HW.ruler("star-trek").base.id), ("harry-potter", "star-trek"))
-raises("12 two bases without a universe rejected", lambda: Stack(["harry-potter@3.0.0", "star-trek@2.0.0"]), StackError)
-raises("12 universe below its bases rejected", lambda: Stack(["universe:wizards-and-warp@2.0.0", "harry-potter@3.0.0", "star-trek@2.0.0"]), StackError)
+raises("12 two bases without a universe rejected", lambda: Stack(["harry-potter@3.1.0", "star-trek@2.1.0"]), StackError)
+raises("12 universe below its bases rejected", lambda: Stack(["universe:wizards-and-warp@2.0.1", "harry-potter@3.1.0", "star-trek@2.1.0"]), StackError)
 u = load(EX/"universes/wizards-and-warp/universe.yaml")
 check("V universe pins", sorted(u["relies-on"]), sorted(f"{b}@{Package(b).cfg['version']}" for b in ["harry-potter", "star-trek"]))
 check("V universe offsets name its bases", set(u["offsets"]) <= {d.split("@")[0] for d in u["relies-on"]}, True)
@@ -636,7 +638,7 @@ check("I spock without the package: no pet (a source leak if used)", g(TREK, "sp
 check("I animated is an official package of secondary-official sources", (Package("star-trek/animated").kind, set(Package("star-trek/animated").sources.values())), ("official", {"secondary-official"}))
 
 # --- adaptation timecodes (§4.9) ---------------------------------------------------
-FILMS = Stack(["harry-potter@3.0.0", "harry-potter/films@1.0.0"]); HF = FILMS.ruler()
+FILMS = Stack(["harry-potter@3.1.0", "harry-potter/films@1.0.1"]); HF = FILMS.ruler()
 for pt, want in [("PS:6:2+00:41:10", True), ("PS:6+00:41:10", True), ("PS+00:41:10", False), ("CoS:1+00:01:00", False), ("PS:6:2", True)]:
     check(f"A valid with films {pt}", isvalid(HF, pt), want)
 check("A timecode needs the films layer", isvalid(HP, "PS:6:2+00:41:10"), False)
@@ -701,7 +703,7 @@ def inversion_candidates(stack):
     return sorted((e, name(b), name(a)) for e, m in by.items() for a, b in swapped if a in m and b in m)
 IC = inversion_candidates(SYT)
 check("T inversion candidates: entities with rows on both sides of a swap", IC,
-      [("cedric-diggory", "GoF", "PoA"), ("harry-potter", "GoF", "PoA"), ("harry-potter+sirius-black", "GoF", "PoA")])
+      [("cedric-diggory", "GoF", "PoA"), ("harry-potter", "GoF", "CoS"), ("harry-potter", "GoF", "PoA"), ("harry-potter+sirius-black", "GoF", "PoA")])
 review = table(EX/f"projects/{R}/reviews/canon.md", "## Inversion candidates")
 check("T every inversion candidate is addressed in the order audit", sorted(r["Candidate"] for r in review), sorted(f"{e} ({b}, {a})" for e, a, b in IC))
 check("T the Firebolt candidate became I4, covered by D4", any(d["ID"] == "D4" and "I4" in d["This story changes it to"] for d in table(EX/f"projects/{R}/bible/divergences.md", "## Divergences")), True)
@@ -880,7 +882,7 @@ def extensions_ok(stack):
         seen[p.id] = {r["Slug"] for r in p.roster()}
     return True
 check("V extension sheets extend a lower layer", extensions_ok(ENRICH), True)
-raises("V fanon below its base rejected", lambda: Stack(["harry-potter/fanon@1.0.0", "harry-potter@3.0.0"]), StackError)
+raises("V fanon below its base rejected", lambda: Stack(["harry-potter/fanon@1.0.1", "harry-potter@3.1.0"]), StackError)
 raises("V wrong package pin rejected", lambda: Stack(["harry-potter@2.1.0"]), StackError)
 
 # --- packages: kinds, ids, sources, points ------------------------------------------
@@ -988,7 +990,7 @@ check("SR inserts before and after book 1", [LR.cmp("youth", "lantern-road:1"), 
 check("SR the inserts are only on the later book's ruler", isvalid(Stack(["project:lantern-road@chapter-12"]).ruler(), "youth"), False)
 check("SR a self-contained stack has no ruler of its own", raises_ok(lambda: Stack.of("lantern-road").ruler(), StackError), True)
 check("SE prequel side: book 1's starting state carried back", snapshot(LRB, "ines-varga", position="chapter-01"),
-      {"eyes": "grey", "role": "apprentice lamplighter"})
+      {"eyes": "grey", "role": "apprentice lamplighter", "born": "NR 12-02-14"})
 check("SE prequel side: what happens in book 1 has not happened yet", seams(LRB, "ines-varga", position="chapter-01"), set())
 check("SE sequel side: book 1's chapter 9 holds", snapshot(LRB, "ines-varga", position="chapter-06")["role"], "master lamplighter")
 check("SE sequel side raises nothing", seams(LRB, "ines-varga", position="chapter-06"), set())
@@ -1037,11 +1039,11 @@ def branch_ok(setting, layers):
         if q.get("follow") == "branch" and (setting.get("follow") != "branch" or r.cmp(setting["divergence_point"], q["divergence_point"]) > 0): return False
     return True
 check("SE every project keeps its layers' branches", all(branch_ok(pyaml(p)["setting"], pyaml(p).get("layers", [])) for p in PROJECTS), True)
-NH = ["harry-potter@3.0.0", "project:no-horcruxes@chapter-01"]
+NH = ["harry-potter@3.1.0", "project:no-horcruxes@chapter-01"]
 check("SE a retelling sequel to a branch is rejected", branch_ok({"cutoff": "CoS:1"}, NH), False)
 check("SE a branch sequel diverging later is rejected", branch_ok({"follow": "branch", "divergence_point": "CoS:1"}, NH), False)
 check("SE a branch sequel diverging no later is accepted", branch_ok({"follow": "branch", "divergence_point": "PS:17"}, NH), True)
-INH = Stack(["harry-potter@3.0.0", "project:second-year-tournament@chapter-03"])
+INH = Stack(["harry-potter@3.1.0", "project:second-year-tournament@chapter-03"])
 check("SE the order is inherited from a project layer", (INH.order() == pyaml("second-year-tournament")["setting"]["order"], INH.ruler().cmp("GoF:1", "CoS:1")), (True, -1))
 check("V seam decisions fit their items", all(r["Decision"] in ({"keep-earlier", "accept", "other"} if ":" not in r["Item"] else {"carry-back", "not-yet", "other"})
       and (r["Decision"] != "other" or r["Note"]) for f in (EX/"projects").glob("*/bible/divergences.md") if has(f, "## Seam conflicts") for r in table(f, "## Seam conflicts")), True)
@@ -1058,7 +1060,7 @@ def promote(project):
             out.append((f.stem, r["Attribute"], r["Value"], r["As of"], r["Source"]))
     return out
 check("P promotion re-cites project rows and dates story-dated ones on the book's work", sorted(promote("lantern-road")),
-      [("ines-varga", "eyes", "grey", "", "lantern-road"), ("ines-varga", "role", "apprentice lamplighter", "", "lantern-road"),
+      [("ines-varga", "born", "NR 12-02-14", "", "lantern-road"), ("ines-varga", "eyes", "grey", "", "lantern-road"), ("ines-varga", "role", "apprentice lamplighter", "", "lantern-road"),
        ("ines-varga", "role", "master lamplighter", "lantern-road:9", "lantern-road")])
 check("P the promoted rows are valid on the series ruler", all(not a or isvalid(LR, a) for *_, a, _ in promote("lantern-road")), True)
 def scene_warnings(project, scenes):
@@ -1107,6 +1109,314 @@ for (f, h), req in REQUIRED.items():
     check(f"C required columns in order {f} {h}", hdr[:len(req)], req)
     check(f"C added columns registered {f} {h}", {(f, h, c) for c in hdr[len(req):]} <= reg, True)
 check("C registry does not repeat a required column", any(c in REQUIRED.get((f, h), []) for f, h, c in reg), False)
+
+# --- in-world time (§4.13) ----------------------------------------------------------
+class Calendar:
+    """A world's calendar: `iso`, or a custom mapping of eras and months. Dates become spans of
+    (year on one line, month, day) tuples; a calendar without months uses (year, 0|1, 0)."""
+    def __init__(self, spec):
+        self.iso = spec == "iso"; self.months = []
+        if self.iso: return
+        eras = spec.get("eras") or []
+        if not eras: raise ValueError("a calendar needs an era")
+        ids = [e["id"] for e in eras]
+        if len(set(ids)) != len(ids) or not all(re.fullmatch(r"[A-Z][A-Z0-9]*", i) for i in ids): raise ValueError("era ids")
+        self.eras, start = {}, 1
+        for i, e in enumerate(eras):
+            if e.get("counts") == "down":
+                if i != 0 or len(eras) == 1 or "years" in e: raise ValueError("only a first era, followed by another, counts down")
+                self.eras[e["id"]] = ("down", 0)
+            else:
+                if i < len(eras) - 1 and not e.get("years"): raise ValueError(f"era {e['id']} needs years")
+                self.eras[e["id"]] = ("up", start); start += e.get("years", 0)
+        self.months = [m["days"] for m in spec.get("months", [])]
+        if any(d < 1 for d in self.months): raise ValueError("a month of no days")
+    def days(self, y, m):
+        if not self.iso: return self.months[m - 1]
+        if m == 2: return 29 if (y % 4 == 0 and y % 100 != 0) or y % 400 == 0 else 28
+        return 31 if m in (1, 3, 5, 7, 8, 10, 12) else 30
+    def nmonths(self): return 12 if self.iso else len(self.months)
+    def single(self, s):
+        """One date, without range or ~: (start, end) tuples."""
+        if self.iso:
+            m = re.fullmatch(r"(-?[1-9]\d*|0)(?:-(\d{2})(?:-(\d{2}))?)?", s)
+            if not m or m[1] == "-0": raise ValueError(s)
+            y = int(m[1])
+        else:
+            m = re.fullmatch(r"([A-Z][A-Z0-9]*) ([1-9]\d*)(?:-(\d{2})(?:-(\d{2}))?)?", s)
+            if not m or m[1] not in self.eras: raise ValueError(s)
+            kind, start = self.eras[m[1]]; n = int(m[2])
+            y = 1 - n if kind == "down" else start + n - 1
+            m = [None, None, m[3], m[4]]
+        mo, d = m[2], m[3]
+        if not self.nmonths():
+            if mo: raise ValueError(f"{s}: this calendar has no months")
+            return (y, 0, 0), (y, 1, 0)
+        if mo is None: return (y, 1, 1), (y, self.nmonths(), self.days(y, self.nmonths()))
+        mo = int(mo)
+        if not 1 <= mo <= self.nmonths(): raise ValueError(s)
+        if d is None: return (y, mo, 1), (y, mo, self.days(y, mo))
+        d = int(d)
+        if not 1 <= d <= self.days(y, mo): raise ValueError(s)
+        return (y, mo, d), (y, mo, d)
+    def parse(self, s):
+        """A date (§4.13): (start or None, end or None, approximate)."""
+        if s.startswith("~"):
+            lo, hi = self.single(s[1:]); return lo, hi, True
+        if ".." in s:
+            a, b = s.split("..", 1)
+            if not a and not b: raise ValueError(s)
+            lo = self.single(a)[0] if a else None; hi = self.single(b)[1] if b else None
+            if lo and hi and lo > hi: raise ValueError(f"{s}: reversed")
+            return lo, hi, False
+        lo, hi = self.single(s); return lo, hi, False
+
+def dcmp(a, b):
+    """-1 before, 1 after, None can't tell (§4.13)."""
+    if a[2] or b[2]: return None
+    if a[1] is not None and b[0] is not None and a[1] < b[0]: return -1
+    if a[0] is not None and b[1] is not None and a[0] > b[1]: return 1
+    return None
+def dkey(a): return (0,) if a[0] is None else (1, *a[0])
+def shift(a, years): return tuple(None if t is None else (t[0] + years, *t[1:]) for t in a[:2]) + (a[2],)
+def age(born, on):
+    """The range of ages, in whole years, from one date to another (§4.13)."""
+    def whole(b, d): return d[0] - b[0] - ((d[1], d[2]) < (b[1], b[2]))
+    return whole(born[1], on[0]), whole(born[0], on[1])
+
+def calendar_of(stack, base=None):
+    """The stack's calendar: its base's, else the original project at the root of its series (§4.13)."""
+    if stack.bases: spec = (stack.bases[base] if base else next(iter(stack.bases.values()))).cfg.get("calendar")
+    else:
+        roots = [p for p, _ in stack.ledgers() if not Stack.of(p).refs] or [stack.project]
+        spec = pyaml(roots[0]).get("calendar")
+    return Calendar(spec) if spec else None
+
+def ruler_files(stack, base=None):
+    """(layer, canon-timeline) pairs whose ## Dates the stack reads: the base's and the inserting packages'."""
+    b = stack.bases[base] if base else next(iter(stack.bases.values()))
+    return [(p.id, p.dir/"canon-timeline.md") for _, p in stack.packages
+            if p.base == b.id and p.kind in ("base", "official", "fanfic") and has(p.dir/"canon-timeline.md", "## Dates")]
+
+def node_dates(stack, base=None):
+    cal = calendar_of(stack, base); out = {}
+    for layer, f in ruler_files(stack, base):
+        for r in table(f, "## Dates"):
+            node = Ruler.split(r["Node"])
+            if node in out: raise ValueError(f"{r['Node']} dated twice")
+            out[node] = (cal.parse(r["Date"]), layer)
+    return out
+
+def point_date(stack, pt, base=None):
+    """The date of the deepest dated node containing a point, if any (§4.13)."""
+    if not pt: return None
+    path = stack.ruler(base, ordered=False).parse(pt)[0]; dates = node_dates(stack, base)
+    for n in range(len(path), 0, -1):
+        if path[:n] in dates: return dates[path[:n]][0]
+    return None
+
+def accepted(f):
+    return [(r["Check"], r["Subject"], r) for r in table(f, "## Accepted")] if has(f, "## Accepted") else []
+
+STATE_FILES = ("relationships.md", "species.md", "history.md")
+def state_tables(d):
+    """(file, key column or None, rows) for each state-history table in a bible directory."""
+    out = [(f, None, table(f, "## State history")) for f in sorted((d/"characters").glob("[!_]*.md"))] if (d/"characters").exists() else []
+    for name in STATE_FILES:
+        f = d/name
+        if f.exists(): out.append((f, "Pair" if name == "relationships.md" else "Entity", table(f, "## State history")))
+    return out
+
+def contradictions(stack, base=None, extra=()):
+    """Chronology contradictions in a stack's packages (§4.13), less those an `## Accepted` row
+    excuses in a layer that holds one of their rows or nodes. `extra`: (layer, dir) to add."""
+    cal = calendar_of(stack, base); found, acc = [], set()
+    layers = [(p.id, p.dir) for _, p in stack.packages if p.base == (base or next(iter(stack.bases)))] + list(extra)
+    dates = node_dates(stack, base)
+    for layer, f in ruler_files(stack, base):                    # outside-parent
+        acc |= {(c, s, layer) for c, s, _ in accepted(f)}
+        for r in table(f, "## Dates"):
+            node = Ruler.split(r["Node"])
+            for n in range(len(node) - 1, 0, -1):
+                if node[:n] in dates:
+                    if dcmp(dates[node][0], dates[node[:n]][0]) is not None:
+                        found.append(("outside-parent", r["Node"], {layer, dates[node[:n]][1]}))
+                    break
+    born, died = {}, {}
+    for layer, d in layers:
+        for f, key, rows in state_tables(d):
+            acc |= {(c, s, layer) for c, s, _ in accepted(f)}
+            for r in rows:
+                subj = r["Attribute"] if key is None else f"{r[key]}.{r['Attribute']}"
+                ent = f.stem if key is None else r[key]
+                if r["Attribute"] in ("born", "died") and r["Value"] != "(unset)":
+                    (born if r["Attribute"] == "born" else died).setdefault(ent, []).append((cal.parse(r["Value"]), layer, subj.rsplit(".", 1)[0] + ".born" if key else "born"))
+                when = r["Value"] if (r["Attribute"] == "date" and f.name == "history.md") else r.get("In-world")
+                if not when: continue
+                for pt in {r.get("True from") or r["As of"], r["As of"]} - {""}:
+                    pd = point_date(stack, pt, base)
+                    if pd and dcmp(cal.parse(when), pd) == 1: found.append(("in-world-after", subj, {layer}))
+    for ent in born:
+        for b, lb, subj in born[ent]:
+            for dd, ld, _ in died.get(ent, []):
+                if dcmp(b, dd) == 1: found.append(("born-died", subj, {lb, ld}))
+    return sorted({(c, s) for c, s, ls in found if not any((c, s, l) in acc for l in ls)})
+
+def chronology(stack, cutoff, base=None):
+    """The events that resolve at a cutoff, sorted by date (§4.13)."""
+    cal = calendar_of(stack, base); events = []
+    for _, p in stack.packages:
+        f = p.dir/"history.md"
+        if f.exists(): events += [r["Entity"] for r in table(f, "## State history")]
+    out = []
+    for e in dict.fromkeys(events):
+        s = snapshot(stack, e, cutoff, base=base)
+        if "date" in s: out.append((dkey(cal.parse(s["date"])), len(out), e))
+    return [e for *_, e in sorted(out)]
+
+ISO = Calendar("iso"); LRC = calendar_of(Stack.of("lantern-road"))
+P = ISO.parse
+for s, ok in [("1991", True), ("1991-07-31", True), ("-43", True), ("991", True), ("0991", False), ("-0", False), ("1991-02-29", False),
+              ("1992-02-29", True), ("1900-02-29", False), ("2000-02-29", True), ("1991-13", False), ("..1991", True), ("1998..", True),
+              ("1971..1978", True), ("1978..1971", False), ("~1975", True), ("~1971..1978", False), ("..", False), ("NR 12", False)]:
+    check(f"D iso date {s!r} {'valid' if ok else 'invalid'}", not raises_ok(lambda: P(s), ValueError), ok)
+for s, ok in [("NR 12", True), ("NR 12-02-14", True), ("NR 12-05", False), ("NR 12-02-93", False), ("BL 5..OR 3", True), ("XX 5", False), ("NR 0", False), ("1991", False)]:
+    check(f"D custom date {s!r} {'valid' if ok else 'invalid'}", not raises_ok(lambda: LRC.parse(s), ValueError), ok)
+check("D 1991 vs 1991-09-01: can't tell", dcmp(P("1991"), P("1991-09-01")), None)
+check("D 1990 before 1991-09-01", dcmp(P("1990"), P("1991-09-01")), -1)
+check("D ..1991 before 1998..", dcmp(P("..1991"), P("1998..")), -1)
+check("D ..1991 vs 1985: can't tell", dcmp(P("..1991"), P("1985")), None)
+check("D ~1975 vs 2000: can't tell, approximate", dcmp(P("~1975"), P("2000")), None)
+check("D ~1975 sorts at 1975", sorted(["2000", "~1975", "1980"], key=lambda s: dkey(P(s))), ["~1975", "1980", "2000"])
+check("D eras: BL 2 and OR 5 are six years apart", LRC.parse("OR 5")[0][0] - LRC.parse("BL 2")[0][0], 6)
+check("D eras: OR 300 is the year before NR 1", LRC.parse("NR 1")[0][0] - LRC.parse("OR 300")[0][0], 1)
+check("D eras: BL 1 is just before OR 1", (dcmp(LRC.parse("BL 1"), LRC.parse("OR 1")), LRC.parse("OR 1")[0][0] - LRC.parse("BL 1")[0][0]), (-1, 1))
+check("D age: born 1980-07-31, in 1991", age(P("1980-07-31"), P("1991")), (10, 11))
+check("D age: on 1991-07-31 exactly", age(P("1980-07-31"), P("1991-07-31")), (11, 11))
+check("D age in a custom calendar: born NR 12-02-14, in NR 30", age(LRC.parse("NR 12-02-14"), LRC.parse("NR 30")), (17, 18))
+YEARS = Calendar({"eras": [{"id": "AC", "name": "after the Conquest"}]})
+check("D a calendar without months: years only", (raises_ok(lambda: YEARS.parse("AC 298-03"), ValueError), age(YEARS.parse("AC 280"), YEARS.parse("AC 298"))), (True, (17, 18)))
+for label, spec in [("no era", {"eras": []}), ("a down era not first", {"eras": [{"id": "A", "name": "a", "years": 5}, {"id": "B", "name": "b", "counts": "down"}]}),
+                    ("a down era alone", {"eras": [{"id": "B", "name": "b", "counts": "down"}]}), ("an up era with no years, not last", {"eras": [{"id": "A", "name": "a"}, {"id": "B", "name": "b"}]}),
+                    ("a month of no days", {"eras": [{"id": "A", "name": "a"}], "months": [{"name": "m", "days": 0}]}), ("a repeated era id", {"eras": [{"id": "A", "name": "a", "years": 3}, {"id": "A", "name": "b"}]})]:
+    raises(f"D calendar rejected: {label}", lambda: Calendar(spec))
+blocks = re.findall(r"```yaml\n(.*?)```", (ROOT/"spec/04-temporal.md").read_text(), re.S)
+check("D the spec's calendars are valid", [bool(Calendar(yaml.safe_load(b)["calendar"])) for b in blocks], [True, True])
+check("D the example's calendar is the spec's", pyaml("lantern-road")["calendar"], yaml.safe_load(blocks[1])["calendar"])
+
+# schemas: who may declare a calendar
+d = load(EX/"worlds/harry-potter/base/package.yaml"); d["notation"] = "japanese"; check("D schema: a base with iso and a notation", schema("package").is_valid(d), True)
+d["calendar"] = yaml.safe_load(blocks[1])["calendar"]; check("D schema: a notation with a custom calendar rejected", schema("package").is_valid(d), False)
+d = load(EX/"worlds/harry-potter/fanon/package.yaml"); d["calendar"] = "iso"; check("D schema: a fanon package's calendar rejected", schema("package").is_valid(d), False)
+d = pyaml("two-witnesses"); d["calendar"] = "iso"; check("D schema: an established project's calendar rejected", schema("project").is_valid(d), False)
+d = pyaml("lantern-road"); d["notation"] = "gregory"; check("D schema: a notation without iso rejected", schema("project").is_valid(d), False)
+d = pyaml("lantern-road"); d["calendar"] = "gregorian"; check("D schema: an unknown calendar name rejected", schema("project").is_valid(d), False)
+
+# every date in the examples parses in its stack's calendar
+def example_dates(d):
+    out = []
+    for f, key, rows in state_tables(d):
+        for r in rows:
+            if r.get("In-world"): out.append(r["In-world"])
+            if r["Attribute"] in ("born", "died") or (r["Attribute"] == "date" and f.name == "history.md"): out.append(r["Value"])
+    f = d/"canon-timeline.md"
+    if has(f, "## Dates"): out += [r["Date"] for r in table(f, "## Dates")]
+    return out
+for pid, cal in [("harry-potter", ISO), ("harry-potter/fanfic/example", ISO), ("star-trek", ISO)]:
+    check(f"D every date in {pid} parses", all(not raises_ok(lambda: cal.parse(s), ValueError) for s in example_dates(pkg_dir(pid))), True)
+for proj in ["lantern-road", "the-long-way-back"]:
+    cal = calendar_of(Stack.of(proj)); ds = example_dates(EX/"projects"/proj/"bible")
+    check(f"D every date in {proj} parses", (len(ds) > 0, all(not raises_ok(lambda: cal.parse(s), ValueError) for s in ds)), (True, True))
+check("D the calendar is the base's, or the series root's", (calendar_of(PURIST).iso, calendar_of(TREK).iso, calendar_of(Stack.of("lantern-road-before")).iso), (True, True, False))
+
+# the ruler's dates, and the cutoff's date
+check("D the cutoff's date: PS:6", point_date(PURIST, "PS:6"), P("1991-09-01"))
+check("D the deepest dated node: PS:6:2 is PS:6's", point_date(PURIST, "PS:6:2"), P("1991-09-01"))
+check("D PS:7 falls back to PS", point_date(PURIST, "PS:7"), P("1991..1992"))
+check("D GoF:37", point_date(PURIST, "GoF:37"), P("1994..1995"))
+check("D an inserted work is dated by its package: FIC:20", point_date(ENRICH, "FIC:20"), P("1998.."))
+check("D TNG:3:15", point_date(TREK, "TNG:3:15"), P("2366"))
+check("D no dates, no date: a timeless row", point_date(PURIST, ""), None)
+check("D order and date need not agree: PS:1 is ten years before PS:2", (HP.cmp("PS:1", "PS:2"), dcmp(point_date(PURIST, "PS:1"), point_date(PURIST, "PS:2"))), (-1, -1))
+
+# ages
+hb = P(snapshot(PURIST, "harry-potter", "GoF:37")["born"])
+check("D harry's age at PS:5", age(hb, point_date(PURIST, "PS:5")), (11, 11))
+check("D harry's age at PS:2", age(hb, point_date(PURIST, "PS:2")), (10, 10))
+check("D harry's birth year is not known at PS:5", "born" in snapshot(PURIST, "harry-potter", "PS:5"), False)
+TLW = Stack.of("the-long-way-back")
+mb = P(snapshot(TLW, "mira-oduya", "TNG:3:15", position="chapter-03")["born"])
+check("D mira by world dates at TNG:3:15 (a traveler: her own years are fewer)", age(mb, point_date(TLW, "TNG:3:15")), (47, 48))
+
+# world history
+check("D an event is an entity: its date resolves", snapshot(PURIST, "grindelwald-defeated", "PS:6")["date"], "1945")
+check("D an event is visible only from its as-of", snapshot(PURIST, "grindelwald-defeated", "PS:5"), {})
+check("D chronology at PS:5", chronology(PURIST, "PS:5"), ["voldemort-falls"])
+check("D chronology at PS:6, sorted by date", chronology(PURIST, "PS:6"), ["grindelwald-defeated", "voldemort-falls"])
+check("D chronology at CoS:9", chronology(PURIST, "CoS:9"), ["hogwarts-founded", "grindelwald-defeated", "voldemort-falls"])
+hist = table(pkg_dir("harry-potter")/"history.md", "## State history")
+check("D every event has a date row", {r["Entity"] for r in hist} <= {r["Entity"] for r in hist if r["Attribute"] == "date"}, True)
+lr = table(EX/"projects/lantern-road/bible/history.md", "## State history")
+check("D lantern-road's events in its own calendar", [r["Entity"] for r in sorted((r for r in lr if r["Attribute"] == "date"), key=lambda r: dkey(LRC.parse(r["Value"])))], ["lamps-first-lit", "road-rebuilt"])
+def participant_warnings(stack, cutoff, base=None):
+    cal = calendar_of(stack, base); out = []
+    for e in chronology(stack, cutoff, base):
+        s = snapshot(stack, e, cutoff, base=base); when = cal.parse(s["date"])
+        for who in filter(None, s.get("participants", "").split("; ")):
+            w = snapshot(stack, who, cutoff, base=base)
+            if "born" in w and dcmp(when, cal.parse(w["born"])) == -1: out.append((e, who, "before born"))
+            if "died" in w and dcmp(when, cal.parse(w["died"])) == 1: out.append((e, who, "after died"))
+    return out
+check("D no participant warnings in the example", participant_warnings(PURIST, "DH:36"), [])
+
+# chronology contradictions and acceptances
+check("D no unaccepted contradictions: the books", contradictions(PURIST), [])
+check("D no unaccepted contradictions: with fanon and the fan work", contradictions(ENRICH), [])
+check("D no unaccepted contradictions: Star Trek", contradictions(TREK), [])
+check("D DH:33 (..1998) inside DH (1997..1998) can't tell, so no contradiction", dcmp(P("..1998"), P("1997..1998")), None)
+_acc = accepted
+accepted = lambda f: [a for a in _acc(f) if a[1] != "PS:1"]
+check("D without its acceptance, PS:1 is outside PS", contradictions(PURIST), [("outside-parent", "PS:1")])
+accepted = _acc
+import tempfile, shutil
+def scratch_layer(files):
+    d = pathlib.Path(tempfile.mkdtemp()); (d/"characters").mkdir()
+    for name, text in files.items(): (d/name).write_text(text)
+    return d
+HDR = "## State history\n| Attribute | Value | As of | Source | Citation | True from | In-world |\n| - | - | - | - | - | - | - |\n"
+t = scratch_layer({"characters/time-traveller.md": HDR + "| born | 2051 | PS:7 | books | x | | |\n| died | 1990 | PS:7 | books | x | | |\n"})
+check("D born-died: born 2051, died 1990", contradictions(PURIST, extra=[("x", t)]), [("born-died", "born")])
+(t/"characters/time-traveller.md").write_text((t/"characters/time-traveller.md").read_text() + "\n## Accepted\n| Check | Subject | Reason | Citation |\n| - | - | - | - |\n| born-died | born | travels back from 2070 | x |\n")
+check("D born-died accepted by the layer that holds the rows", contradictions(PURIST, extra=[("x", t)]), [])
+u = scratch_layer({"characters/time-traveller.md": "## State history\n| Attribute | Value | As of | Source | Citation |\n| - | - | - | - | - |\n\n## Accepted\n| Check | Subject | Reason | Citation |\n| - | - | - | - |\n| outside-parent | PS:1 | not ours | x |\n"})
+accepted = lambda f: [a for a in _acc(f) if a[1] != "PS:1"] + (_acc(f) if f.parent.parent == u else [])
+check("D a layer cannot accept a contradiction it holds no part of", contradictions(PURIST, extra=[("y", u)]), [("outside-parent", "PS:1")])
+accepted = _acc
+v = scratch_layer({"characters/seer.md": HDR + "| fate | dies in the war | PS:7 | books | x | | 1999 |\n"})
+check("D in-world-after: a fact dated after the point that shows it", contradictions(PURIST, extra=[("x", v)]), [("in-world-after", "fate")])
+w = scratch_layer({"history.md": "## State history\n| Entity | Attribute | Value | As of | Source | Citation |\n| - | - | - | - | - | - |\n| omen | date | 2001 | PS:7 | books | x |\n"})
+check("D in-world-after: an event dated after its as-of", contradictions(PURIST, extra=[("x", w)]), [("in-world-after", "omen.date")])
+for x in (t, u, v, w): shutil.rmtree(x)
+vals = {"outside-parent", "in-world-after", "born-died"}
+for f in [pkg_dir("harry-potter")/"canon-timeline.md"]:
+    check("D acceptances name a known check, a held subject, a reason, and a citation", all(
+        c in vals and s in {r["Node"] for r in table(f, "## Dates")} and r["Reason"] and r["Citation"] for c, s, r in accepted(f)), True)
+
+# universe offsets need the same calendar (§8.1)
+def offsets_ok(universe):
+    cals = [Package(b.split("@")[0]).cfg.get("calendar") for b in universe["relies-on"]]
+    return not universe.get("offsets") or (cals[0] is not None and all(c == cals[0] for c in cals))
+check("D the universe's offsets: both bases are iso", offsets_ok(u_ := load(EX/"universes/wizards-and-warp/universe.yaml")), True)
+_cfg = Package.__init__
+def no_trek_calendar(self, pid):
+    _cfg(self, pid)
+    if pid == "star-trek": self.cfg.pop("calendar", None)
+Package.__init__ = no_trek_calendar
+check("D offsets with a base that has no calendar are invalid", offsets_ok(u_), False)
+Package.__init__ = _cfg
+off = int(u_["offsets"]["harry-potter"][:-1])
+check("D universe time: Harry's first journey to Hogwarts is in 2364", shift(point_date(PURIST, "PS:6"), off), P("2364-09-01"))
+check("D universe time: Grindelwald's defeat comes before TNG season 1", dcmp(shift(P("1945"), off), point_date(TREK, "TNG:1")), -1)
 
 # --- serial buffer and early access (§13.3, §13.9, §10.18) ---------------------------
 STATUS = ["drafted", "line-edited", "final", "early-access", "released"]

@@ -3,7 +3,63 @@
 This log records the design decisions behind the spec, most recent first. Each entry
 says what was unclear or contradictory, what was decided, and where the rule now lives.
 
-## 0.3: reference agents
+## 0.3: in-world time
+
+**D111. Re-pinning to a new minor or patch version is a patch bump.** §2.8 required a
+bump on every change but did not say which one a re-pin is. Adding the calendar to the
+two example bases bumped them to minor versions, so every package relying on them had to
+re-pin. A re-pin to a new major version stays a major bump; any other re-pin is a patch.
+→ §2.8
+
+**D110. Chronology contradictions, and accepting them.** A date can contradict the
+ruler on purpose: a flashback chapter outside its book's years, a prophecy shown before
+its event, a time traveller who dies before being born. Three checks
+(`outside-parent`, `in-world-after`, `born-died`) make a package or project invalid
+unless an `## Accepted` row, in the file that holds the row or node, excuses that check
+on that subject with a reason. A package's acceptance records what the source does and
+cites it; a project's is the author's decision. A layer can accept only a contradiction
+that involves its own rows or nodes. Format errors (a date that does not parse, a date
+with no calendar, an event with no date, an offset across calendars) can never be
+accepted. Story-level problems (an event outside a participant's lifetime, an age the
+dates rule out, an event before the cutoff's date) are warnings the continuity-editor
+raises. → §1.6, §4.13, §10.5, §12.4, §12.12, §14.2
+
+**D109. World history is a file of events, and events are entities.** Backstory and
+off-page events had nowhere structured to go. `history.md` is a multi-entity state
+history whose entities are events, with the reserved attributes `date` (required),
+`summary`, and `participants`. Treating events as entities rather than giving them a
+table of their own reuses visibility by `As of`, hidden truths, layering, resolution
+modes, and the ledger unchanged; the chronology is a view, sorted by date. A universe's
+chronology merges its bases' histories in universe time. → §2.7, §3.3, §4.13, §8.1,
+§10.5
+
+**D108. Where dates are recorded.** Four optional places: a `## Dates` table in
+`canon-timeline.md`, sparse and never interpolated, written by whoever owns the works it
+dates; an `In-world` column on state-history rows; the date-valued attributes `born`,
+`died`, and an event's `date`; and a `Date` column in `timeline.md`. `True from` stays a
+ruler point, because the snapshot compares it with the cutoff to find hidden truths
+(§7.2), and a sparse `## Dates` table could not always turn a cutoff into a date. The
+snapshot returns the cutoff's date. → §4.4, §4.13, §7.2, §10.4, §10.5, §10.6, §10.15,
+§12.3, §12.7, §13.6
+
+**D107. Dates are spans, and comparisons can't always tell.** Canon rarely gives an
+exact day. A date is a span: a year, a month, a day, a range with optional open ends, or
+an approximate `~` date. One date is before another only if its span ends before the
+other's begins; otherwise the answer may be "can't tell", which is never a
+contradiction. An approximate date always can't tell, but sorts at its stated date, so
+that extraction never invents bounds the source does not give. Relative times stay free
+text. Ages are ranges. → §4.13, §10.0
+
+**D106. In-world time has a calendar of its own.** The ruler orders reading, and the
+spec had no structured in-world date: `Story time` was free text, `True from` a ruler
+point, and universe offsets shifted a calendar nothing defined. The owner of the ruler
+(a base, or an original project) MAY now declare a calendar. `iso` stores every
+real-world date as ISO 8601, whatever calendar the work uses, with an optional
+`notation` (a BCP 47 calendar identifier, such as `japanese`) telling agents how the
+work writes dates; the name is ISO, not Gregorian, so that no culture's calendar is the
+default by name. A custom calendar declares eras on one line of years, and optional
+fixed months, with no leap rules. Universe offsets apply only between bases with the
+same calendar. → §1.6, §4.1, §4.7, §4.13, §8.1, §10.1, §10.2, `schemas/`
 
 **D105. Fan works insert their own works.** Only `official` packages could insert into
 the base's ruler, so a fan work set after the books end, or between them, had no points

@@ -8,3 +8,14 @@ seed: "An apprentice lamplighter walks the road between two quarrelling towns, a
 setting:
   type: original
   temporal_model: linear
+
+calendar:                       # the world's own calendar (§4.13)
+  eras:
+    - { id: BL, name: before the Lamps, counts: down }
+    - { id: OR, name: the Old Road, years: 300 }
+    - { id: NR, name: the New Road }
+  months:
+    - { name: Thaw, days: 90 }
+    - { name: Bloom, days: 92 }
+    - { name: Ember, days: 91 }
+    - { name: Dark, days: 92 }

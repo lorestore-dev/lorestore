@@ -8,7 +8,8 @@ every rule. Facts are recorded in our own words, with citations.
 examples/
 ├── worlds/
 │   ├── harry-potter/
-│   │   ├── base/                # the base: novels and chapters; magic/ catalog; a reveal
+│   │   ├── base/                # the base: novels and chapters; magic/ catalog; a reveal;
+│   │   │                        #   an iso calendar, ruler dates, and world history
 │   │   ├── films/               # an adaptation: the first film, with adaptation timecodes
 │   │   ├── fanon/               # community conventions, as extension sheets
 │   │   ├── theories/            # a fan theory, as numbered claims
@@ -16,7 +17,7 @@ examples/
 │   │       └── example/         # a placeholder fan work, with its own work inserted after the books
 │   └── star-trek/
 │       ├── base/                # the base: series, seasons, episodes, a film; technology.md,
-│       │                        #   species.md; character versions; an undivided season
+│       │                        #   species.md; character versions; an undivided season; dates
 │       └── animated/            # official: the animated series, inserted into the ruler
 ├── universes/
 │   └── wizards-and-warp/        # a crossover of both: the author's brief and the bridge
@@ -28,7 +29,7 @@ examples/
     ├── blind-harry/             # a retelling: Harry is blind, canon still unfolds around him
     ├── three-brothers/          # a short story adopting a fan theory
     ├── the-long-way-back/       # Star Trek, established, a serial with a buffer and early access, frames
-    ├── lantern-road/            # a self-contained book, with a story-dated row
+    ├── lantern-road/            # a self-contained book, with a story-dated row and its own calendar
     ├── lantern-road-before/     # its split-frame follow-up: before and after book 1, on the series ruler
     └── hogwarts-at-warp/        # the crossover: two bases and the universe layer, a cutoff per base
 ```
@@ -39,12 +40,12 @@ stacks, from the base up:
 
 | Name     | Layers                                                                      | Resolution |
 | -------- | --------------------------------------------------------------------------- | ---------- |
-| canon    | `harry-potter@3.0.0`                                                         | precedence |
-| fan      | `harry-potter@3.0.0`, `harry-potter/fanon@1.0.0`, `harry-potter/fanfic/example@1.1.0` | precedence |
+| canon    | `harry-potter@3.1.0`                                                         | precedence |
+| fan      | `harry-potter@3.1.0`, `harry-potter/fanon@1.0.1`, `harry-potter/fanfic/example@1.2.0` | precedence |
 | fan, recency | the same layers                                                         | recency    |
 | fan, fill    | the same layers                                                         | fill       |
-| trek     | `star-trek@2.0.0`                                                            | precedence |
-| animated | `star-trek@2.0.0`, `star-trek/animated@1.0.0`                                | precedence |
+| trek     | `star-trek@2.1.0`                                                            | precedence |
+| animated | `star-trek@2.1.0`, `star-trek/animated@1.0.1`                                | precedence |
 
 `two-witnesses` uses the fan stack with recency.
 
@@ -251,16 +252,19 @@ through. Each inversion ends up covered by a divergence's `Overrides`. `cedric-d
 is not an inversion, because both rows have the same value. `two-witnesses`, which keeps
 canon order, has none.
 
-**18a. Inversion candidates.** The order swaps *Goblet of Fire* and *Prisoner of
-Azkaban*, and three entities have rows in both: `cedric-diggory`,
-`harry-potter`, and `harry-potter+sirius-black` (§6.8). The order audit addresses each
-under `## Inversion candidates`. Two are I1 to I3. The third, `harry-potter`, has no
-reversed attribute, but the first task (`GoF:20`) has Harry summon the Firebolt he gets
-at `PoA:11`: the audit raises it as I4, and the author chose to substitute his Nimbus
-Two Thousand (D4, `Overrides`: `—`). `two-witnesses` has no candidates.
+**18a. Inversion candidates.** The order moves *Goblet of Fire* before *Chamber of
+Secrets* and *Prisoner of Azkaban*. Four candidates have rows on both sides of a swap
+(§6.8): `cedric-diggory`, `harry-potter`, and `harry-potter+sirius-black` across `PoA`
+and `GoF`, and `harry-potter` across `CoS` and `GoF`. The order audit addresses each
+under `## Inversion candidates`. Two are I1 to I3. The third, `harry-potter` (PoA,
+GoF), has no reversed attribute, but the first task (`GoF:20`) has Harry summon the
+Firebolt he gets at `PoA:11`: the audit raises it as I4, and the author chose to
+substitute his Nimbus Two Thousand (D4, `Overrides`: `—`). The fourth is Harry's single
+`born` row (`CoS:8`): one row reverses nothing, so the audit records no finding.
+`two-witnesses` has no candidates.
 
 **18b. A stack change.** A Star Trek project order that swaps `TOS:3` and `TMP` is no
-longer a permutation once `star-trek/animated@1.0.0` joins the stack. The host refuses
+longer a permutation once `star-trek/animated@1.0.1` joins the stack. The host refuses
 to run and proposes `TOS:1, TOS:2, TMP, TOS:3, TAS:1, TAS:2, …`: each inserted segment
 right after the one it follows on the new ruler. Removing the package again proposes
 the original order.
@@ -399,7 +403,7 @@ finds no value seam for Harry, Cedric, Hermione, or Snape. Switched to `preceden
 finds one: `harry-potter.broom`. Book 1 (`recency`) gave the Firebolt from the books,
 and `precedence` gives the fan work's Cleansweep Seven.
 
-**L6. Inherited settings.** A stack of `harry-potter@3.0.0` and
+**L6. Inherited settings.** A stack of `harry-potter@3.1.0` and
 `project:second-year-tournament@chapter-03` sets no order, and so uses book 1's: `GoF:1`
 sorts before `CoS:1`. A sequel to the `no-horcruxes` branch MUST be a branch, with a
 divergence point no later than `PS:17`.
@@ -454,15 +458,58 @@ be refused (§13.10). In `two-witnesses`, which `two-witnesses-ii` pins at `chap
 chapters 1 and 2 keep their ids. `three-brothers` has no readers and no pins, so any of
 its chapters may move.
 
+## In-world time
+
+**W1. Calendars.** `harry-potter` and `star-trek` declare `calendar: iso`.
+`lantern-road` declares its own (§4.13): `BL` counts down, `OR` lasts 300 years, `NR`
+is open-ended, and a year has four months. `BL 2` and `OR 5` are six years apart, `BL 1`
+is the year before `OR 1`, and `OR 300` the year before `NR 1`. `NR 12-05` is invalid
+(there are four months), and so are `1991-02-30` and `1900-02-29`; `2000-02-29` is
+valid. `lantern-road-before` dates in `lantern-road`'s calendar. A calendar with only
+years takes no months: `AC 298-03` is invalid.
+
+**W2. Comparing dates.** `1991` against `1991-09-01`: can't tell. `1990` is before
+`1991-09-01`, and `..1991` before `1998..`. `~1975` can't tell against any date, but
+sorts at 1975.
+
+**W3. Ruler dates.** Canon stack. The date of `PS:6` is `1991-09-01`, and so is that of
+`PS:6:2`, from the deepest dated node. `PS:7` takes `PS`'s `1991..1992`, and `GoF:37`
+is `1994..1995`. In the fan stack, `FIC:20` is `1998..`, from the fan work's own
+`## Dates`. Trek stack: `TNG:3:15` is `2366`. `PS:1` (`1981-11`) is read before `PS:2`
+(`1991-06`) and dated before it, ten years earlier.
+
+**W4. An accepted contradiction.** `PS:1` falls outside `PS` (`outside-parent`), and
+the base's `## Accepted` table excuses it. Without that row, the package is invalid.
+`DH:33` (`..1998`) against `DH` (`1997..1998`) can't tell, so it is no contradiction.
+No stack in the examples has an unaccepted contradiction.
+
+**W5. In-world dates and ages.** Snape's `loyalty` has `True from: PS` and `In-world:
+..1971`. Harry's `born` is `1980-07-31`, as of `CoS:8`: he is 11 at `PS:5` and 10 at
+`PS:2`, and at `PS:5` his `born` row is not yet visible. Mira's `born` is `2318`: by
+world dates she is 47 or 48 at `TNG:3:15`, but she is a traveler, so her own age is the
+continuity-editor's judgment (§4.13). Ines, born `NR 12-02-14`, is 17 or 18 in `NR 30`.
+
+**W6. World history.** In the canon stack, the chronology (§4.13) at `PS:5` is
+`voldemort-falls`; at `PS:6`, `grindelwald-defeated` (`1945`) then `voldemort-falls`;
+at `CoS:9`, `hogwarts-founded` (`..991`) first. `grindelwald-defeated` resolves like any
+entity: at `PS:5` it has no rows yet. `lantern-road`'s history is `lamps-first-lit`
+(`OR 1`), then `road-rebuilt` (`NR 1`). No event has a participant outside their
+lifetime.
+
+**W7. Universe time.** `wizards-and-warp` moves Harry Potter by `+373y`, and both bases
+are `iso`, so the offset is valid (§8.1). Harry's first journey to Hogwarts (`PS:6`) is
+`2364-09-01` in universe time, and Grindelwald's defeat (`1945`) is `2318`, before
+*The Next Generation*'s first season (`2364`).
+
 ## Validation cases
 
 A conforming host MUST report each of these if introduced:
 
 - citing the `films` source from the Harry Potter base (a tier its kind does
   not allow, §2.3);
-- removing `harry-potter/fanon@1.0.0` from `two-witnesses-ii` (a package layer not
+- removing `harry-potter/fanon@1.0.1` from `two-witnesses-ii` (a package layer not
   relisted, §2.2);
-- moving `harry-potter/fanon@1.0.0` below `harry-potter@3.0.0` in any stack (a layer
+- moving `harry-potter/fanon@1.0.1` below `harry-potter@3.1.0` in any stack (a layer
   below what it relies on, §2.2);
 - a `PS:6:2+00:41:10` as-of in a stack without `harry-potter/films` (§4.9);
 - changing the animated package's `TAS:1` row to insert after `TOS:4` (an unknown
@@ -489,9 +536,18 @@ A conforming host MUST report each of these if introduced:
 - a `lantern-road:13` point in `lantern-road-before`, past its pin (§4.12);
 - a `lantern-road-before` Seam conflicts row with decision `accept` for a project item, or `other` with no note (§10.8);
 - a sequel to `no-horcruxes` that is a retelling, or a branch diverging after `PS:17` (§6.14);
-- adding `star-trek/animated@1.0.0` to a Star Trek project with a `setting.order` that lacks `TAS:1` and `TAS:2` (§6.8);
+- adding `star-trek/animated@1.0.1` to a Star Trek project with a `setting.order` that lacks `TAS:1` and `TAS:2` (§6.8);
 - `lantern-road` with a `setting.cutoff` (§4.7, rejected by the schema);
-- registering `gof-first-printing` as `primary` (two tied rows in one package, §4.4), or an `erratum` source in `harry-potter/fanon` (§2.3).
+- registering `gof-first-printing` as `primary` (two tied rows in one package, §4.4), or an `erratum` source in `harry-potter/fanon` (§2.3);
+- a `calendar` in `harry-potter/fanon` or `two-witnesses`, a `notation` beside `lantern-road`'s custom calendar, or `calendar: gregorian` (rejected by the schema, §4.13);
+- `lantern-road`'s `OR` era without `years`, or `BL` (counting down) moved after it (§4.13);
+- a date of `1991-02-30` in `## Dates`, or `NR 12-05` in `lantern-road` (§4.13);
+- deleting the base's `## Accepted` row for `PS:1` (`outside-parent`, §4.13), or adding it to `harry-potter/fanon` instead, which holds no part of it;
+- an `In-world` of `1999` on a row as of `PS:7`, or an event dated `2001` as of `PS:7` (`in-world-after`, §4.13);
+- a character with `born` `2051` and `died` `1990` and no acceptance (`born-died`, §4.13);
+- an event in `history.md` with no `date` row (§4.13);
+- removing `star-trek`'s calendar while `wizards-and-warp` gives offsets (§8.1).
 
 A conforming host SHOULD warn if `the-long-way-back`'s `## Columns` row for `Notes` is
-deleted (an unregistered column, §10.0).
+deleted (an unregistered column, §10.0), or if a `timeline.md` event dated `1975` lists
+`harry-potter`, born in 1980 (§4.13).

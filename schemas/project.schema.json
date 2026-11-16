@@ -169,6 +169,12 @@
         }
       }
     },
+    "calendar": {
+      "$ref": "#/$defs/calendar"
+    },
+    "notation": {
+      "$ref": "#/$defs/notation"
+    },
     "modules": {
       "type": "object",
       "additionalProperties": false,
@@ -457,6 +463,57 @@
           }
         }
       }
+    },
+    {
+      "description": "Only an original project declares a calendar; an established one dates in its stack's (spec §4.13).",
+      "if": {
+        "properties": {
+          "setting": {
+            "properties": {
+              "type": {
+                "const": "established"
+              }
+            }
+          }
+        },
+        "required": [
+          "setting"
+        ]
+      },
+      "then": {
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "calendar"
+              ]
+            },
+            {
+              "required": [
+                "notation"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "A notation needs calendar: iso.",
+      "if": {
+        "required": [
+          "notation"
+        ]
+      },
+      "then": {
+        "required": [
+          "calendar"
+        ],
+        "properties": {
+          "calendar": {
+            "const": "iso"
+          }
+        }
+      }
     }
   ],
   "$defs": {
@@ -477,6 +534,85 @@
       "type": "string",
       "description": "<package-id>@<version>, universe:<id>@<version>, or project:<id>@chapter-<NN>. See spec/02-layout.md §2.2.",
       "pattern": "^(([a-z0-9]+(-[a-z0-9]+)*(/[a-z0-9]+(-[a-z0-9]+)*){0,2})|universe:[a-z0-9]+(-[a-z0-9]+)*)@(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$|^project:[a-z0-9]+(-[a-z0-9]+)*@chapter-\\d{2,}$"
+    },
+    "calendar": {
+      "description": "The world's calendar (spec §4.13): iso, or a custom calendar of eras and optional months. The order rules for eras (only the first counts down, and it is not last; every era counting up except the last gives years) are host validations, §14.2.",
+      "oneOf": [
+        {
+          "const": "iso"
+        },
+        {
+          "type": "object",
+          "required": [
+            "eras"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "eras": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "name"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Z][A-Z0-9]*$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "counts": {
+                    "const": "down"
+                  },
+                  "years": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "not": {
+                  "required": [
+                    "counts",
+                    "years"
+                  ]
+                }
+              }
+            },
+            "months": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "days"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "days": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "notation": {
+      "type": "string",
+      "pattern": "^[a-z0-9]{3,8}(-[a-z0-9]{3,8})*$",
+      "description": "The calendar the work writes dates in: a Unicode BCP 47 calendar identifier, such as gregory or japanese. Only with calendar: iso (spec §4.13)."
     }
   }
 }

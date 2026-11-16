@@ -29,16 +29,16 @@ the base up. The project itself is always the top layer and is never listed.
   │ project:my-book-1@chapter-30                 │  an earlier book: read-only
   │ harry-potter/fanfic/harry-crowe@1.0.0        │  a fan work
   │ harry-potter/fanon@1.3.0                     │  fan conventions
-  │ harry-potter/films@1.0.0                     │  an adaptation
-  │ harry-potter@3.0.0                           │  the base: holds the ruler
+  │ harry-potter/films@1.0.1                     │  an adaptation
+  │ harry-potter@3.1.0                           │  the base: holds the ruler
   └──────────────────────────────────────────────┘
                     ▲ bottom: the base, which everything is built on
 ```
 
 ```yaml
 layers:                                   # from the base up
-  - harry-potter@3.0.0
-  - harry-potter/films@1.0.0
+  - harry-potter@3.1.0
+  - harry-potter/films@1.0.1
   - harry-potter/fanon@1.3.0
   - harry-potter/fanfic/harry-crowe@1.0.0
   - project:my-book-1@chapter-30
@@ -288,7 +288,8 @@ then each higher layer's, in stack order, then the project's own. Each row keeps
 naming its layer.
 
 Each file has a **key**: the slug in a roster, the term in a glossary, the entry id in a
-catalog or `time-travel.md`, the place id in `places.md`, the path in `index.md`.
+catalog or `time-travel.md`, the place id in `places.md`, the event id in
+`history.md`, the path in `index.md`.
 
 - **A layer adds keys; it never redefines one.** A key already defined by a lower layer
   MUST NOT be defined again by a higher one, and the host MUST report it. A Harry Potter
@@ -328,8 +329,8 @@ to a package:
 | Bump      | When                                                                                               |
 | --------- | -------------------------------------------------------------------------------------------------- |
 | **major** | The ruler is reordered, a ruler point is removed, a slug is renamed or removed, a source is removed, a relied-on package is re-pinned to a new major version |
-| **minor** | Facts, works, sources, or files are added                                                          |
-| **patch** | Values or citations are corrected without adding or removing anything                              |
+| **minor** | Facts, works, sources, dates, or files are added                                                   |
+| **patch** | Values or citations are corrected without adding or removing anything, or a relied-on package is re-pinned to a new minor or patch version |
 
 Every pin names an exact version: a project's layers, a package's `relies-on`, and a
 universe's `relies-on`. When a package's version differs from a pin, the host MUST warn,

@@ -10,7 +10,7 @@ parameters:
   target_length: 85000
 
 layers:                         # from the base up
-  - star-trek@2.0.0
+  - star-trek@2.1.0
 
 setting:
   type: established

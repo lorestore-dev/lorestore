@@ -6,9 +6,9 @@ gates: milestones
 seed: "The year after the graveyard. The Ministry has two witnesses to discredit, and one of them is a Hufflepuff prefect everyone trusts."
 
 layers:                         # from the base up
-  - harry-potter@3.0.0
-  - harry-potter/fanon@1.0.0
-  - harry-potter/fanfic/example@1.1.0
+  - harry-potter@3.1.0
+  - harry-potter/fanon@1.0.1
+  - harry-potter/fanfic/example@1.2.0
   - project:two-witnesses@chapter-02   # book 1, read through chapter 2
 resolution: recency
 

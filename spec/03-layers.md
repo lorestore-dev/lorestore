@@ -77,6 +77,7 @@ any project file (§13.10).
 | `sources.md`                 | world  | Source registry (§5)                                                                               | human                          | human (self-contained only) |
 | `glossary.md`                | union  | Canonical names and terms; the anti-drift file                                                     | merger                         | worldbuilder           |
 | `world.md`                   | world  | Setting, era, rules and systems (each with cost and limit), as a state history                     | merger                         | worldbuilder           |
+| `history.md`                 | world  | World history: past and off-page events, each dated in-world (§4.13)                               | merger                         | worldbuilder           |
 | `places.md`                  | world  | Atlas: places, connectivity, access control, state over time                                       | merger                         | worldbuilder           |
 | `society.md`                 | world  | Law, institutions, politics, economy, customs                                                      | merger                         | worldbuilder           |
 | `culture.md`                 | world  | Food, holidays, fashion, media, sayings                                                            | merger                         | worldbuilder           |

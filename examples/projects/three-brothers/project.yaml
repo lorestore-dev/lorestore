@@ -6,8 +6,8 @@ gates: milestones
 seed: "King's Cross, told as the last page of the tale: Dumbledore as the Death who greets an old friend."
 
 layers:                         # from the base up
-  - harry-potter@3.0.0
-  - harry-potter/theories@1.0.0
+  - harry-potter@3.1.0
+  - harry-potter/theories@1.0.1
 
 setting:
   type: established

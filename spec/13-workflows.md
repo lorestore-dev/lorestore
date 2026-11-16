@@ -334,7 +334,9 @@ with one writer per output file.
 - **F0** runs for a base, and for an adaptation, where it writes the `## Works` and `##
   Adapts` tables (§4.9), and for an official or fanfic package with works of its own,
   where it writes the `## Works` and `## Insert` tables (§4.10). Other packages use
-  their base's ruler, and skip it.
+  their base's ruler, and skip it. In a world with a calendar, F0 also writes the
+  `## Dates` table for the package's own works (§4.13), and MAY re-run after F1 to add
+  the dates the extraction records give.
 - **F0b** seeds the package's own roster: for a package other than a base, only the
   entities that are new in it.
 - In a package other than a base, extractors and mergers read the packages it relies

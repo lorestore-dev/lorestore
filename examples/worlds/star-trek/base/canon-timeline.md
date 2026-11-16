@@ -22,3 +22,15 @@ this example. Scenes are uncounted: the scene level is the extraction's own brea
 | 6     | TNG:2   | The Next Generation, season 2 | 22       |                                        |
 | 7     | TNG:3   | The Next Generation, season 3 | 26       |                                        |
 | 8     | TNG:4   | The Next Generation, season 4 | 26       |                                        |
+
+## Dates
+| Node  | Date | Notes                                                    |
+| ----- | ---- | -------------------------------------------------------- |
+| TOS:1 | 2266 | Stardates are kept in citations; they are not converted  |
+| TOS:2 | 2267 |                                                          |
+| TOS:3 | 2268 |                                                          |
+| TMP   | 2273 |                                                          |
+| TNG:1 | 2364 |                                                          |
+| TNG:2 | 2365 |                                                          |
+| TNG:3 | 2366 |                                                          |
+| TNG:4 | 2367 |                                                          |

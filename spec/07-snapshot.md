@@ -69,7 +69,9 @@ For entity `E`:
    notes, together with their open consequences.
 6. **Return** the resolved attributes, each annotated with its provenance: layer,
    source, tier, as-of, and citation, or the divergence id (qualified by project for an
-   earlier book's, `two-witnesses:D1`) for overridden values.
+   earlier book's, `two-witnesses:D1`) for overridden values. If the stack has a
+   calendar, also return the date of `X` (§4.13), if a dated node contains it, so that
+   agents can place the cutoff in-world and work out ages from `born`.
 7. **Return hidden truths separately.** List the rows that passed the step 2 filter
    whose `True from` is at or before `X` but whose `As of` is after it: facts already
    true at the cutoff that the story has not yet revealed. They are marked hidden and
