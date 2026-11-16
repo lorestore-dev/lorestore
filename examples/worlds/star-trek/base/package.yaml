@@ -1,0 +1,7 @@
+spec_version: "0.2"
+id: star-trek
+kind: base
+name: "Star Trek"
+version: 2.0.0
+status: open-for-extraction
+relies-on: []

@@ -1,4 +1,4 @@
-spec_version: "0.1"
+spec_version: "0.2"
 id: two-witnesses
 name: "Two Witnesses"
 workflow: novel
@@ -9,15 +9,17 @@ parameters:
   tense: past
   target_length: 90000
 
-world:
-  id: harry-potter
-  version: 2.1.0
+layers:                         # from the base up
+  - harry-potter@3.0.0
+  - harry-potter/fanon@1.0.0
+  - harry-potter/fanfic/example@1.0.0
+resolution: recency             # the latest row wins, from any layer
 
 setting:
   type: established
   fidelity: flexible
-  canon_point: "GoF:37"
-  active_profile: enhanced
+  fidelity_notes: "Minor forks are acceptable, but the rules of magic and the Ministry's politics are load-bearing and must hold."
+  cutoff: "GoF:37"
   temporal_model: linear
 
 modules:

@@ -1,6 +1,6 @@
 # Canon review: order audit
 
-Audit of the project order in `bible/canon-track.md` (PS, GoF, CoS, PoA, …). The
+Audit of the project order in `bible/sync-points.md` (PS, GoF, CoS, PoA, …). The
 author decides each inversion; this review only sets out the options.
 
 ## Findings
@@ -9,6 +9,7 @@ author decides each inversion; this review only sets out the options.
 | 1 | Order inversion | harry-potter+sirius-black.bond  | GoF:2 "correspondents" now precedes PoA:17 "met"           | author     |
 | 2 | Order inversion | cedric-diggory.status           | PoA:9 "alive" now follows GoF:32 "dead"                    | author     |
 | 3 | Order inversion | cedric-diggory.role             | PoA:9 "Hufflepuff Seeker" now follows GoF:16 "champion"    | author     |
+| 4 | Order inversion | harry-potter (broom, first task) | GoF:20 has Harry summon the Firebolt, which he gets at PoA:11 | author     |
 
 ## Order inversions
 
@@ -35,6 +36,25 @@ author decides each inversion; this review only sets out the options.
 - now later: PoA:9 "Hufflepuff Seeker"
 - depends on: the same as I2; resolving I2 resolves this.
 
+### I4 — harry-potter (broom)
+- found from the inversion candidate harry-potter (PoA, GoF): no two rows of one
+  attribute are reversed
+- now earlier: GoF:20, the first task (Harry summons his broom past the dragon)
+- now later: PoA:11 "Firebolt" (a gift he has not yet been given)
+- depends on: Harry owning the Firebolt
+- option remove: Harry flies no broom in the first task. Fallout: he needs another way past the dragon.
+- option substitute: he summons his Nimbus Two Thousand. Fallout: a slower broom; the task is closer run.
+- option supply: the Firebolt reaches him earlier, by another route. Fallout: Sirius's gift has no occasion later.
+- option reorder: move PoA back before GoF. Fallout: undoes part of the premise.
+
+## Inversion candidates
+| Candidate                             | Addressed                                  |
+| ------------------------------------- | ------------------------------------------ |
+| cedric-diggory (PoA, GoF)             | I2 and I3                                  |
+| harry-potter (PoA, GoF)               | I4                                         |
+| harry-potter+sirius-black (PoA, GoF)  | I1                                         |
+
 ## Priorities
 1. Author to decide I1.
 2. Author to decide I2 (I3 follows it).
+3. Author to decide I4.

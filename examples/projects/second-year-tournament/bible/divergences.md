@@ -6,6 +6,7 @@
 | D1 | The Tournament is in fourth year (GoF)                 | The Tournament is in second year                  | —                                                        | planned | chapter-01   |            |
 | D2 | Harry writes to Sirius about his scar (GoF:2), having met him (PoA:17) | Author's choice for I1 (substitute): Harry writes to Dumbledore instead; he and Sirius stay strangers until the Shrieking Shack | harry-potter+sirius-black.bond=strangers | planned | chapter-01 | chapter-40 |
 | D3 | Cedric is alive and Hufflepuff's Seeker in PoA (PoA:9) | Author's choice for I2 and I3 (remove): Cedric's PoA appearances don't happen; he died in year two | cedric-diggory.status=dead; cedric-diggory.role=(unset) | planned | chapter-14 |  |
+| D4 | Harry summons his Firebolt in the first task (GoF:20), a gift from PoA:11 | Author's choice for I4 (substitute): he summons his Nimbus Two Thousand | — | planned | chapter-08 |  |
 
 ## Consequences
 | Divergence | Consequence                                                              | Status | Absorbed in |
@@ -15,3 +16,4 @@
 | D2         | Dumbledore hears about Harry's scar directly, months earlier than in canon | open |             |
 | D2         | Sirius's advice before the first task has no source; replace it or cut it | open   |             |
 | D3         | Hufflepuff needs a different Seeker for the year-four match against Gryffindor | open |          |
+| D4         | The first task is closer run on a slower broom                           | open   |             |

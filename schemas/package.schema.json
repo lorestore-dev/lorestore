@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "package.yaml",
+  "description": "Package configuration. See spec/10-formats.md §10.2. Cross-file rules (the id matches the package's folder; every relies-on entry names a package that exists at that version; a base package registers only primary and secondary-official sources) are host validations, spec/14-implementation.md §14.2.",
+  "type": "object",
+  "required": ["spec_version", "id", "kind", "name", "version", "status", "relies-on"],
+  "additionalProperties": false,
+  "properties": {
+    "spec_version": { "type": "string", "const": "0.2" },
+    "id": { "$ref": "#/$defs/packageId" },
+    "kind": {
+      "enum": ["base", "official", "adaptation", "fanon", "fanfic", "theories"],
+      "description": "What the package holds. See spec/02-layout.md §2.3."
+    },
+    "name": { "type": "string", "minLength": 1 },
+    "version": { "$ref": "#/$defs/semver" },
+    "status": { "enum": ["open-for-extraction", "locked"] },
+    "relies-on": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/packagePin" },
+      "description": "The packages this one describes, pinned. Every one MUST appear below this package in any stack that uses it (spec §2.2)."
+    }
+  },
+  "allOf": [
+    {
+      "description": "A base package: its id is a bare fandom id and it relies on nothing.",
+      "if": { "properties": { "kind": { "const": "base" } } },
+      "then": {
+        "properties": {
+          "id": { "$ref": "#/$defs/id" },
+          "relies-on": { "maxItems": 0 }
+        }
+      },
+      "else": {
+        "properties": {
+          "id": { "pattern": "/" },
+          "relies-on": { "minItems": 1 }
+        }
+      }
+    },
+    {
+      "description": "A fanfic package lives under <fandom>/fanfic/<work>.",
+      "if": { "properties": { "kind": { "const": "fanfic" } } },
+      "then": { "properties": { "id": { "pattern": "^[a-z0-9]+(-[a-z0-9]+)*/fanfic/[a-z0-9]+(-[a-z0-9]+)*$" } } }
+    }
+  ],
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "packageId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(/[a-z0-9]+(-[a-z0-9]+)*){0,2}$",
+      "description": "<fandom> for a base package, <fandom>/<package> otherwise, <fandom>/fanfic/<work> for a fan work."
+    },
+    "semver": { "type": "string", "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$" },
+    "packagePin": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(/[a-z0-9]+(-[a-z0-9]+)*){0,2}@(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
+    }
+  }
+}

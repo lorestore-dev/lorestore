@@ -1,0 +1,10 @@
+spec_version: "0.2"
+id: lantern-road
+name: "The Lantern Road"
+workflow: novel
+gates: milestones
+seed: "An apprentice lamplighter walks the road between two quarrelling towns, and learns why its lamps keep going out."
+
+setting:
+  type: original
+  temporal_model: linear

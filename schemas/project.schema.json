@@ -15,7 +15,7 @@
   "properties": {
     "spec_version": {
       "type": "string",
-      "const": "0.1"
+      "const": "0.2"
     },
     "id": {
       "$ref": "#/$defs/id"
@@ -56,11 +56,22 @@
         }
       }
     },
-    "world": {
-      "$ref": "#/$defs/packageRef"
+    "layers": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/layerRef"
+      },
+      "description": "The layers the project reads, from the base up. Absent or empty: a self-contained project. See spec/02-layout.md §2.2."
     },
-    "universe": {
-      "$ref": "#/$defs/packageRef"
+    "resolution": {
+      "enum": [
+        "precedence",
+        "recency",
+        "fill"
+      ],
+      "default": "precedence",
+      "description": "How rows from different layers resolve. See spec/05-sources.md §5.4."
     },
     "setting": {
       "type": "object",
@@ -82,20 +93,25 @@
             "au"
           ]
         },
-        "canon_point": {
-          "$ref": "#/$defs/canonPoint"
+        "fidelity_notes": {
+          "type": "string",
+          "description": "Free text: latitude of the project's own, such as what is load-bearing. Established only. See spec/06-divergence.md §6.3."
         },
-        "canon_points": {
+        "cutoff": {
+          "$ref": "#/$defs/rulerPoint"
+        },
+        "cutoffs": {
           "type": "object",
           "propertyNames": {
             "$ref": "#/$defs/id"
           },
           "additionalProperties": {
-            "$ref": "#/$defs/canonPoint"
+            "$ref": "#/$defs/rulerPoint"
           },
-          "minProperties": 1
+          "minProperties": 1,
+          "description": "Keyed by base package id. Universe projects only."
         },
-        "canon_mode": {
+        "follow": {
           "enum": [
             "retelling",
             "branch"
@@ -104,7 +120,7 @@
           "description": "Whether canon after the divergence point still happens. See spec/06-divergence.md §6.6."
         },
         "divergence_point": {
-          "$ref": "#/$defs/canonPoint"
+          "$ref": "#/$defs/rulerPoint"
         },
         "divergence_points": {
           "type": "object",
@@ -112,21 +128,37 @@
             "$ref": "#/$defs/id"
           },
           "additionalProperties": {
-            "$ref": "#/$defs/canonPoint"
+            "$ref": "#/$defs/rulerPoint"
           },
-          "minProperties": 1
+          "minProperties": 1,
+          "description": "Keyed by base package id. Universe projects only."
         },
-        "active_profile": {
-          "$ref": "#/$defs/id"
+        "order": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9]+(:[0-9]+)*$"
+          },
+          "minItems": 1,
+          "uniqueItems": true,
+          "description": "The project order: every segment of the base's ruler, once each. Established only. See spec/06-divergence.md §6.8."
         },
-        "active_profiles": {
+        "orders": {
           "type": "object",
           "propertyNames": {
             "$ref": "#/$defs/id"
           },
           "additionalProperties": {
-            "$ref": "#/$defs/id"
-          }
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9]+(:[0-9]+)*$"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "minProperties": 1,
+          "description": "Keyed by base package id: the bases the project reorders. Universe projects only."
         },
         "temporal_model": {
           "enum": [
@@ -168,75 +200,66 @@
   },
   "allOf": [
     {
-      "description": "At most one of world / universe.",
-      "not": {
-        "required": [
-          "world",
-          "universe"
-        ]
-      }
-    },
-    {
-      "description": "A world project uses canon_point / active_profile, never the per-world maps.",
+      "description": "A project with a universe layer uses the per-base maps, never the single-cutoff keys.",
       "if": {
-        "required": [
-          "world"
-        ]
-      },
-      "then": {
         "properties": {
-          "setting": {
-            "not": {
-              "anyOf": [
-                {
-                  "required": [
-                    "canon_points"
-                  ]
-                },
-                {
-                  "required": [
-                    "active_profiles"
-                  ]
-                },
-                {
-                  "required": [
-                    "divergence_points"
-                  ]
-                }
-              ]
+          "layers": {
+            "contains": {
+              "type": "string",
+              "pattern": "^universe:"
             }
           }
-        }
-      }
-    },
-    {
-      "description": "A universe project uses canon_points / active_profiles, never the single-world keys.",
-      "if": {
+        },
         "required": [
-          "universe"
+          "layers"
         ]
       },
       "then": {
         "properties": {
           "setting": {
             "required": [
-              "canon_points"
+              "cutoffs"
             ],
             "not": {
               "anyOf": [
                 {
                   "required": [
-                    "canon_point"
-                  ]
-                },
-                {
-                  "required": [
-                    "active_profile"
+                    "cutoff"
                   ]
                 },
                 {
                   "required": [
                     "divergence_point"
+                  ]
+                },
+                {
+                  "required": [
+                    "order"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "setting": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "cutoffs"
+                  ]
+                },
+                {
+                  "required": [
+                    "divergence_points"
+                  ]
+                },
+                {
+                  "required": [
+                    "orders"
                   ]
                 }
               ]
@@ -291,12 +314,12 @@
         "properties": {
           "setting": {
             "properties": {
-              "canon_mode": {
+              "follow": {
                 "const": "branch"
               }
             },
             "required": [
-              "canon_mode"
+              "follow"
             ]
           }
         }
@@ -321,7 +344,7 @@
       }
     },
     {
-      "description": "canon_mode and divergence points apply only to established settings.",
+      "description": "follow, divergence points, fidelity notes, cutoffs, and the project order apply only to established settings.",
       "if": {
         "properties": {
           "setting": {
@@ -340,7 +363,7 @@
               "anyOf": [
                 {
                   "required": [
-                    "canon_mode"
+                    "follow"
                   ]
                 },
                 {
@@ -352,9 +375,85 @@
                   "required": [
                     "divergence_points"
                   ]
+                },
+                {
+                  "required": [
+                    "fidelity_notes"
+                  ]
+                },
+                {
+                  "required": [
+                    "order"
+                  ]
+                },
+                {
+                  "required": [
+                    "orders"
+                  ]
+                },
+                {
+                  "required": [
+                    "cutoff"
+                  ]
+                },
+                {
+                  "required": [
+                    "cutoffs"
+                  ]
                 }
               ]
             }
+          }
+        }
+      }
+    },
+    {
+      "description": "An established project has at least one package or project layer. See spec/06-divergence.md §6.1.",
+      "if": {
+        "properties": {
+          "setting": {
+            "properties": {
+              "type": {
+                "const": "established"
+              }
+            }
+          }
+        },
+        "required": [
+          "setting"
+        ]
+      },
+      "then": {
+        "required": [
+          "layers"
+        ],
+        "properties": {
+          "layers": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "description": "An original project has no layers: a project that reads a package or an earlier book is established. See spec/06-divergence.md §6.1.",
+      "if": {
+        "properties": {
+          "setting": {
+            "properties": {
+              "type": {
+                "const": "original"
+              }
+            }
+          }
+        },
+        "required": [
+          "setting"
+        ]
+      },
+      "then": {
+        "properties": {
+          "layers": {
+            "maxItems": 0
           }
         }
       }
@@ -369,26 +468,15 @@
       "type": "string",
       "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
     },
-    "canonPoint": {
+    "rulerPoint": {
       "type": "string",
       "description": "work{:index}[+HH:MM:SS[.fraction]] — see spec/04-temporal.md §4.2. Validity against the ruler (levels, counts, segments, timed level) is checked by the host, not the schema.",
       "pattern": "^[A-Za-z][A-Za-z0-9-]*(:[1-9]\\d*)*(\\+\\d{2,}:[0-5]\\d:[0-5]\\d(\\.\\d+)?)?$"
     },
-    "packageRef": {
-      "type": "object",
-      "required": [
-        "id",
-        "version"
-      ],
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "$ref": "#/$defs/id"
-        },
-        "version": {
-          "$ref": "#/$defs/semver"
-        }
-      }
+    "layerRef": {
+      "type": "string",
+      "description": "<package-id>@<version>, universe:<id>@<version>, or project:<id>@chapter-<NN>. See spec/02-layout.md §2.2.",
+      "pattern": "^(([a-z0-9]+(-[a-z0-9]+)*(/[a-z0-9]+(-[a-z0-9]+)*){0,2})|universe:[a-z0-9]+(-[a-z0-9]+)*)@(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$|^project:[a-z0-9]+(-[a-z0-9]+)*@chapter-\\d{2,}$"
     }
   }
 }

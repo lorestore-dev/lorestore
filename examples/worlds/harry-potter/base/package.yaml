@@ -1,0 +1,7 @@
+spec_version: "0.2"
+id: harry-potter
+kind: base
+name: "Harry Potter"
+version: 3.0.0
+status: locked
+relies-on: []

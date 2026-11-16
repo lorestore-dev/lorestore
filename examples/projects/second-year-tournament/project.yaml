@@ -1,4 +1,4 @@
-spec_version: "0.1"
+spec_version: "0.2"
 id: second-year-tournament
 name: "The Second-Year Tournament"
 workflow: novel
@@ -9,13 +9,13 @@ parameters:
   tense: past
   target_length: 120000
 
-world:
-  id: harry-potter
-  version: 2.1.0
+layers:                         # from the base up
+  - harry-potter@3.0.0
 
 setting:
   type: established
   fidelity: flexible
-  canon_point: "PS:17"
-  active_profile: book-purist
+  fidelity_notes: "The reordering and its knock-ons (D1 to D3) are deliberate; everything else follows canon."
+  cutoff: "PS:17"
+  order: [PS, GoF, CoS, PoA, OotP, HBP, DH]   # the project order (§6.8)
   temporal_model: linear
