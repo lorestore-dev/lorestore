@@ -5,7 +5,7 @@ reference implementation of layer stacks (§2.2), the snapshot algorithm (§7), 
 points and adaptation timecodes (§4.2, §4.9), sync points and the project order
 (§6.7-6.8), branch and retelling modes (§6.6), hidden truths (§4.4, §6.12), theory
 conflicts (§6.13), in-world dates and world history (§4.13), the travel, mysteries,
-and lineage modules (§9.4-9.6), and chapter statuses (§10.18), comparing each result
+and lineage modules (§9.4-9.6), image prompts (§10.29), and chapter statuses (§10.18), comparing each result
 with the
 expected answers in examples/README.md.
 
@@ -1704,6 +1704,46 @@ check("L no lineage contradictions in the examples", contradictions(PURIST), [])
 check("L schema: lantern-road enables travel and mysteries", (pyaml("lantern-road")["modules"], schema("project").is_valid(pyaml("lantern-road"))), ({"travel": True, "mysteries": True}, True))
 d = pyaml("two-witnesses"); d["modules"]["romance"] = True; check("L schema: an unknown module rejected", schema("project").is_valid(d), False)
 d = pyaml("two-witnesses"); d["modules"]["lineage"] = "yes"; check("L schema: a module flag is a boolean", schema("project").is_valid(d), False)
+
+# --- image prompts (§10.29, §12.20) ----------------------------------------------------
+KINDS = {"character", "family-portrait", "family-tree", "map", "location"}
+def names_of(stack):
+    """{slug: display name} across the stack's rosters."""
+    out = {r["Slug"]: r["Name"] for _, p in stack.packages for r in p.roster()}
+    for proj, _ in stack.ledgers() + ([(stack.project, None)] if stack.project else []):
+        f = EX/"projects"/proj/"bible/characters/_roster.md"
+        if f.exists(): out.update({r["Slug"]: r["Name"] for r in table(f, "## Characters")})
+    return out
+def prompt_errors(project, f):
+    fm, text, stack = front(f), f.read_text(), Stack.of(project)
+    lines = text.splitlines(); out = []
+    if fm.get("kind") not in KINDS: out.append("kind")
+    if not ("## Gaps" in lines and "## Sources" in lines): out.append("sections")
+    if fm.get("cutoff") and not isvalid(stack.ruler(), fm["cutoff"]): out.append("cutoff")
+    if fm.get("position") and not chapter_ok(fm["position"]): out.append("position")
+    places = {r["Entity"] for r in table(EX/"projects"/project/"bible/places.md", "## State history")} if (EX/"projects"/project/"bible/places.md").exists() else set()
+    pool = places if fm.get("kind") in ("map", "location") else set(names_of(stack))
+    if not set(fm.get("subjects", [])) <= pool: out.append("subjects")
+    return out
+PROMPTS = [(p.parent.parent.name, p) for p in sorted((EX/"projects").glob("*/prompts/*.md"))]
+check("P the examples have prompts", [f"{a}/{p.name}" for a, p in PROMPTS], ["lantern-road/road-map.md", "two-witnesses/potter-family-tree.md"])
+for proj, f in PROMPTS:
+    check(f"P prompt valid: {proj}/{f.name}", prompt_errors(proj, f), [])
+TW = Stack.of("two-witnesses"); NAMES = names_of(TW)
+def members(t): return [t[0]] + [m for c in t[1] for m in members(c)]
+tree = members(family_tree(TW, "harry-potter", "GoF:37"))
+body = (EX/"projects/two-witnesses/prompts/potter-family-tree.md").read_text().split("## Gaps")[0]
+check("P the family tree at GoF:37: Harry and his parents", sorted(tree), ["harry-potter", "james-potter", "lily-potter"])
+check("P the tree prompt names exactly the tree, and no one else in the roster",
+      sorted(s for s, n in NAMES.items() if n in body), sorted(tree))
+check("P the tree prompt gives no date the snapshot lacks", ("1960" in body, "1981" in body, "1980" in body), (False, False, True))
+bad = EX/"projects/two-witnesses/prompts/potter-family-tree.md"
+_front = front
+for label, change, want in [("an unknown kind", {"kind": "poster"}, ["kind"]), ("a cutoff off the ruler", {"cutoff": "GoF:38"}, ["cutoff"]),
+                            ("a subject not in the roster", {"subjects": ["harry-potter", "neville-longbottom"]}, ["subjects"])]:
+    front = lambda p, c=change: dict(_front(p), **c)
+    check(f"P prompt error: {label}", prompt_errors("two-witnesses", bad), want)
+front = _front
 
 # --- serial buffer and early access (§13.3, §13.9, §10.18) ---------------------------
 STATUS = ["drafted", "line-edited", "final", "early-access", "released"]

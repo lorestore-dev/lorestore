@@ -1048,3 +1048,41 @@ A multi-entity state history (§10.5) whose entities are titles and offices:
 - `holder`: a slug (§10.9), or `(unset)` while the title is vacant.
 - `rule`: how the title passes on, in free text.
 - Other attributes are free.
+
+## 10.29 `prompts/<id>.md` (image prompts)
+
+One image prompt, written by the prompter (§12.20). `<id>` is an id (§10.0) that the
+author chooses.
+
+```markdown
+---
+kind: family-tree          # character | family-portrait | family-tree | map | location
+subjects: [harry-potter]   # slugs, or place ids for a map or location
+cutoff: "GoF:37"           # a ruler point; or, in a project with no stack, omit it
+position: chapter-12       # optional: a chapter, for story-dated rows (§4.11)
+date: "1995"               # family-portrait only: the in-world date it is painted (§4.13)
+---
+## Prompt
+<plain descriptive prose for an image generator>
+
+## Gaps
+- <a detail the bible does not give, and how the prompt treats it>
+
+## Sources
+| Fact                         | From                                   |
+| ---------------------------- | -------------------------------------- |
+| Harry's parents              | `harry-potter.parents` (books, PS:1)   |
+```
+
+- `kind`: one of the five kinds. `family-portrait` and `family-tree` need the lineage
+  module (§9.6). A `map` that shows journey times needs travel (§9.4).
+- `subjects`: what the picture shows, or, for a `family-tree`, the entity it starts
+  from. Each MUST be a slug in the stack's roster, or, for a `map` or `location`, a
+  place id in `places.md`.
+- `cutoff` and `position`: where the snapshot is taken (§7.2). In an established
+  project, the cutoff defaults to the project's, and MUST be a valid point on the
+  stack's ruler. In a project with no stack, only `position` applies.
+- `date`: a date in the stack's calendar. Without it, a family portrait is dated at
+  its cutoff's date.
+- `## Gaps` is required, and MAY be empty. `## Sources` is required: one row per fact
+  the prompt states about a subject.

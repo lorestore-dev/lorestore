@@ -122,6 +122,7 @@ any project file (§13.10).
 | `manuscript/chapter-<NN>.md`   | manuscript | drafter; line-editor; dialogue (explicit rewrite step only); `release` skill (front matter only, serials) |
 | `revisions.md`                 | control    | chronicler (early-access chapters; released installments of serials with revisable releases) |
 | `reviews/<reviewer>.md`        | review     | the named reviewer (§12)                                     |
+| `prompts/<id>.md`              | output     | prompter (§12.20); never canon, and read by no agent         |
 | `derived/bible/…`              | cache      | `compose` skill (§7.6)                                       |
 | `derived/as-of-…`              | cache      | `temporal-snapshot` skill (§7.6)                             |
 | `references/…`                 | input      | human; `references/feedback/…` holds human readers' notes (§10.25) |

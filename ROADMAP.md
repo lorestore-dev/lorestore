@@ -43,7 +43,7 @@ point (§4.4), and universe offsets (§8.1) shift a base calendar that nothing d
 
 ### 3. Reference agents and workflows (0.4)
 
-- Write the 18 agent files (`agents/*.md`) to the anatomy of §11.3 and the
+- Write the 19 agent files (`agents/*.md`) to the anatomy of §11.3 and the
   specifications of §12.
 - Write the workflow files (`workflows/*.md`) for every chain and overlay of §13.
 - Change §1.2: the spec defines the contract (§11–12), and `agents/` and `workflows/`

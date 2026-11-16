@@ -23,7 +23,8 @@ examples/
 ├── universes/
 │   └── wizards-and-warp/        # a crossover of both: the author's brief and the bridge
 └── projects/
-    ├── two-witnesses/           # Harry Potter with fan layers, recency, divergences, two modules
+    ├── two-witnesses/           # Harry Potter with fan layers, recency, divergences, two modules,
+    │                            #   and an image prompt
     ├── two-witnesses-ii/        # its sequel: book 1 as a project layer
     ├── second-year-tournament/  # Harry Potter with canon rearranged: the Tournament in year two
     ├── no-horcruxes/            # a branch: Voldemort dies in year one, later canon never happens
@@ -31,7 +32,7 @@ examples/
     ├── three-brothers/          # a short story adopting a fan theory
     ├── the-long-way-back/       # Star Trek, established, a serial with a buffer and early access, frames
     ├── lantern-road/            # a self-contained book, with a story-dated row and its own calendar;
-    │                            #   routes and journey times, and a mystery
+    │                            #   routes and journey times, a mystery, and a map prompt
     ├── lantern-road-before/     # its split-frame follow-up: before and after book 1, on the series ruler
     └── hogwarts-at-warp/        # the crossover: two bases and the universe layer, a cutoff per base
 ```
@@ -532,6 +533,16 @@ from `salazar-slytherin`) and `tom-riddle-sr`. The `headmaster-of-hogwarts` is
 at `OotP:38`, and `severus-snape` at `DH:36`. James and Lily, born in 1960 and dead on
 `1981-10-31`, raise no lineage warning, and the examples have no lineage contradiction.
 
+**M4. Image prompts.** `two-witnesses/prompts/potter-family-tree.md` is a family tree
+from `harry-potter` at `GoF:37` (§10.29, §12.20). The tree at that cutoff is Harry,
+James, and Lily, so the prompt names those three and no one else. It gives Harry's
+date of birth (known from `CoS:8`), and leaves his parents' dates blank, because their
+rows are as of `DH:16`. Asked again at `DH:16`, it could give them.
+`lantern-road/prompts/road-map.md` maps the three places, with Highcairn to the north
+and Lowmere to the south, from `places.md`, and the two halves of the road the same
+length, from the routes. Both prompts list what the bible does not give under
+`## Gaps`.
+
 ## Validation cases
 
 A conforming host MUST report each of these if introduced:
@@ -582,7 +593,8 @@ A conforming host MUST report each of these if introduced:
 - in the base's `mysteries.md`, the mystery `who-is-it` (not a secret), a red herring marked needed, a clue of kind `hint`, a second clue `c1`, or a clue planted at `GoF:38` (§10.27), or a higher layer that moves `c1` (§10.27);
 - a `parents` value that is not in the roster, or two characters each the other's parent, or one descended from herself, with no acceptance (`ancestry-cycle`, §9.6);
 - a character born in 2051 whose parent is born in 2070, with no acceptance (`born-before-parent`, §9.6);
-- `modules.romance`, or `lineage: "yes"`, in `project.yaml` (rejected by the schema).
+- `modules.romance`, or `lineage: "yes"`, in `project.yaml` (rejected by the schema);
+- a prompt of kind `poster`, cut off at `GoF:38`, or with a subject `neville-longbottom`, who is not in the stack's roster (§10.29).
 
 A conforming host SHOULD warn if `the-long-way-back`'s `## Columns` row for `Notes` is
 deleted (an unregistered column, §10.0), if a `timeline.md` event dated `1975` lists

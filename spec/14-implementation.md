@@ -125,6 +125,7 @@ is defined.
 | A renumbering moves a released or early-access chapter, or a chapter at or before another project's pin, or leaves a chapter id unrewritten | §13.10 |
 | A change to an early-access chapter, or a revisable released one, with no `revisions.md` row or no reader note | §10.22 |
 | A feedback file's `chapter` does not match its folder                            | §10.25    |
+| A prompt file with an unknown `kind`, a subject that is not in the roster or `places.md`, an invalid `cutoff`, `position`, or `date`, or no `## Gaps` or `## Sources` | §10.29 |
 | A `time-travel.md` entry has no `model`, or an unknown model or free-will value  | §10.24    |
 | A traveler leg names a mechanism missing from `time-travel.md`                   | §10.16    |
 | A world point names a branch missing from `branches.md`, or a branch has an unknown status | §10.16 |

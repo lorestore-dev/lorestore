@@ -29,6 +29,7 @@ established.
 | `critic`             | Review          | Structural developmental feedback                                       | `reviews/critique.md`                                                      |
 | `beta-reader`        | Review          | A target reader's felt experience                                       | `reviews/beta-reader.md`                                                   |
 | `bridge-builder`     | Crossover       | Drafts the bridge that reconciles a universe's worlds                   | `bridge.md`                                                                |
+| `prompter`           | Illustration    | Image prompts for characters, family portraits and trees, maps, and locations, as known at a cutoff | `prompts/<id>.md`                                         |
 
 Each specification below gives the agent's **Reads** as a retrieval spec (§11.6). "The
 chapter's cast" means the entities the chapter's outline beat names, plus anyone the
@@ -54,8 +55,9 @@ deciding what happens next when the happy path forks.
     step-14 gate like a pending decide item (§11.8). Once the author decides, hand the
     decision to the curator to record, then re-run the draft for the marked passage.
   - Read review priorities and schedule revision steps before advancing.
-  - Insert on-demand steps the chain lacks (a dialogue pass, a research check), and decide
-    which chapters a changed outline invalidates.
+  - Insert on-demand steps the chain lacks (a dialogue pass, a research check, an image
+    prompt the author asks for), and decide which chapters a changed outline
+    invalidates.
   - **Decide items** (§6.9): under `gates: none`, make the call and log the reasoning;
     otherwise surface it to the human. **Order inversions**, **divergence conflicts**,
     **hidden canon**, **theory conflicts**, and **seam conflicts**
@@ -523,3 +525,51 @@ a human approves at the gate.
   a mapping would force one world to change; flags open questions for the human instead
   of settling them.
 
+## 12.20 `prompter`: image prompts
+
+Writes prompts for image generators: pictures of characters, family portraits, family
+trees, maps, and locations, each drawn from the bible as a reader knows it at a chosen
+point in the story. It runs only when the author asks for a picture. A prompt is
+plain descriptive prose, for no particular image model (§1).
+
+- **Context:** project.
+- **Reads:** the author's request (the kind, the subjects, the cutoff or chapter, and
+  any art direction); `references/art-direction.md`, if the author keeps one; the
+  **snapshot** (§7) of each subject at the prompt's cutoff and position; the roster's
+  reveal aliases for the subjects (§10.9); and per kind:
+  - `character`: the subject's sheet, and `born`, for their age at the prompt's date
+    (§4.13);
+  - `family-portrait`: each sitter's snapshot, and their `parents`, `guardians`, and
+    `born` and `died` rows (lineage, §9.6);
+  - `family-tree`: the family-tree view (§9.6) from the subject, with each member's
+    name and dates;
+  - `map`: `places.md`, and `routes.md` (travel, §9.4), for the places the map shows;
+  - `location`: the place's rows in `places.md`, and the `world.md`, `culture.md`,
+    and catalog rows that the place's description names.
+- **Writes:** `prompts/<id>.md` (§10.29).
+- **Duties:**
+  - **Respect the snapshot.** Depict only what the snapshot returns at the prompt's
+    cutoff and position: a character's look, possessions, and age as they stand then,
+    and a place as it stands then. Name a revealed identity only from its `Revealed at`
+    (§10.9). Never depict a hidden truth (§7.2) or a seam conflict.
+  - **Family portraits and trees** show only the parentage visible at the cutoff (§9.6).
+    A portrait has a date, and leaves out anyone not alive on it: born after it or dead
+    before it, by the dates (§4.13). A tree gives each member's name and the dates the
+    snapshot knows. It never adds members to fill the tree out.
+  - **Maps** show only places the snapshot knows at the cutoff. Their layout follows
+    what `places.md` says about where places lie, and the routes' journey times, as
+    relative distances. Where neither says, the map leaves the layout open and notes it.
+  - **Locations** show the place's state at the cutoff (a ruin is a ruin only from its
+    row on), with the culture and systems that are visible there.
+  - **Facts, not flourishes.** Composition, lighting, framing, and mood are the
+    prompt's to choose, within the author's art direction. Facts about a subject are
+    not. A physical detail that the bible does not give goes under `## Gaps`, and the
+    prompt either leaves it unstated or marks the choice as the prompter's.
+  - Record where each fact comes from in `## Sources`, so the author can check the
+    prompt against the bible.
+- **Guardrails:** never writes the bible, the manuscript, or reviews. A prompt is never
+  canon, and no agent reads one. Never copies source text: it describes in its own
+  words (§5). Never describes a real person's likeness, such as an actor who played
+  the character, and never asks for a living artist's style by name. Never goes past
+  the prompt's cutoff, even when the author asks for "how they end up": that is a
+  later cutoff, which the author chooses.

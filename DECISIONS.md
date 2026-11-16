@@ -5,6 +5,19 @@ says what was unclear or contradictory, what was decided, and where the rule now
 
 ## 0.3: in-world time
 
+**D115. The prompter: image prompts from the bible.** Authors wanted pictures of their
+characters, families, maps, and places, and a picture drawn from the bible can leak as
+easily as a paragraph. A nineteenth agent, the prompter, writes one prompt per step to
+`prompts/<id>.md`: a character, a family portrait, a family tree, a map, or a location,
+each from the snapshot at a cutoff the author chooses. It depicts only what the
+snapshot returns: parentage and dates as the reader knows them, places as they stand
+then, revealed identities only from their reveal. Composition and mood are the
+prompter's to choose; facts are not, and a detail the bible lacks is listed under
+`## Gaps` rather than invented. Prompts are plain prose for no particular model, are
+never canon, and are read by no agent. They never describe an actor's likeness or ask
+for a living artist's style by name. → §2.5, §2.6, §3.3, §10.29, §12.1, §12.2, §12.20,
+§14.2
+
 **D114. Lineage: parentage, ancestry, and titles.** Relationships are pairwise, so the
 spec could not hold a family tree, a dynasty, or a succession. The lineage module adds
 the reserved attributes `parents`, `guardians`, and `descends-from` (slug lists, on any

@@ -205,6 +205,7 @@ projects/<project-id>/
 ├── manuscript/
 │   └── chapter-<NN>.md
 ├── reviews/                # advisory diagnostics, never canon
+├── prompts/                # image prompts, never canon (§10.29)
 ├── derived/                # rebuildable caches, never canon (§7.6)
 │   └── bible/              # the composed bible: every layer merged (§7.6)
 ├── references/             # user-supplied input
@@ -229,6 +230,7 @@ rooted at the project, with these prefixes:
 | `manuscript/…`      | `projects/<p>/manuscript/…`                |
 | `manuscript/@<q>/…` | `projects/<q>/manuscript/…`, for a project layer `q`, up to its pinned chapter (read-only) |
 | `reviews/…`         | `projects/<p>/reviews/…`                   |
+| `prompts/…`         | `projects/<p>/prompts/…`                   |
 | `derived/…`         | `projects/<p>/derived/…`                   |
 | `references/…`      | `projects/<p>/references/…`                |
 

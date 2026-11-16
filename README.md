@@ -22,7 +22,7 @@ editing it; and how a team of narrow AI agents reads and writes those files.
 | 9  | [Modules](spec/09-modules.md)                       | Frames, LitRPG, languages, travel, mysteries, lineage                |
 | 10 | [Formats](spec/10-formats.md)                       | The exact structure of every file                                    |
 | 11 | [Agent contract](spec/11-agent-contract.md)         | The orchestration loop, agent anatomy, retrieval, gates              |
-| 12 | [Agents](spec/12-agents.md)                         | The eighteen agents                                                  |
+| 12 | [Agents](spec/12-agents.md)                         | The nineteen agents                                                  |
 | 13 | [Workflows](spec/13-workflows.md)                   | Novel, short story, serial, overlays, adopt, extraction, crossover, early access |
 | 14 | [Implementation](spec/14-implementation.md)         | Host requirements, validation rules, the contracts summarized        |
 
