@@ -104,4 +104,5 @@ A short finding is fine. "I couldn't tell what §4.4 means by X" is a good issue
 you'd rather send all your notes as one document, open a single issue and attach it.
 
 Findings go into draft 0.5. Each one that changes a rule gets an entry in
-`DECISIONS.md`.
+`DECISIONS.md`. Once you've responded, you'll be thanked by name in the README, unless
+you'd rather not be.
