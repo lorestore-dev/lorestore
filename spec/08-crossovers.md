@@ -16,9 +16,9 @@ A project uses a universe by stacking it above its bases, like any other layer (
 
 ```yaml
 layers:
-  - harry-potter@3.2.1
-  - star-trek@2.1.1
-  - universe:wizards-and-warp@2.0.3
+  - harry-potter@3.2.2
+  - star-trek@2.1.2
+  - universe:wizards-and-warp@2.0.4
 ```
 
 Each base's other packages can be stacked too, in any order that keeps every package
@@ -32,14 +32,14 @@ entities (§7.4).
 gives each an **offset** that aligns its calendar to the universe's shared "now":
 
 ```yaml
-spec_version: "0.3"
+spec_version: "0.4"
 id: wizards-and-warp
 kind: universe
 name: "Wizards and Warp"
 version: 2.0.0
 relies-on:
-  - harry-potter@3.2.1
-  - star-trek@2.1.1
+  - harry-potter@3.2.2
+  - star-trek@2.1.2
 offsets: { harry-potter: "+373y", star-trek: "+0y" }
 bridge: bridge.md
 ```

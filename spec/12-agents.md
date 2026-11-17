@@ -42,8 +42,9 @@ deciding what happens next when the happy path forks.
 
 - **Context:** project.
 - **Reads:** `project.yaml`; the active workflow files; `showrunner-log.md`; the output
-  of the step just finished; the `## Priorities` of each review; the `## Findings` of
-  `reviews/canon.md`; TODO markers found by searching `manuscript/`.
+  of the step just finished; the `## Priorities` of each review; the `## Findings` and
+  `## Consequences honored` of `reviews/canon.md`; TODO markers found by searching
+  `manuscript/`.
 - **Writes:** `showrunner-log.md`.
 - **Duties:**
   - After each draft step, route every `TODO: needs bible` marker to the right builder
@@ -55,6 +56,8 @@ deciding what happens next when the happy path forks.
     step-14 gate like a pending decide item (§11.8). Once the author decides, hand the
     decision to the curator to record, then re-run the draft for the marked passage.
   - Read review priorities and schedule revision steps before advancing.
+  - Log the consequences the canon-keeper reports honored, by divergence id and chapter,
+    so the curator can mark them absorbed (E5).
   - Insert on-demand steps the chain lacks (a dialogue pass, a research check, an image
     prompt the author asks for), and decide which chapters a changed outline
     invalidates.
@@ -302,7 +305,8 @@ Three modes. The workflow step selects one.
     spoken in the chapter (languages); the routes between the chapter's places
     (travel); the mysteries the chapter touches, with their clues (mysteries);
   - an adopted theory only through the divergences whose `Basis` cites it (§6.13);
-    never `bible/theories.md` itself.
+    never `bible/theories.md` itself;
+  - in a revision, the chapter as it stands and the notes for the revision (§11.8).
 - **Writes:** `manuscript/chapter-<NN>.md`, with `status: drafted`.
 - **Duties:**
   - Render each scene as **goal, rising conflict, turn**; enter late, leave early.

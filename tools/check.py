@@ -60,7 +60,7 @@ bad = pyaml("hogwarts-at-warp"); bad["setting"]["cutoff"] = "HBP:7"
 check("schema rejects cutoff beside a universe layer", schema("project").is_valid(bad), False)
 bad = pyaml("two-witnesses"); bad["setting"]["cutoffs"] = {"harry-potter": "GoF:37"}
 check("schema rejects cutoffs without a universe layer", schema("project").is_valid(bad), False)
-for ref, ok in [("harry-potter@3.2.1", True), ("harry-potter/fanfic/example@1.2.3", True), ("universe:wizards-and-warp@2.0.3", True),
+for ref, ok in [("harry-potter@3.2.2", True), ("harry-potter/fanfic/example@1.2.4", True), ("universe:wizards-and-warp@2.0.4", True),
                 ("project:two-witnesses@chapter-02", True), ("harry-potter", False), ("project:two-witnesses@1.0.0", False),
                 ("harry-potter/a/b/c@1.0.0", False), ("fanon-hp@latest", False)]:
     d = pyaml("blind-harry"); d["layers"] = [ref]
@@ -70,7 +70,7 @@ d = pyaml("two-witnesses"); d["resolution"] = "newest"; check("schema rejects un
 d = pyaml("two-witnesses"); d["setting"]["active_profile"] = "enhanced"; check("schema rejects 0.1 active_profile", schema("project").is_valid(d), False)
 d = load(EX/"worlds/harry-potter/fanon/package.yaml"); d["relies-on"] = []
 check("schema non-base package must rely on something", schema("package").is_valid(d), False)
-d = load(EX/"worlds/harry-potter/base/package.yaml"); d["relies-on"] = ["star-trek@2.1.1"]
+d = load(EX/"worlds/harry-potter/base/package.yaml"); d["relies-on"] = ["star-trek@2.1.2"]
 check("schema base package relies on nothing", schema("package").is_valid(d), False)
 d = load(EX/"worlds/harry-potter/fanfic/example/package.yaml"); d["id"] = "harry-potter/example"
 check("schema fanfic id under <fandom>/fanfic/", schema("package").is_valid(d), False)
@@ -79,9 +79,9 @@ check("schema serial project, default release policy", (ser["workflow"], "serial
 ser["serial"] = {"released": "revisable"}; check("schema serial revisable accepted", schema("project").is_valid(ser), True)
 ser["serial"] = {"released": "frozen"}; check("schema serial unknown policy rejected", schema("project").is_valid(ser), False)
 for name, doc in [("project", pyaml("two-witnesses")), ("package", load(EX/"worlds/harry-potter/base/package.yaml")), ("universe", load(EX/"universes/wizards-and-warp/universe.yaml"))]:
-    check(f"schema {name}: spec version 0.3", doc["spec_version"], "0.3")
-    doc["spec_version"] = "0.2"; check(f"schema {name}: a 0.2 manifest is not 0.3", schema(name).is_valid(doc), False)
-check("schema: this document is version 0.3", "This document is version `0.3`." in (ROOT/"spec/10-formats.md").read_text(), True)
+    check(f"schema {name}: spec version 0.4", doc["spec_version"], "0.4")
+    doc["spec_version"] = "0.2"; check(f"schema {name}: a 0.2 manifest is not 0.4", schema(name).is_valid(doc), False)
+check("schema: this document is version 0.4", "This document is version `0.4`." in (ROOT/"spec/10-formats.md").read_text(), True)
 nov = pyaml("two-witnesses"); nov["serial"] = {"released": "locked"}
 check("schema serial block on novel rejected", schema("project").is_valid(nov), False)
 
@@ -114,12 +114,13 @@ def pkg_dir(pid):
     fandom, *rest = pid.split("/")
     return EX/"worlds"/fandom/("/".join(rest) if rest else "base")
 
+MULTI_FILES = ("world.md", "places.md", "society.md", "culture.md", "species.md", "history.md", "titles.md")   # §10.5
 def entity_rows(d, entity):
     """An entity's state rows in one bible directory (§10.5)."""
     f = d/"characters"/f"{entity}.md"
     out = table(f, "## State history") if f.exists() else []
     if (d/"relationships.md").exists(): out += [r for r in table(d/"relationships.md", "## State history") if r["Pair"] == entity]
-    for multi in ("species.md", "history.md", "titles.md"):
+    for multi in MULTI_FILES:
         if (d/multi).exists(): out += [r for r in table(d/multi, "## State history") if r["Entity"] == entity]
     if (d/"knowledge.md").exists():
         out += [dict(r, Attribute=r["Secret"], Value=r["State"]) for r in table(d/"knowledge.md", "## Knowledge") if r["Character"] == entity]
@@ -535,12 +536,12 @@ def hidden(stack, entity, cutoff, base=None):
     return {r["Attribute"] for r in stack.layer_rows(entity, base) if r.get("True from")
             and ruler.cmp(r["True from"], cutoff) <= 0 < ruler.cmp(r["As of"], cutoff)}
 
-PURIST  = Stack(["harry-potter@3.2.1"])
-ENRICH  = Stack(["harry-potter@3.2.1", "harry-potter/fanon@1.0.4", "harry-potter/fanfic/example@1.2.3"])
+PURIST  = Stack(["harry-potter@3.2.2"])
+ENRICH  = Stack(["harry-potter@3.2.2", "harry-potter/fanon@1.0.5", "harry-potter/fanfic/example@1.2.4"])
 ENHANCE = Stack(ENRICH.refs, "recency")
 FILL    = Stack(ENRICH.refs, "fill")
-TREK    = Stack(["star-trek@2.1.1"])
-TAS     = Stack(["star-trek@2.1.1", "star-trek/animated@1.0.2"])
+TREK    = Stack(["star-trek@2.1.2"])
+TAS     = Stack(["star-trek@2.1.2", "star-trek/animated@1.0.3"])
 HP, ST = PURIST.ruler(), TREK.ruler()
 g = lambda s, e, c, a, **k: snapshot(s, e, c, **k).get(a)
 
@@ -560,7 +561,7 @@ check("3 broom fill PS:10: the base has a row, so it stands", g(FILL, "harry-pot
 check("3 broom fill PoA:10: the base's (unset) stands", g(FILL, "harry-potter", "PoA:10", "broom"), None)
 check("3 broom fill PoA:11", g(FILL, "harry-potter", "PoA:11", "broom"), "Firebolt")
 check("3 glasses fill: canon's round stands", g(FILL, "harry-potter", "GoF:37", "glasses"), "round")
-FILMS = Stack(["harry-potter@3.2.1", "harry-potter/films@1.0.3"])
+FILMS = Stack(["harry-potter@3.2.2", "harry-potter/films@1.0.4"])
 check("3 quote: the books give the line to Ron", quote(PURIST, "harry-potter", "q1", "GoF:1"), "ron-weasley")
 check("3 quote: precedence with the films gives it to Hermione", quote(FILMS, "harry-potter", "q1", "GoF:1"), "hermione-granger")
 check("3 quote: recency, same point, the higher layer", quote(Stack(FILMS.refs, "recency"), "harry-potter", "q1", "GoF:1"), "hermione-granger")
@@ -605,8 +606,8 @@ check("12 universe stack has two bases", sorted(HW.bases), ["harry-potter", "sta
 check("12 harry broom", g(HW, "harry-potter", None, "broom", base="harry-potter"), "Firebolt")
 check("12 picard", g(HW, "jean-luc-picard", None, "status", base="star-trek"), "captain of the USS Enterprise-D")
 check("12 each base has its own ruler", (HW.ruler("harry-potter").base.id, HW.ruler("star-trek").base.id), ("harry-potter", "star-trek"))
-raises("12 two bases without a universe rejected", lambda: Stack(["harry-potter@3.2.1", "star-trek@2.1.1"]), StackError)
-raises("12 universe below its bases rejected", lambda: Stack(["universe:wizards-and-warp@2.0.3", "harry-potter@3.2.1", "star-trek@2.1.1"]), StackError)
+raises("12 two bases without a universe rejected", lambda: Stack(["harry-potter@3.2.2", "star-trek@2.1.2"]), StackError)
+raises("12 universe below its bases rejected", lambda: Stack(["universe:wizards-and-warp@2.0.4", "harry-potter@3.2.2", "star-trek@2.1.2"]), StackError)
 u = load(EX/"universes/wizards-and-warp/universe.yaml")
 check("V universe pins", sorted(u["relies-on"]), sorted(f"{b}@{Package(b).cfg['version']}" for b in ["harry-potter", "star-trek"]))
 check("V universe offsets name its bases", set(u["offsets"]) <= {d.split("@")[0] for d in u["relies-on"]}, True)
@@ -643,7 +644,7 @@ check("I spock without the package: no pet (a source leak if used)", g(TREK, "sp
 check("I animated is an official package of secondary-official sources", (Package("star-trek/animated").kind, set(Package("star-trek/animated").sources.values())), ("official", {"secondary-official"}))
 
 # --- adaptation timecodes (§4.9) ---------------------------------------------------
-FILMS = Stack(["harry-potter@3.2.1", "harry-potter/films@1.0.3"]); HF = FILMS.ruler()
+FILMS = Stack(["harry-potter@3.2.2", "harry-potter/films@1.0.4"]); HF = FILMS.ruler()
 for pt, want in [("PS:6:2+00:41:10", True), ("PS:6+00:41:10", True), ("PS+00:41:10", False), ("CoS:1+00:01:00", False), ("PS:6:2", True)]:
     check(f"A valid with films {pt}", isvalid(HF, pt), want)
 check("A timecode needs the films layer", isvalid(HP, "PS:6:2+00:41:10"), False)
@@ -887,7 +888,7 @@ def extensions_ok(stack):
         seen[p.id] = {r["Slug"] for r in p.roster()}
     return True
 check("V extension sheets extend a lower layer", extensions_ok(ENRICH), True)
-raises("V fanon below its base rejected", lambda: Stack(["harry-potter/fanon@1.0.4", "harry-potter@3.2.1"]), StackError)
+raises("V fanon below its base rejected", lambda: Stack(["harry-potter/fanon@1.0.5", "harry-potter@3.2.2"]), StackError)
 raises("V wrong package pin rejected", lambda: Stack(["harry-potter@2.1.0"]), StackError)
 
 # --- packages: kinds, ids, sources, points ------------------------------------------
@@ -915,7 +916,9 @@ TB = "three-brothers"; TBS = Stack.of(TB)
 theories = entries(pkg_dir("harry-potter/theories")/"theories.md")
 claims = {t: {int(k.split("-")[1]) for k in e if k.startswith("claim-")} for t, e in theories.items()}
 check("Q theory claims numbered", claims["T1"], {1, 2, 3, 4})
-check("Q theories never resolve into state", snapshot(TBS, "albus-dumbledore"), {})
+check("Q theories never resolve into state", snapshot(TBS, "albus-dumbledore"), snapshot(Stack(["harry-potter@3.2.2"]), "albus-dumbledore", "DH:36"))
+check("Q the theory's subject has canon state of his own", "hallows-hunt" in snapshot(TBS, "albus-dumbledore"), True)
+check("S a place in places.md has a snapshot (§10.5)", snapshot(TBS, "kings-cross-limbo").get("under-a-bench", "")[:24], "a small, flayed, child-l")
 def basis(d):
     m = re.fullmatch(r"(\S+):(T\d+) \(claims? ([\d, ]+)\)", d.get("Basis", ""))
     return (m[1], m[2], {int(x) for x in m[3].split(", ")}) if m else None
@@ -1044,11 +1047,11 @@ def branch_ok(setting, layers):
         if q.get("follow") == "branch" and (setting.get("follow") != "branch" or r.cmp(setting["divergence_point"], q["divergence_point"]) > 0): return False
     return True
 check("SE every project keeps its layers' branches", all(branch_ok(pyaml(p)["setting"], pyaml(p).get("layers", [])) for p in PROJECTS), True)
-NH = ["harry-potter@3.2.1", "project:no-horcruxes@chapter-01"]
+NH = ["harry-potter@3.2.2", "project:no-horcruxes@chapter-01"]
 check("SE a retelling sequel to a branch is rejected", branch_ok({"cutoff": "CoS:1"}, NH), False)
 check("SE a branch sequel diverging later is rejected", branch_ok({"follow": "branch", "divergence_point": "CoS:1"}, NH), False)
 check("SE a branch sequel diverging no later is accepted", branch_ok({"follow": "branch", "divergence_point": "PS:17"}, NH), True)
-INH = Stack(["harry-potter@3.2.1", "project:second-year-tournament@chapter-03"])
+INH = Stack(["harry-potter@3.2.2", "project:second-year-tournament@chapter-03"])
 check("SE the order is inherited from a project layer", (INH.order() == pyaml("second-year-tournament")["setting"]["order"], INH.ruler().cmp("GoF:1", "CoS:1")), (True, -1))
 check("V seam decisions fit their items", all(r["Decision"] in ({"keep-earlier", "accept", "other"} if ":" not in r["Item"] else {"carry-back", "not-yet", "other"})
       and (r["Decision"] != "other" or r["Note"]) for f in (EX/"projects").glob("*/bible/divergences.md") if has(f, "## Seam conflicts") for r in table(f, "## Seam conflicts")), True)
@@ -1223,7 +1226,7 @@ def point_date(stack, pt, base=None):
 def accepted(f):
     return [(r["Check"], r["Subject"], r) for r in table(f, "## Accepted")] if has(f, "## Accepted") else []
 
-STATE_FILES = ("relationships.md", "species.md", "history.md", "titles.md")
+STATE_FILES = ("relationships.md",) + MULTI_FILES
 def state_tables(d):
     """(file, key column or None, rows) for each state-history table in a bible directory."""
     out = [(f, None, table(f, "## State history")) for f in sorted((d/"characters").glob("[!_]*.md"))] if (d/"characters").exists() else []
@@ -2223,5 +2226,214 @@ check("R run late, the release takes the scheduled date and author", (due[2]["st
       ("released", "2026-12-01", "ade", False, []))
 due, told = run_schedules(chs, "2026-12-02T09:00", texts={3: "<!-- TODO: seam conflict: x -->"})
 check("R a schedule that fails its re-check is removed, and the author told", (due[2]["status"], "release-on" in due[2], told), ("early-access", False, ["3: a pending decision or marker"]))
+# --- W. reference workflow files (§11.7, §13) -------------------------------------
+print("\n# W. reference workflow files")
+SPEC = ROOT / "spec"
+def tables_in(text):
+    """Every pipe table in text, as (preceding heading, rows as dicts)."""
+    out, cur, head = [], [], None
+    for l in text.splitlines() + [""]:
+        if l.startswith("|"): cur.append(l); continue
+        if cur:
+            cells = [[c.strip() for c in re.split(r"(?<!\\)\|", x)[1:-1]] for x in cur]
+            out.append((head, [dict(zip(cells[0], r)) for r in cells[2:]])); cur = []
+        if l.startswith("#"): head = l
+    return out
+def spec_section(fname, number):
+    lines = (SPEC / fname).read_text().splitlines(); out, on = [], False
+    for l in lines:
+        if l.startswith("## "): on = l.startswith(f"## {number} ")
+        if on: out.append(l)
+    return "\n".join(out)
+def spec_steps(number):
+    rows = [r for _, t in tables_in(spec_section("13-workflows.md", number)) for r in t
+            if "Step" in r and ("Agent" in r or "Agent / skill" in r)]   # not an added-reads table
+    for r in rows:
+        if "Agent / skill" in r: r["Agent"] = r.pop("Agent / skill")
+    return rows
+ROSTER_AGENTS = {m.group(1) for m in re.finditer(r"^## 12\.\d+ `([a-z-]+)`", (SPEC / "12-agents.md").read_text(), re.M)}
+SKILLS = {m.group(1) for m in re.finditer(r"^\| `([a-z-]+)` +\|", spec_section("11-agent-contract.md", "11.10"), re.M)}
+REPEATS = {"", "per-arc", "per-chapter", "per-character", "per-file", "per-unit", "per-target"}
+check("§12 defines nineteen agents", len(ROSTER_AGENTS), 19)
+check("§11.10 lists the skills", {"compose", "indexer", "release", "export"} <= SKILLS, True)
+
+def wf_parse(p):
+    text = p.read_text(); fm = front(p)
+    steps_part = text.split("\n## Steps", 1)[1].split("\n## ", 1)[0]
+    tabs = tables_in(steps_part)
+    rows = [dict(r, _phase=h) for h, t in tabs for r in t]
+    return fm, text, tabs, rows
+
+WF = {"novel": "13.1", "short-story": "13.2", "serial": "13.3", "established-world": "13.4",
+      "frames": "13.5", "extraction": "13.6", "crossover": "13.7", "adopt": "13.8"}
+check("workflows/ holds one file per §13 workflow", sorted(p.stem for p in (ROOT / "workflows").glob("*.md")), sorted(WF))
+spec_rows = {w: spec_steps(n) for w, n in WF.items()}
+spec_rows["serial"] = spec_rows["novel"][:9] + spec_rows["serial"]          # Phase 1 is steps 1-9 of novel
+check("§13.4 has a compose step before step 1", [(r["Agent"], r["Position"]) for r in spec_rows["established-world"] if r["Step"] == "E0"], [("`compose`", "before 1")])
+check("§13.5 has a frames table", [r["Step"] for r in spec_rows["frames"]], ["T1"])
+
+def catalog():
+    """§3.3: path -> {context: writer cell}."""
+    out = {}
+    for head, t in tables_in(spec_section("03-layers.md", "3.3")):
+        for r in t:
+            path = next(v for k, v in r.items() if k.startswith(("File", "Path")))
+            path = re.sub(r"^`(universes/<u>/|extraction/<pkg>/)", "`", path)
+            path = re.sub(r"`(.*?)`.*", r"\1", path)
+            if head.startswith(("### World", "### Story")): path = "bible/" + path
+            w = out.setdefault(path, {})
+            for k, v in r.items():
+                if k == "Writer": w["package"] = w["project"] = w["universe"] = w.get("project", "") + v
+                elif k == "Writer: package": w["package"] = w.get("package", "") + v
+                elif k == "Writer: project": w["project"] = w.get("project", "") + v
+    return out
+CAT = catalog()
+REVIEWERS = {"continuity": "continuity-editor", "canon": "canon-keeper", "research": "researcher",
+             "critique": "critic", "pacing": "pacing-analyst", "beta-reader": "beta-reader"}
+GENERIC = {"bible/<file>", "bible/<ledger>", "bible/<target>"}
+def write_errors(agent, writes, context):
+    errs = []
+    for path in re.findall(r"`([^`]+)`", writes):
+        if path.startswith("status:") or path in GENERIC: continue
+        name = agent.strip("`")
+        m = re.fullmatch(r"reviews/([a-z-]+)\.md", path)
+        if m:
+            if REVIEWERS.get(m.group(1)) != name: errs.append(f"{name} writes {path}")
+            continue
+        key = re.sub(r"chapter-\d\d", "chapter-<NN>", path)
+        cell = CAT.get(key, {}).get(context)
+        if cell is None: errs.append(f"{path} not in §3.3"); continue
+        if not re.search(rf"(?<![a-z-]){re.escape(name)}(?![a-z-])", cell): errs.append(f"{name} may not write {path}")
+    return errs
+check("§3.3 writer check catches a wrong writer", write_errors("drafter", "`bible/style.md`", "project"), ["drafter may not write bible/style.md"])
+check("§3.3 writer check catches a wrong reviewer", write_errors("critic", "`reviews/pacing.md`", "project"), ["critic writes reviews/pacing.md"])
+
+for w, n in WF.items():
+    p = ROOT / "workflows" / f"{w}.md"
+    fm, text, tabs, rows = wf_parse(p)
+    kind = "overlay" if w in ("established-world", "frames") else "chain"
+    ctx = {"extraction": "package", "crossover": "universe"}.get(w, "project")
+    check(f"{w}: front matter", fm, {"id": w, "kind": kind, "context": ctx})
+    check(f"{w}: heading", next(l for l in text.splitlines() if l.startswith("# ")), f"# Workflow: {w}")
+    cols = {tuple(t[0].keys()) for _, t in tabs}
+    want = ("Step", "Agent", "Reads", "Writes", "Gate", "Repeat") + (("Position",) if kind == "overlay" else ("Parallel",) if w == "extraction" else ())
+    check(f"{w}: step-table columns (§11.7)", cols, {want})
+    phase_ok = all(h is None or re.fullmatch(r"### Phase \d+ — [^()]+( \(repeat: (per-[a-z]+)\))?", h or "") for h, _ in tabs)
+    check(f"{w}: phase headings (§11.7)", phase_ok, True)
+    check(f"{w}: repeat values", all(r["Repeat"] in REPEATS for r in rows), True)
+    check(f"{w}: agents exist (§12, §11.10)", [r["Agent"] for r in rows if not (r["Agent"] in ROSTER_AGENTS or (r["Agent"].startswith("`") and r["Agent"].strip("`") in SKILLS))], [])
+    check(f"{w}: every step reads something", [r["Step"] for r in rows if not r["Reads"]], [])
+    check(f"{w}: writes match §3.3", [e for r in rows for e in write_errors(r["Agent"], r["Writes"], ctx)], [])
+    keys = ("Step", "Agent", "Writes", "Gate") + (("Position",) if kind == "overlay" else ("Parallel",) if w == "extraction" else ())
+    got = [tuple(r.get(k, "") for k in keys) + (r.get("Repeat", ""),) for r in rows]
+    exp = [tuple(r.get(k, "") for k in keys) + (r.get("Repeat", ""),) for r in spec_rows[w]]
+    check(f"{w}: steps match §{n}", got, exp)
+    reps = {re.search(r"repeat: (per-[a-z]+)", h).group(1) for h, _ in tabs if h and "repeat:" in h}
+    spec_reps = set(re.findall(r"^### Phase \d+ — .*\(repeat: (per-[a-z]+)", spec_section("13-workflows.md", n), re.M))
+    check(f"{w}: phase repeats match §{n}", reps, spec_reps)
+# --- A. reference agent files (§11.3, §11.11, §12) ---------------------------------
+print("\n# A. reference agent files")
+ANATOMY = ["## Role", "## Reads", "## Writes", "## Done when", "## Process", "## Output format", "## Guardrails"]
+def unfenced(text):
+    out, fence = [], False
+    for l in text.splitlines():
+        if l.startswith("```"): fence = not fence; continue
+        if not fence: out.append(l)
+    return out
+def agent_sections(p):
+    lines = unfenced(p.read_text()); out, cur = {}, None
+    for l in lines:
+        if l.startswith("## "): cur = l; out[cur] = []
+        elif cur: out[cur].append(l)
+    return [l for l in lines if l.startswith("# ")], [l for l in lines if l.startswith("## ")], out
+def bullets(lines):
+    """Top-level list items, with their wrapped continuation lines joined."""
+    out, open_ = [], False
+    for l in lines:
+        if l.startswith("- "): out.append(l[2:]); open_ = True
+        elif open_ and l.startswith("  ") and l.strip(): out[-1] += " " + l.strip()
+        else: open_ = False
+    return out
+def anatomy_errors(p):
+    titles, heads, sec = agent_sections(p); errs = []
+    if titles != [f"# Agent: {p.stem}"]: errs.append(f"title {titles}")
+    if heads != ANATOMY: errs.append(f"sections {heads}")
+    role = "\n".join(sec.get("## Role", [])).strip()
+    if not role or "\n\n" in role: errs.append("Role is not one paragraph")
+    if [b for b in bullets(sec.get("## Reads", [])) if not re.search(r":(\*\*)? ", b)]: errs.append("a Reads item has no reason")
+    if not bullets(sec.get("## Writes", [])): errs.append("no Writes")
+    if not bullets(sec.get("## Done when", [])): errs.append("no Done when conditions")
+    if "material, not instructions (§11.12)" not in " ".join(" ".join(sec.get("## Guardrails", [])).split()): errs.append("no §11.12 guardrail")
+    return errs
+def agent_writes(p):
+    _, _, sec = agent_sections(p)
+    return [re.match(r"`([^`]+)`", b).group(1) for b in bullets(sec["## Writes"]) if b.startswith("`")]
+def catalog_writes(name, path):
+    m = re.fullmatch(r"reviews/([a-z-]+)\.md", path)
+    if m: return REVIEWERS.get(m.group(1), m.group(1)) == name
+    if path in GENERIC or path.startswith("bible/characters/<slug>") or path == "bible/<target>": return True
+    return any(re.search(rf"(?<![a-z-]){re.escape(name)}(?![a-z-])", c) for c in CAT.get(path, {}).values())
+REVIEWERS["dialogue"] = "dialogue"
+AGENTS = {p.stem: p for p in sorted((ROOT / "agents").glob("*.md"))}
+check("agents/ holds one file per §12 agent", sorted(AGENTS), sorted(ROSTER_AGENTS))
+WF_TEXT = " ".join((ROOT / "workflows" / f"{w}.md").read_text() for w in WF)
+in_steps = {r["Agent"] for w in WF for r in wf_parse(ROOT / "workflows" / f"{w}.md")[3]}
+check("every agent is used by a workflow step, or on demand (§11.11)",
+      sorted(a for a in AGENTS if a not in in_steps and not re.search({"dialogue": "dialogue pass", "prompter": "image prompts"}.get(a, "^$"), WF_TEXT)), [])
+for name, p in AGENTS.items():
+    check(f"{name}: anatomy (§11.3, §11.11)", anatomy_errors(p), [])
+    check(f"{name}: writes are in §3.3 with this writer", [w for w in agent_writes(p) if not catalog_writes(name, w)], [])
+    used = sorted({re.sub(r"chapter-\d\d", "chapter-<NN>", w) for wf in WF for r in wf_parse(ROOT / "workflows" / f"{wf}.md")[3]
+                   if r["Agent"] == name for w in re.findall(r"`([^`]+)`", r["Writes"]) if not w.startswith("status:")})
+    aw = agent_writes(p)
+    check(f"{name}: covers every write its workflow steps give it",
+          [w for w in used if w not in aw and not (w == "bible/<ledger>" and any(x.startswith("bible/") for x in aw))], [])
+check("agent check catches a missing section", "sections" in " ".join(anatomy_errors(ROOT / "workflows" / "novel.md")), True)
+check("agent check catches a wrong writer", catalog_writes("critic", "bible/style.md"), False)
+check("agent check joins wrapped list items", bullets(["- `a`", "  b: c", "", "- d", "x"]), ["`a` b: c", "d"])
+# --- W2. overlay positions resolve in every chain (§11.7) --------------------------
+print("\n# W2. overlay positions")
+CHAIN_ONLY = {"A1": "serial", "A2": "serial"}
+def position_errors(chain, overlay):
+    steps = {r["Step"] for r in wf_parse(ROOT / "workflows" / f"{chain}.md")[3]}
+    errs = []
+    for ov in overlay:
+        own = {r["Step"] for r in wf_parse(ROOT / "workflows" / f"{ov}.md")[3]}
+        for r in wf_parse(ROOT / "workflows" / f"{ov}.md")[3]:
+            anchor = r["Position"].split(" ", 1)[1]
+            if anchor not in steps | own and CHAIN_ONLY.get(anchor) != chain and anchor not in CHAIN_ONLY:
+                errs.append(f"{r['Step']} {r['Position']}")
+    return errs
+for chain in ("novel", "short-story", "serial"):
+    check(f"{chain}: every overlay position resolves (§11.7)", position_errors(chain, ["established-world", "frames"]), [])
+STORY_PLAN = ("bible/premise.md", "bible/outline.md", "bible/style.md")
+def unwritten_reads(chain):
+    """Story files a step reads before any earlier step of its chain writes them (§3.3)."""
+    written, errs = set(), []
+    for r in wf_parse(ROOT / "workflows" / f"{chain}.md")[3]:
+        errs += [f"{r['Step']} reads {p}" for p in re.findall(r"`([^`]+)`", r["Reads"]) if p in STORY_PLAN and p not in written]
+        written |= set(re.findall(r"`([^`]+)`", r["Writes"]))
+    return errs
+for chain in ("novel", "short-story", "serial"):
+    check(f"{chain}: every premise, outline, and style read follows its write (§3.3)", unwritten_reads(chain), [])
+def unrouted_reviews(chain):
+    """Review steps with no showrunner step after them to route their priorities (§12.1)."""
+    rows = wf_parse(ROOT / "workflows" / f"{chain}.md")[3]
+    return [r["Step"] for i, r in enumerate(rows) if "`reviews/" in r["Writes"]
+            and not any(s["Agent"] == "showrunner" for s in rows[i + 1:])]
+for chain in ("novel", "short-story", "serial"):
+    check(f"{chain}: a showrunner step follows every review step (§12.1)", unrouted_reviews(chain), [])
+def added_reads(text):
+    """An overlay's `## Added reads` table (§11.7), as (step, reads) pairs."""
+    part = text.split("\n## Added reads", 1)[1].split("\n## ", 1)[0] if "\n## Added reads" in text else ""
+    return [(r["Step"], r["Reads"]) for _, t in tables_in(part) for r in t]
+CHAIN_STEPS = {r["Step"] for c in ("novel", "short-story", "serial") for r in wf_parse(ROOT / "workflows" / f"{c}.md")[3]}
+for ov, n in (("established-world", "13.4"), ("frames", "13.5")):
+    text = (ROOT / "workflows" / f"{ov}.md").read_text()
+    spec_added = [(r["Step"], r["Reads"]) for _, t in tables_in(spec_section("13-workflows.md", n)) for r in t if set(r) == {"Step", "Reads"}]
+    check(f"{ov}: added reads match §{n}", added_reads(text), spec_added)
+    check(f"{ov}: added reads name chain steps (§11.7)", [s for s, _ in added_reads(text) if s not in CHAIN_STEPS], [])
+check("§13.4 adds the ledger to the drafter's reads", any(s == "10" and "divergences.md" in r for s, r in added_reads((ROOT / "workflows" / "established-world.md").read_text())), True)
+check("added-reads check catches a step no chain has", [s for s, _ in added_reads("x\n## Added reads\n| Step | Reads |\n| - | - |\n| Z9 | `a` |\n") if s not in CHAIN_STEPS], ["Z9"])
 print("\nFAILURES:", fails)
 sys.exit(1 if fails else 0)

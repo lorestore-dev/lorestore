@@ -1,6 +1,6 @@
 # LoreStore: notes for Claude
 
-This repository is the LoreStore specification (draft 0.3): a file-based, model-agnostic
+This repository is the LoreStore specification (draft 0.4): a file-based, model-agnostic
 canon store for fiction, plus the agent framework that reads and writes it. It holds the
 spec, not an implementation.
 
@@ -13,8 +13,13 @@ spec, not an implementation.
 - `examples/`: abridged Harry Potter and Star Trek packages under
   `worlds/<fandom>/<package>/` (each base in `base/`), a crossover universe, and eight
   projects. `examples/README.md` lists the numbered cases and their expected results.
+- `agents/`: the reference agent files (informative, §1.2), in the second person, each
+  restating its §12 section in full with § citations. Change §12 first, then the file.
+- `workflows/`: the reference workflow files (informative, §1.2). Each mirrors its §13
+  table, and the checker holds them to it: change §13 first, then the file.
 - `DECISIONS.md`: decisions D1 onwards, newest first. Add an entry for every rule change.
-- `tools/check.py`: the conformance checker.
+- `tools/check.py`: the conformance checker. `tools/loop.py`: the tool-less loop (§11.1);
+  `examples/runs/` holds a recorded run of it, which the checker does not read.
 
 ## Working rules
 

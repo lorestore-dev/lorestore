@@ -21,9 +21,14 @@ orchestrate the agents, and enforce the contracts defined here.
 | **Agent framework**          | 11–13    | The agent I/O contract, the agent roster, the workflows                    |
 | **Implementation guidance**  | 14       | What a host application (the IWE) must do to conform                       |
 
-Out of scope: the prose of individual agent files (`agents/*.md`), skill
-implementations, model selection, and version-control tooling. This spec defines what
-those artifacts must do, not their wording.
+The repository's `agents/` and `workflows/` folders hold a **reference
+implementation** of the agent framework: one agent file per agent of §12, and one
+workflow file per workflow of §13. They are informative. A host MAY use them as they
+are, adapt them, or write its own, and any agent or workflow file conforms if it meets
+§11–13. Where a reference file and this specification disagree, the specification
+holds.
+
+Out of scope: skill implementations, model selection, and version-control tooling.
 
 ## 1.3 Defining properties
 

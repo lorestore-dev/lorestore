@@ -102,6 +102,12 @@ In project context, `bible/…` reads come from the composed bible (§7.6), so o
 spans every layer of the stack. Each row's `Layer` column says which layer it came
 from; an agent never needs to know where the packages live.
 
+The one exception is the step's own target. A step that writes a project file under
+`bible/` reads that file from the project's own `bible/`, as it stands, so that it
+extends the project's rows and never copies another layer's rows, or the `Layer`
+column, into them. Where it also needs the other layers' rows (the worldbuilder
+adding to the glossary, say), it reads the composed file as well, as a separate input.
+
 Two ways to retrieve, both file-only:
 
 - **Tool-capable runtime:** the agent fetches its own slice at run time with read or
@@ -135,16 +141,33 @@ context: project     # project | package | universe
 | 1    | architect | project.yaml               | bible/premise.md   | milestone |        |
 ```
 
+- `Reads`: the step's retrieval spec (§11.6): agent paths, globs, and the snapshots it
+  needs, each narrowed to the slice the step uses.
 - `Gate`: `milestone` or empty (§11.8).
 - `Repeat`: empty, or one of `per-arc`, `per-chapter`, `per-character`, `per-file`,
   `per-unit`, `per-target`. The instance value substitutes into placeholders in `Reads`
   and `Writes` (`<NN>`, `<slug>`, `<file>`, `<work>`, `<target>`).
+- `Parallel` (optional column, after `Repeat`): `yes` where the instances of a repeated
+  step write different files and MAY run at once (§11.5); empty otherwise.
 - A **phase** is a group of steps that repeats together (the per-chapter drafting loop).
-  Mark it with a `### Phase <n> — <name> (repeat: <kind>)` heading above its table.
+  Mark it with a `### Phase <n> — <name> (repeat: <kind>)` heading above its table, or
+  `### Phase <n> — <name>` for a phase that runs once.
+- A `## Notes` section MAY follow the steps: when a step runs or is skipped, and what
+  the showrunner routes between them, in prose.
 
 An **overlay** adds a `Position` column after `Repeat`, with the value
 `before <step>`, `after <step>`, or `replace <step>`. Overlays apply in the order
-established-world, then frames.
+established-world, then frames. A position names a step of the chain or of the overlay
+itself. Every chain an overlay applies to MUST have each step its positions name, so
+chains that share a step share its number (§13.2, §13.3). The one exception is a step
+that only some chains have, such as `serial`'s arc planning (A1, A2): an overlay step
+positioned on it runs only in those chains.
+
+An overlay MAY also add reads to the chain's own steps, where its condition gives a
+step more to read: in an established world, the drafter reads the divergences that touch
+its cast. It lists them in an `## Added reads` table after its steps, with the columns
+`Step` and `Reads`, one row per step. The orchestrator appends each row's reads to that
+step's `Reads` in every chain that has the step.
 
 ## 11.8 Gates
 
@@ -163,6 +186,11 @@ three signals:
 - **`revise: <notes>`**: re-run the same step with the notes appended to its inputs.
 - **`back: <step>`**: return to an earlier step (for example, the outline needs
   rework).
+
+A step the showrunner schedules with notes (§12.1), a revision or any other, runs as a
+`revise:` does: the showrunner's notes for it are appended to its inputs. A step that revises a file,
+by either route, also reads that file as it stands, so that it changes what the notes
+ask and keeps the rest.
 
 Gates are separate from **decisions** (§6.9): a pending decide item blocks progress past
 its chapter under every gate policy. A `TODO: hidden canon` or `TODO: seam conflict`

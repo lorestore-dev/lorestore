@@ -10,7 +10,7 @@ below are what tools rely on.
 
 **Spec versions.** Every manifest (`project.yaml`, `package.yaml`, `universe.yaml`)
 declares `spec_version`: the `<major>.<minor>` of this specification whose rules its
-directory follows. This document is version `0.3`.
+directory follows. This document is version `0.4`.
 
 - A host MUST list the spec versions it supports, and MUST refuse a stack that holds a
   manifest of any other version, naming it.
@@ -67,7 +67,7 @@ this chapter requires front matter, its keys are listed.
 Schema: [`schemas/project.schema.json`](../schemas/project.schema.json).
 
 ```yaml
-spec_version: "0.3"
+spec_version: "0.4"
 id: two-witnesses
 name: "Two Witnesses"
 workflow: novel                 # novel | short-story | serial
@@ -81,9 +81,9 @@ parameters:
   told_from: end                # optional: a chapter id or end, for a narrator looking back (§7.7)
 
 layers:                         # from the base up; absent or empty = self-contained
-  - harry-potter@3.2.1
-  - harry-potter/fanon@1.0.4
-  - harry-potter/fanfic/example@1.2.3
+  - harry-potter@3.2.2
+  - harry-potter/fanon@1.0.5
+  - harry-potter/fanfic/example@1.2.4
 resolution: recency             # precedence (default) | recency | fill
 
 setting:
@@ -170,14 +170,14 @@ Schema: [`schemas/package.schema.json`](../schemas/package.schema.json).
 Every package has one, in the package's folder:
 
 ```yaml
-spec_version: "0.3"
+spec_version: "0.4"
 id: harry-potter/fanon          # <fandom> | <fandom>/<package> | <fandom>/fanfic/<work>
 kind: fanon                     # base | official | adaptation | fanon | fanfic | theories
 name: "Harry Potter fanon"
 version: 1.0.0
 status: open-for-extraction     # open-for-extraction | locked
 relies-on:                      # pinned; empty for a base package
-  - harry-potter@3.2.1
+  - harry-potter@3.2.2
 license: CC-BY-4.0              # optional: an SPDX license expression (§2.10)
 credit: "Compiled by the fans of the example"   # optional: how to credit the makers
 ```
@@ -714,9 +714,13 @@ Quotations:
 
 ## Consistency rules
 - <rule>
+
+## Open questions
+- <question>
 ```
 
-Concepts and entities are base-qualified (`<base-id>:<id>`). Crossover canon rows use
+`## Open questions` (optional) lists what the bridge-builder could not settle, for the
+human at the gate (§12.19). Concepts and entities are base-qualified (`<base-id>:<id>`). Crossover canon rows use
 source `bridge`. `As of` in crossover canon is a ruler point qualified by world
 (`harry-potter:HBP:7`) or empty.
 

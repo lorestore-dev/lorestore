@@ -1,5 +1,5 @@
-"""Check that every § reference in the spec and the repository's documents resolves to a
-numbered heading in spec/.
+"""Check that every § reference in the spec, the repository's documents, and the
+reference agent and workflow files resolves to a numbered heading in spec/.
 
 Usage:
     python tools/refs.py [repo-root]     # repo-root defaults to this file's parent's parent
@@ -23,7 +23,8 @@ for p in sorted((ROOT / "spec").glob("*.md")):
         m = re.match(r"#+\s+(\d+(?:\.\d+)*)\.?\s", line)
         if m: heads.add(m.group(1))
 
-files = sorted((ROOT / "spec").glob("*.md")) + [ROOT / f for f in DOCS if (ROOT / f).is_file()]
+files = (sorted((ROOT / "spec").glob("*.md")) + [ROOT / f for f in DOCS if (ROOT / f).is_file()]
+         + sorted((ROOT / "agents").glob("*.md")) + sorted((ROOT / "workflows").glob("*.md")))
 bad = []
 for p in files:
     for i, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1):

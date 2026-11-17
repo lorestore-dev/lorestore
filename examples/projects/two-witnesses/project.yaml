@@ -1,4 +1,4 @@
-spec_version: "0.3"
+spec_version: "0.4"
 id: two-witnesses
 name: "Two Witnesses"
 workflow: novel
@@ -10,9 +10,9 @@ parameters:
   target_length: 90000
 
 layers:                         # from the base up
-  - harry-potter@3.2.1
-  - harry-potter/fanon@1.0.4
-  - harry-potter/fanfic/example@1.2.3
+  - harry-potter@3.2.2
+  - harry-potter/fanon@1.0.5
+  - harry-potter/fanfic/example@1.2.4
 resolution: recency             # the latest row wins, from any layer
 
 setting:

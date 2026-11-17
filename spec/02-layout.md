@@ -29,16 +29,16 @@ the base up. The project itself is always the top layer and is never listed.
   │ project:my-book-1@chapter-30                 │  an earlier book: read-only
   │ harry-potter/fanfic/harry-crowe@1.0.0        │  a fan work
   │ harry-potter/fanon@1.3.0                     │  fan conventions
-  │ harry-potter/films@1.0.3                     │  an adaptation
-  │ harry-potter@3.2.1                           │  the base: holds the ruler
+  │ harry-potter/films@1.0.4                     │  an adaptation
+  │ harry-potter@3.2.2                           │  the base: holds the ruler
   └──────────────────────────────────────────────┘
                     ▲ bottom: the base, which everything is built on
 ```
 
 ```yaml
 layers:                                   # from the base up
-  - harry-potter@3.2.1
-  - harry-potter/films@1.0.3
+  - harry-potter@3.2.2
+  - harry-potter/films@1.0.4
   - harry-potter/fanon@1.3.0
   - harry-potter/fanfic/harry-crowe@1.0.0
   - project:my-book-1@chapter-30

@@ -100,23 +100,29 @@ because the author, not the chain, decides when they run.
 
 ## 13.2 `short-story`
 
-A compressed chain for a single scene or arc: one chapter, a lighter foundation.
+A compressed chain for a single scene or arc: one chapter, a lighter foundation. Its
+steps are a selection of `novel`'s, under the same numbers, so the established-world
+and frames overlays apply unchanged. The numbers are ids: the table's order is the
+order the steps run in, and here the critic reads the chapter before it is polished,
+and the showrunner routes its priorities (step 18) before the line-editor runs.
 
 | Step | Agent              | Writes                         | Gate      | Repeat        |
 | ---- | ------------------ | ------------------------------ | --------- | ------------- |
 | 1    | architect          | `bible/premise.md`             | milestone |               |
 | 2    | architect          | `bible/outline.md`             |           |               |
-| 3    | character-designer | `bible/characters/<slug>.md`   |           | per-character |
-| 4    | drafter            | `manuscript/chapter-01.md`     |           |               |
-| 5    | showrunner         | `showrunner-log.md`            |           |               |
-| 6    | continuity-editor  | `reviews/continuity.md`        |           |               |
-| 7    | critic             | `reviews/critique.md`          |           |               |
-| 8    | line-editor        | `manuscript/chapter-01.md`     | milestone |               |
-| 9    | line-editor        | `manuscript/chapter-01.md` (`status: final`) | milestone |  |
+| 4    | character-designer | `bible/characters/<slug>.md`   |           | per-character |
+| 9    | line-editor        | `bible/style.md`               | milestone |               |
+| 10   | drafter            | `manuscript/chapter-01.md`     |           |               |
+| 11   | showrunner         | `showrunner-log.md`            |           |               |
+| 13   | continuity-editor  | `reviews/continuity.md`        |           |               |
+| 16   | critic             | `reviews/critique.md`          |           |               |
+| 18   | showrunner         | `showrunner-log.md`            |           |               |
+| 14   | line-editor        | `manuscript/chapter-01.md`     | milestone |               |
+| 19   | line-editor        | `manuscript/chapter-01.md` (`status: final`) | milestone |  |
 
-Self-contained short stories that need setting add worldbuilder steps after step 2.
-Step 9 is the finishing pass, as step 19 is for a novel; the author MAY send the story
-to early access before it (§13.9). R1 and R2 run on demand, as in `novel`.
+Self-contained short stories that need setting add worldbuilder steps (step 3, as in
+`novel`) after step 2. Step 19 is the finishing pass, as in a novel; the author MAY send
+the story to early access before it (§13.9). R1 and R2 run on demand, as in `novel`.
 
 ## 13.3 `serial`
 
@@ -244,6 +250,7 @@ curator, adds the canon-keeper to review, and runs the living-canon loop (§6.11
 
 | Step | Agent             | Writes                     | Gate      | Position          |
 | ---- | ----------------- | -------------------------- | --------- | ----------------- |
+| E0   | `compose`         | `derived/bible/…`          |           | before 1          |
 | E1   | architect         | `bible/sync-points.md`     | milestone | after 2           |
 | E1a  | canon-keeper      | `reviews/canon.md`         | milestone | after E1          |
 | E1b  | canon-keeper      | `reviews/canon.md`         | milestone | after E1a         |
@@ -256,6 +263,14 @@ curator, adds the canon-keeper to review, and runs the living-canon loop (§6.11
 | E6   | worldbuilder      | `bible/divergences.md`     |           | after A1          |
 | E6a  | canon-keeper      | `reviews/canon.md`         | milestone | after A2          |
 | E6b  | worldbuilder      | `bible/divergences.md`     |           | after E6a         |
+
+It adds reads to two of the chain's steps (§11.7), so that the plan and the prose know
+what the story changes in canon:
+
+| Step | Reads                                                                                                    |
+| ---- | -------------------------------------------------------------------------------------------------------- |
+| 2    | `bible/divergences.md`; `bible/canon-timeline.md`; `plot-architecture.md` (the stretch the story covers) |
+| 10   | `bible/divergences.md` (the divergences and open consequences that touch the cast)                       |
 
 - Steps 3, 6, and 7 write only the project's own additions (§13.1): the world comes from
   the stack, and the adherence settings are the author's, in `project.yaml` (§6.3).
@@ -291,7 +306,8 @@ curator, adds the canon-keeper to review, and runs the living-canon loop (§6.11
   entities (§6.2), the reordering itself, and the author's chosen resolution for each
   order inversion, with its fallout as open consequences.
 - **E3** classifies the chapter's problems (§6.9). **E4** routes fix items and resolves
-  or surfaces decide items. A pending decide item blocks step 14 (§11.8).
+  or surfaces decide items. It also logs the consequences E3 reports honored, so that
+  E5 can mark them absorbed. A pending decide item blocks step 14 (§11.8).
 - **E5** runs only when E4 accepted an emergent divergence or consequences were
   absorbed. It logs the divergence and updates consequence statuses. The showrunner then
   schedules revisions for any already-written chapter an open consequence invalidates.
@@ -303,8 +319,9 @@ curator, adds the canon-keeper to review, and runs the living-canon loop (§6.11
   gate waits for the author, under every gate policy. E6b logs the author's choices,
   and the showrunner repeats E6a and E6b until E6a finds nothing new.
 - Steps 4 and 5 (character-designer) write original characters and their roster rows only.
-- A `compose` step (§7.6) runs before step 1, and again whenever a layer's pin or the
-  project's own `bible/` changes, so the agents read a current composed bible.
+- **E0**, the `compose` skill (§7.6), runs before step 1, and the showrunner runs it
+  again whenever a layer's pin or the project's own `bible/` changes, so the agents read
+  a current composed bible.
 - When the stack's packages are extracted, a `temporal-snapshot` step MAY precede step
   10 to materialize the cast's snapshots (§7.6).
 
@@ -312,13 +329,17 @@ curator, adds the canon-keeper to review, and runs the living-canon loop (§6.11
 
 Applies when `setting.temporal_model: frames`.
 
+| Step | Agent        | Writes             | Gate | Position |
+| ---- | ------------ | ------------------ | ---- | -------- |
+| T1   | canon-keeper | `reviews/canon.md` |      | after 13 |
+
+- **T1** runs only in a project that is not established-world, for the frame,
+  mechanism, and paradox checks alone (§9.1). In an established world, E3 makes them.
 - The rules of time travel come from `time-travel.md` (§9.1). In a self-contained
   project, the worldbuilder writes it at step 3, alongside the rest of the world.
 - Step 12 (chronicler) also maintains `timelines.md` and `branches.md`.
 - The drafter marks every scene's world point and travelers (§10.18).
-- The canon-keeper runs its frame, mechanism, and paradox checks (§9.1). In a project
-  that is not established-world, the overlay inserts the canon-keeper after step 13 for
-  those checks only.
+- The canon-keeper runs its frame, mechanism, and paradox checks (§9.1), at E3 or T1.
 - An accepted paradox is recorded by a chronicler step on `branches.md`, scheduled by
   the showrunner.
 

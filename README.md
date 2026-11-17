@@ -5,7 +5,7 @@ fictional world, and the stories set in it, are stored as small markdown and YAM
 how facts are dated, sourced, and resolved; how a story forks from canon without
 editing it; and how a team of narrow AI agents reads and writes those files.
 
-**Status:** draft, spec version `0.3`. Breaking changes are still expected.
+**Status:** draft, spec version `0.4`. Breaking changes are still expected.
 
 ## Reading order
 
@@ -35,7 +35,9 @@ Integrated Writing Environment) should also read chapters 10, 11, and 14.
 spec/            the specification, one chapter per file
 schemas/         JSON Schemas for project.yaml, package.yaml, universe.yaml
 examples/        a small conforming workspace, with expected snapshot results
-tools/           the conformance checker for the examples
+agents/          the reference agent files, one per agent of chapter 12 (informative)
+workflows/       the reference workflow files, one per workflow of chapter 13 (informative)
+tools/           the conformance checker, and a minimal tool-less loop (loop.py)
 DECISIONS.md     design decisions taken, and the questions still open
 ROADMAP.md       the path from this draft to 1.0
 CONTRIBUTING.md  how to set up the repository, propose changes, and submit packages
@@ -62,14 +64,20 @@ check fails. [tools/refs.py](tools/refs.py) checks that every `§` reference res
 a heading. Run both after changing a rule, a schema, or an example; CI runs them on
 every pull request.
 
+[tools/loop.py](tools/loop.py) is a minimal tool-less loop (§11.1): it runs a project's
+workflow with any model, or writes each step's prompt for a reply by hand.
+[examples/runs/](examples/runs/) records a run of it.
+
 **Limitations:**
 
 - It checks the bundled examples only. Paths and expected values are hard-coded, so it is
   not a validator for workspaces of your own.
-- It is a reference for the data model only. It does not test the agent contract, the
-  agents, or the workflows (chapters 11–13).
+- It is a reference for the data model. Of the agent framework (chapters 11–13), it
+  checks only the shape of the reference files: that each workflow file matches its
+  chapter 13 table, that each agent file follows the anatomy of §11.3, and that both
+  agree with the file catalog (§3.3). It does not run them, or judge their prose
+  against chapter 12.
 - It parses only the tables it needs, not every format in chapter 10.
-- It does not check markdown links.
 - A passing run means the examples are consistent with the checker's reading of the
   spec. Where the two disagree, the spec is the authority.
 

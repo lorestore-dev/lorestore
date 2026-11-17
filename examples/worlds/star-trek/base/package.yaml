@@ -1,8 +1,8 @@
-spec_version: "0.3"
+spec_version: "0.4"
 id: star-trek
 kind: base
 name: "Star Trek"
-version: 2.1.1
+version: 2.1.2
 status: open-for-extraction
 relies-on: []
 calendar: iso

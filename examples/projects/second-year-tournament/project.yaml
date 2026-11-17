@@ -1,4 +1,4 @@
-spec_version: "0.3"
+spec_version: "0.4"
 id: second-year-tournament
 name: "The Second-Year Tournament"
 workflow: novel
@@ -10,7 +10,7 @@ parameters:
   target_length: 120000
 
 layers:                         # from the base up
-  - harry-potter@3.2.1
+  - harry-potter@3.2.2
 
 setting:
   type: established
