@@ -1,0 +1,56 @@
+name: Review finding
+description: A problem found while reading or implementing the spec
+labels: ["review"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        One finding per issue. See [REVIEWING.md](https://github.com/lorestore-dev/lorestore/blob/main/REVIEWING.md) for what to look for.
+  - type: input
+    id: section
+    attributes:
+      label: Section
+      description: The § reference of the rule, such as §7.2.
+      placeholder: §7.2
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - Contradiction (two rules can't both hold)
+        - Gap (no rule covers the case)
+        - Ambiguity (a rule reads two ways, with different results)
+        - Unexplained term
+        - Example disagrees (an expected answer in examples/README.md)
+        - Design doubt (it works, but seems wrong or too complex)
+    validations:
+      required: true
+  - type: textarea
+    id: rule
+    attributes:
+      label: The rule
+      description: Quote the rule, or the part of it that's the problem.
+      render: markdown
+    validations:
+      required: true
+  - type: textarea
+    id: case
+    attributes:
+      label: A concrete case
+      description: The files, the stack, the cutoff, what you expected, and what the spec gives. Leave it empty if the finding doesn't need one.
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggestion
+      description: Optional. How you'd fix it, if you have an idea.
+  - type: dropdown
+    id: track
+    attributes:
+      label: Track
+      options:
+        - "A: reading the core"
+        - "B: implementing the snapshot"
+        - "C: the agent framework"
+        - Other

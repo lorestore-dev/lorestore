@@ -55,6 +55,7 @@ point (§4.4), and universe offsets (§8.1) shift a base calendar that nothing d
 ### 4. Outside review (0.5)
 
 - Stop internal review rounds.
+- Add `REVIEWING.md`, a guide for reviewers, and a **Review finding** issue form.
 - Have one or two people who did not write the spec read it, ideally by implementing a
   piece of it, such as the snapshot query (§7).
 - Fold their findings into the spec and the agents. Tag `v0.5`.
@@ -77,7 +78,7 @@ point (§4.4), and universe offsets (§8.1) shift a base calendar that nothing d
 ### 6. Cut 1.0
 
 - Tag the last pre-1.0 commit `v0-archive`, which keeps the decision history.
-- Remove `DECISIONS.md`, `CLAUDE.md`, `ROADMAP.md`, and `tools/`.
+- Remove `DECISIONS.md`, `CLAUDE.md`, `ROADMAP.md`, `REVIEWING.md`, and `tools/`.
 - Remove "draft" from the README status, and set `spec_version: "1.0"` in the schemas,
   the spec, and every example manifest.
 - Point CONTRIBUTING.md's package registry at something that exists, or remove the

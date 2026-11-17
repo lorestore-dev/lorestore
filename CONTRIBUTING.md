@@ -53,6 +53,9 @@ useful issues:
 - say whether the problem is a contradiction (two rules disagree), a gap (no rule covers
   the case), or something unclear (a rule can be read two ways).
 
+If you're reviewing the spec, [REVIEWING.md](REVIEWING.md) suggests what to read and
+look for, and the **Review finding** issue form asks for all of the above.
+
 Some questions are design questions, not bugs. Those are welcome too, and an issue is
 the right place to discuss them before anyone writes a pull request.
 

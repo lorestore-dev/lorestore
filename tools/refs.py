@@ -15,7 +15,7 @@ be linked from at least one spec section.
 import re, sys, pathlib
 
 ROOT = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else pathlib.Path(__file__).resolve().parent.parent
-DOCS = ("README.md", "CONTRIBUTING.md", "DECISIONS.md", "ROADMAP.md", "CLAUDE.md", "examples/README.md")
+DOCS = ("README.md", "CONTRIBUTING.md", "DECISIONS.md", "ROADMAP.md", "REVIEWING.md", "CLAUDE.md", "examples/README.md")
 
 heads = set()
 for p in sorted((ROOT / "spec").glob("*.md")):
