@@ -60,7 +60,7 @@ bad = pyaml("hogwarts-at-warp"); bad["setting"]["cutoff"] = "HBP:7"
 check("schema rejects cutoff beside a universe layer", schema("project").is_valid(bad), False)
 bad = pyaml("two-witnesses"); bad["setting"]["cutoffs"] = {"harry-potter": "GoF:37"}
 check("schema rejects cutoffs without a universe layer", schema("project").is_valid(bad), False)
-for ref, ok in [("harry-potter@3.2.1", True), ("harry-potter/fanfic/example@1.2.2", True), ("universe:wizards-and-warp@2.0.3", True),
+for ref, ok in [("harry-potter@3.2.1", True), ("harry-potter/fanfic/example@1.2.3", True), ("universe:wizards-and-warp@2.0.3", True),
                 ("project:two-witnesses@chapter-02", True), ("harry-potter", False), ("project:two-witnesses@1.0.0", False),
                 ("harry-potter/a/b/c@1.0.0", False), ("fanon-hp@latest", False)]:
     d = pyaml("blind-harry"); d["layers"] = [ref]
@@ -536,7 +536,7 @@ def hidden(stack, entity, cutoff, base=None):
             and ruler.cmp(r["True from"], cutoff) <= 0 < ruler.cmp(r["As of"], cutoff)}
 
 PURIST  = Stack(["harry-potter@3.2.1"])
-ENRICH  = Stack(["harry-potter@3.2.1", "harry-potter/fanon@1.0.3", "harry-potter/fanfic/example@1.2.2"])
+ENRICH  = Stack(["harry-potter@3.2.1", "harry-potter/fanon@1.0.4", "harry-potter/fanfic/example@1.2.3"])
 ENHANCE = Stack(ENRICH.refs, "recency")
 FILL    = Stack(ENRICH.refs, "fill")
 TREK    = Stack(["star-trek@2.1.1"])
@@ -887,7 +887,7 @@ def extensions_ok(stack):
         seen[p.id] = {r["Slug"] for r in p.roster()}
     return True
 check("V extension sheets extend a lower layer", extensions_ok(ENRICH), True)
-raises("V fanon below its base rejected", lambda: Stack(["harry-potter/fanon@1.0.3", "harry-potter@3.2.1"]), StackError)
+raises("V fanon below its base rejected", lambda: Stack(["harry-potter/fanon@1.0.4", "harry-potter@3.2.1"]), StackError)
 raises("V wrong package pin rejected", lambda: Stack(["harry-potter@2.1.0"]), StackError)
 
 # --- packages: kinds, ids, sources, points ------------------------------------------
@@ -1866,5 +1866,130 @@ check("S every revision has a reader note", all(r["Reader note"] for r in rev), 
 fb = sorted((TLB/"references/feedback").glob("chapter-*/*.md"))
 check("S feedback filed per chapter and reader", [(p.parent.name, p.stem) for p in fb], [("chapter-03", "reader-a")])
 check("S feedback only on chapters readers have", all(st[chap(p.parent.name) - 1] in ("early-access", "released") for p in fb), True)
+# --- licenses, authors, and content notes (§2.10, §11.13, §13.11) ---------------------
+SPDX_ID = re.compile(r"^(LicenseRef-)?[A-Za-z0-9][A-Za-z0-9.\-+]*$")
+def spdx_ok(expr):
+    """A small SPDX expression parser: ids joined by AND, OR, and WITH, with brackets (§2.10)."""
+    toks = re.findall(r"\(|\)|[^\s()]+", expr or ""); pos = 0
+    def term():
+        nonlocal pos
+        if pos < len(toks) and toks[pos] == "(":
+            pos += 1
+            if not compound() or pos >= len(toks) or toks[pos] != ")": return False
+            pos += 1; return True
+        if pos < len(toks) and SPDX_ID.match(toks[pos]) and toks[pos] not in ("AND", "OR", "WITH"):
+            pos += 1
+            if pos < len(toks) and toks[pos] == "WITH":
+                pos += 1
+                if pos >= len(toks) or not SPDX_ID.match(toks[pos]): return False
+                pos += 1
+            return True
+        return False
+    def compound():
+        nonlocal pos
+        if not term(): return False
+        while pos < len(toks) and toks[pos] in ("AND", "OR"):
+            pos += 1
+            if not term(): return False
+        return True
+    return bool(toks) and compound() and pos == len(toks)
+def license_errors(manifest):
+    doc = load(manifest); lic = doc.get("license")
+    if lic is None: return []
+    if not spdx_ok(lic): return ["license"]
+    if "LicenseRef-" in lic and not (manifest.parent/"LICENSE.md").exists(): return ["LICENSE.md"]
+    return []
+HPW = EX/"worlds/harry-potter"
+check("U fanon is CC-BY-4.0, with a credit", (load(HPW/"fanon/package.yaml").get("license"), bool(load(HPW/"fanon/package.yaml").get("credit"))), ("CC-BY-4.0", True))
+check("U the base states no license", "license" in load(HPW/"base/package.yaml"), False)
+check("U every manifest's license is valid", [str(p.relative_to(EX)) for p in EX.rglob("*.yaml") if p.name in ("package.yaml", "universe.yaml") and license_errors(p)], [])
+check("U the fan work's own terms have their LICENSE.md", load(HPW/"fanfic/example/package.yaml")["license"].startswith("LicenseRef-") and (HPW/"fanfic/example/LICENSE.md").exists(), True)
+for expr, ok in [("CC-BY-4.0", True), ("CC-BY-SA-4.0 OR MIT", True), ("(MIT AND CC0-1.0) OR Apache-2.0", True), ("GPL-2.0-or-later WITH Classpath-exception-2.0", True),
+                 ("LicenseRef-fan-author-terms", True), ("MIT OR", False), ("(MIT", False), ("free to use", False), ("", False), ("AND MIT", False)]:
+    check(f"U SPDX {expr!r}", spdx_ok(expr), ok)
+for name, path in [("package", HPW/"fanon/package.yaml"), ("universe", EX/"universes/wizards-and-warp/universe.yaml")]:
+    d = load(path); d["license"] = "MIT"; d["credit"] = "x"
+    check(f"U schema: {name} takes license and credit", schema(name).is_valid(d), True)
+    d["credit"] = ""; check(f"U schema: {name} credit may not be empty", schema(name).is_valid(d), False)
+
+TLBY = pyaml("the-long-way-back")
+AUTHORS = [a["id"] for a in TLBY.get("authors", [])]
+check("U the-long-way-back has two authors", AUTHORS, ["ade", "kit"])
+for label, change, ok in [("an author with no name", lambda d: d["authors"].append({"id": "sam"}), False),
+                          ("an author id that is not an id", lambda d: d["authors"].append({"id": "Sam W", "name": "Sam"}), False),
+                          ("an empty authors list", lambda d: d.__setitem__("authors", []), False),
+                          ("a content note id that is not an id", lambda d: d["content_notes"].__setitem__("Self Harm", "x"), False),
+                          ("an empty content note", lambda d: d["content_notes"].__setitem__("peril", ""), False),
+                          ("an empty content_notes map", lambda d: d.__setitem__("content_notes", {}), False),
+                          ("a third author", lambda d: d["authors"].append({"id": "sam", "name": "Sam"}), True)]:
+    d = copy.deepcopy(TLBY); change(d); check(f"U schema: {label}", schema("project").is_valid(d), ok)
+
+BY_REQUIRED = ("## Hidden canon", "## Theory conflicts", "## Seam conflicts")
+def author_errors(project_yaml, chapters, ledgers):
+    """§11.13: unique ids; By and -by values are authors; with two or more, required where §10.8, §10.5, §10.18 say."""
+    ids = [a["id"] for a in project_yaml.get("authors", [])]; many = len(ids) >= 2; out = []
+    if len(set(ids)) != len(ids): out.append("duplicate author")
+    ok = lambda v: v in ids
+    for c in chapters:
+        for step in ("early-access", "released"):
+            by = c.get(f"{step}-by")
+            if by is not None and not ok(by): out.append(f"chapter {c['chapter']}: {step}-by {by}")
+            if many and step in c and by is None: out.append(f"chapter {c['chapter']}: no {step}-by")
+    for heading, rows in ledgers.items():
+        for r in rows:
+            by = r.get("By", "")
+            if by and not ok(by): out.append(f"{heading}: By {by}")
+            need = heading in BY_REQUIRED or heading == "## Accepted" or (heading == "## Consequences" and r.get("Status") == "accepted")
+            if many and need and not by: out.append(f"{heading}: no By")
+    return out
+TLB_LEDGERS = {h: table(TLB/"bible/divergences.md", h) for h in ("## Divergences", "## Consequences")}
+check("U the-long-way-back's authors are valid", author_errors(TLBY, chs, TLB_LEDGERS), [])
+check("U each release and early access names its author", [(c["chapter"], c.get("released-by") or c.get("early-access-by")) for c in chs if c["status"] != "drafted"], [(1, "ade"), (2, "kit"), (3, "kit")])
+HID = {"## Hidden canon": [{"Entity": "x", "Decision": "keep-hidden", "By": ""}]}
+ACC = {"## Consequences": [{"Status": "accepted", "Note": "n", "By": ""}, {"Status": "open", "By": ""}]}
+for label, y, c, led, want in [
+        ("a duplicate author id", {"authors": [{"id": "ade"}, {"id": "ade"}]}, [], {}, 1),
+        ("a release by someone not listed", TLBY, [{"chapter": 1, "released": "d", "released-by": "sam"}], {}, 1),
+        ("a release that names no author, with two", TLBY, [{"chapter": 1, "released": "d"}], {}, 1),
+        ("the same, with one author", {"authors": [{"id": "ade"}]}, [{"chapter": 1, "released": "d"}], {}, 0),
+        ("the same, with none listed", {}, [{"chapter": 1, "released": "d"}], {}, 0),
+        ("a hidden-canon decision with no By, with two", TLBY, [], HID, 1),
+        ("an accepted consequence with no By; an open one needs none", TLBY, [], ACC, 1),
+        ("a project acceptance with no By, with two", TLBY, [], {"## Accepted": [{"Check": "born-died", "By": ""}]}, 1),
+        ("a divergence By that is not an author", TLBY, [], {"## Divergences": [{"ID": "D1", "By": "sam"}]}, 1),
+        ("a divergence with no By (SHOULD, not MUST)", TLBY, [], {"## Divergences": [{"ID": "D1", "By": ""}]}, 0)]:
+    check(f"U author error: {label}", len(author_errors(y, c, led)), want)
+
+def note_errors(project_yaml, chapters):
+    """§13.11, §10.18."""
+    notes = project_yaml.get("content_notes"); out = []
+    for c in chapters:
+        n = c["chapter"]
+        if notes is None:
+            if "content-notes" in c or "content-notes-suggested" in c: out.append(f"{n}: notes without content_notes")
+            continue
+        if any(x not in notes for x in c.get("content-notes") or []): out.append(f"{n}: unknown note")
+        if any(x not in notes and not re.fullmatch(r"new:[a-z0-9]+(-[a-z0-9]+)*", x) for x in c.get("content-notes-suggested") or []): out.append(f"{n}: bad suggestion")
+        if c["status"] in ("early-access", "released") and "content-notes" not in c: out.append(f"{n}: unconfirmed")
+    return out
+def note_warnings(project_yaml, chapters):
+    notes = project_yaml.get("content_notes") or {}
+    return [c["chapter"] for c in chapters if c["status"] in ("early-access", "released")
+            and any(x in notes and x not in (c.get("content-notes") or []) for x in c.get("content-notes-suggested") or [])]
+check("U the-long-way-back's content notes are valid", note_errors(TLBY, chs), [])
+check("U the notes readers see", {c["chapter"]: c.get("content-notes") for c in chs}, {1: ["death"], 2: [], 3: ["grief"], 4: None})
+check("U a new: suggestion the author did not keep raises nothing", note_warnings(TLBY, chs), [])
+ch3 = next(c for c in chs if c["chapter"] == 3)
+for label, chapter, y, want in [
+        ("a confirmed note not on the list", dict(ch3, **{"content-notes": ["violence"]}), TLBY, 1),
+        ("a suggestion neither listed nor new:", dict(ch3, **{"content-notes-suggested": ["violence"]}), TLBY, 1),
+        ("an early-access chapter with no notes", {k: v for k, v in ch3.items() if k != "content-notes"}, TLBY, 1),
+        ("a drafted chapter with no notes", {"chapter": 4, "status": "drafted"}, TLBY, 0),
+        ("notes in a project without content_notes", ch3, {k: v for k, v in TLBY.items() if k != "content_notes"}, 1)]:
+    check(f"U content-note error: {label}", len(note_errors(y, [chapter])), want)
+check("U a revision's listed suggestion missing from the confirmed notes warns",
+      note_warnings(TLBY, [dict(ch3, **{"content-notes-suggested": ["grief", "death"]})]), [3])
+check("U the line-editor only suggests; the release skill confirms",
+      [c["chapter"] for c in chs if "content-notes" in c and c["status"] not in ("early-access", "released")], [])
 print("\nFAILURES:", fails)
 sys.exit(1 if fails else 0)

@@ -172,6 +172,8 @@ none` the showrunner makes the decision; otherwise a human does. **Order inversi
 (§6.13), and **seam conflicts** (§6.14) are the exception: they are always the author's
 decision, and wait for the author even under `gates: none`. So are the author's
 publishing steps: sending a chapter to early access and releasing it (§13.3, §13.9).
+In a project with more than one author, any of them may give a signal or decide
+(§11.13).
 
 ## 11.9 Signals between agents
 
@@ -202,7 +204,7 @@ language-model agents, but they obey the same one-output rule:
 | `indexer`           | `bible/index.md`           | Lists every file in its package or project, with its layer from §3.3 |
 | `cite`              | the requested output file  | Renders `sources.md` bibliography entries as APA, MLA, or Chicago |
 | `renumber`          | every chapter id in the project | Applies a mapping of old chapter ids to new ones across the project's files, refusing to move a chapter readers have seen or another project pins (§13.10) |
-| `release`           | `manuscript/chapter-<NN>.md` | At the author's word only: sets the chapter's front matter to `status: early-access` and `early-access: <date>`, or (serials) `status: released` and `released: <date>`, refusing a chapter out of order (§13.3, §13.9) |
+| `release`           | `manuscript/chapter-<NN>.md` | At the author's word only: sets the chapter's front matter to `status: early-access` and `early-access: <date>`, or (serials) `status: released` and `released: <date>`, refusing a chapter out of order (§13.3, §13.9). Records the content notes the author confirms (§13.11), and, with two or more authors, which author it acted for (§11.13) |
 
 `compose` writes many files, but they are one output: the composed bible as a whole. No
 other step writes under `derived/bible/`. Likewise, `renumber` writes one output: the
@@ -243,3 +245,27 @@ book being extracted.
   prompter under `## Gaps` (§10.29). The showrunner surfaces each report to the author.
 - An instruction that a story's characters give each other, in dialogue or in a
   quoted letter, is story, and is neither followed nor reported.
+
+## 11.13 More than one author
+
+Wherever this specification says **the author**, it means the person the project
+belongs to, and, in a project whose `project.yaml` lists `authors` (§10.1), any one of
+them. Any listed author may approve a gate, make an author-only decision (order
+inversions, divergence conflicts, hidden canon, theory conflicts, seam conflicts,
+accepting a chronology contradiction or a consequence), send a chapter to early access,
+or release it.
+
+- **The host knows who is acting.** How it knows is the host's business. It MUST
+  refuse an author's decision, or a gate signal, from anyone who is not a listed author.
+- **Every decision names its author.** With two or more authors, each record of an
+  author's decision carries the author's id: the `By` column in `divergences.md`
+  (§10.8) and in a project's `## Accepted` tables (§10.5), and `early-access-by` and
+  `released-by` in a chapter's front matter (§10.18). The showrunner records in its log
+  which author gave each gate signal.
+- **A decision stands until an author changes it.** Changing one is a new decision,
+  by whichever author makes it, and the record takes their id.
+- **Agents never choose between authors.** When two authors' requests conflict (one
+  asks for a revision another has approved, say), the showrunner surfaces both to the
+  authors and waits. Settling it is theirs.
+
+**Example cases:** [U2](../examples/README.md#case-u2).

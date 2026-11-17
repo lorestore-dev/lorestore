@@ -12,10 +12,11 @@ examples/
 │   │   │                        #   an iso calendar, ruler dates, and world history;
 │   │   │                        #   a mystery, parentage, and a title
 │   │   ├── films/               # an adaptation: the first film, with adaptation timecodes
-│   │   ├── fanon/               # community conventions, as extension sheets
+│   │   ├── fanon/               # community conventions, as extension sheets; CC-BY-4.0
 │   │   ├── theories/            # a fan theory, as numbered claims
 │   │   └── fanfic/
-│   │       └── example/         # a placeholder fan work, with its own work inserted after the books
+│   │       └── example/         # a placeholder fan work, with its own work inserted after the books,
+│   │                            #   under its author's own terms (LICENSE.md)
 │   └── star-trek/
 │       ├── base/                # the base: series, seasons, episodes, a film; technology.md,
 │       │                        #   species.md; character versions; an undivided season; dates
@@ -30,7 +31,8 @@ examples/
     ├── no-horcruxes/            # a branch: Voldemort dies in year one, later canon never happens
     ├── blind-harry/             # a retelling: Harry is blind, canon still unfolds around him
     ├── three-brothers/          # a short story adopting a fan theory
-    ├── the-long-way-back/       # Star Trek, established, a serial with a buffer and early access, frames
+    ├── the-long-way-back/       # Star Trek, established, a serial with a buffer and early access, frames;
+    │                            #   two authors, and content notes
     ├── lantern-road/            # a self-contained book, with a story-dated row and its own calendar;
     │                            #   routes and journey times, a mystery, a map prompt, and
     │                            #   viewpoints, told from the end
@@ -45,7 +47,7 @@ stacks, from the base up:
 | Name     | Layers                                                                      | Resolution |
 | -------- | --------------------------------------------------------------------------- | ---------- |
 | canon    | `harry-potter@3.2.1`                                                         | precedence |
-| fan      | `harry-potter@3.2.1`, `harry-potter/fanon@1.0.3`, `harry-potter/fanfic/example@1.2.2` | precedence |
+| fan      | `harry-potter@3.2.1`, `harry-potter/fanon@1.0.4`, `harry-potter/fanfic/example@1.2.3` | precedence |
 | fan, recency | the same layers                                                         | recency    |
 | fan, fill    | the same layers                                                         | fill       |
 | trek     | `star-trek@2.1.1`                                                            | precedence |
@@ -566,15 +568,39 @@ chapter 11.
 `viewpoint=ines-varga` and `viewpoint=tomas-hale told-from=—` matches its outline. With
 Ines in both scenes, the host warns ([§7.7](../spec/07-snapshot.md#77-viewpoints)).
 
+## Sharing and publishing
+
+<a id="case-u1"></a>**U1. Licenses and credit.** `harry-potter/fanon` is `CC-BY-4.0`, with a
+credit line ([§2.10](../spec/02-layout.md#210-licenses-and-credit)). `harry-potter/fanfic/example` uses
+`LicenseRef-fan-author-terms`, so its terms are in a `LICENSE.md` beside its manifest. The
+`harry-potter` base states no license: a host shows that plainly, and never reads it as
+permission. Either license covers the package's own records, never the novels.
+
+<a id="case-u2"></a>**U2. Two authors.** `the-long-way-back` lists two authors, `ade` and
+`kit` ([§11.13](../spec/11-agent-contract.md#1113-more-than-one-author)). Either may release a chapter or make an author-only decision, and
+the record names who did: Ade released chapter 1 (`released-by: ade`), Kit chapter 2,
+and Kit sent chapter 3 to early access (`early-access-by: kit`) ([§10.18](../spec/10-formats.md#1018-manuscript-chapters)). Its
+`divergences.md` carries a `By` column in both tables ([§10.8](../spec/10-formats.md#108-divergencesmd)). A hidden-canon row
+or an `accepted` consequence with no `By` would be an error here; a divergence with
+none is not.
+
+<a id="case-u3"></a>**U3. Content notes.** `the-long-way-back` lists two notes, `death` and
+`grief` ([§13.11](../spec/13-workflows.md#1311-content-notes)). For chapter 1 the line-editor suggested `death` and `new:peril`;
+the author confirmed `death` only, so `content-notes: [death]`, and the `peril` they
+did not keep raises nothing. Chapter 2 needs none (`content-notes: []`), and chapter 3,
+in early access, carries `grief`. Chapter 4 is drafted, with no notes yet. If a
+revision of chapter 3 led the line-editor to suggest `death` too, the host would warn
+until the author confirmed or declined it.
+
 ## Validation cases
 
 A conforming host MUST report each of these if introduced:
 
 - citing the `films` source from the Harry Potter base (a tier its kind does
   not allow, [§2.3](../spec/02-layout.md#23-packages));
-- removing `harry-potter/fanon@1.0.3` from `two-witnesses-ii` (a package layer not
+- removing `harry-potter/fanon@1.0.4` from `two-witnesses-ii` (a package layer not
   relisted, [§2.2](../spec/02-layout.md#22-layers-and-stacks));
-- moving `harry-potter/fanon@1.0.3` below `harry-potter@3.2.1` in any stack (a layer
+- moving `harry-potter/fanon@1.0.4` below `harry-potter@3.2.1` in any stack (a layer
   below what it relies on, [§2.2](../spec/02-layout.md#22-layers-and-stacks));
 - a `PS:6:2+00:41:10` as-of in a stack without `harry-potter/films` ([§4.9](../spec/04-temporal.md#49-adaptations-base-points-with-the-adaptations-timecode));
 - changing the animated package's `TAS:1` row to insert after `TOS:4` (an unknown
@@ -619,11 +645,16 @@ A conforming host MUST report each of these if introduced:
 - `modules.romance`, or `lineage: "yes"`, in `project.yaml` (rejected by the schema);
 - a prompt of kind `poster`, cut off at `GoF:38`, or with a subject `neville-longbottom`, who is not in the stack's roster ([§10.29](../spec/10-formats.md#1029-promptsidmd-image-prompts));
 - in `lantern-road`'s outline: a mode `all`; chapter 3 with no viewpoint, or with two rows; a scene of chapter 6 with no viewpoint, or its scenes numbered from 2; a viewpoint in chapter 2; `harry-potter` as a viewpoint (not in the roster); chapter 5 told from `chapter-03`; or a `Told from` on a scene whose viewpoint is `—` ([§10.23](../spec/10-formats.md#1023-outlinemd), [§7.7](../spec/07-snapshot.md#77-viewpoints));
-- `viewpoints: all` or `told_from: later` in `project.yaml` (rejected by the schema).
+- `viewpoints: all` or `told_from: later` in `project.yaml` (rejected by the schema);
+- `license: free to use`, or `MIT OR`, in a manifest, or removing the fan work's `LICENSE.md` ([§2.10](../spec/02-layout.md#210-licenses-and-credit));
+- a third author with id `ade`; `released-by: sam` (not an author); or chapter 1 with no `released-by` ([§11.13](../spec/11-agent-contract.md#1113-more-than-one-author));
+- `content-notes: [violence]` (not on the list) on chapter 3, `violence` without `new:` among its suggestions, or chapter 3 with no `content-notes`; or any note on a chapter of a project without `content_notes` ([§13.11](../spec/13-workflows.md#1311-content-notes));
+- an author with no `name`, an empty `authors` list, or a content note id `Self Harm` (rejected by the schema).
 
 A conforming host SHOULD warn if `the-long-way-back`'s `## Columns` row for `Notes` is
 deleted (an unregistered column, [§10.0](../spec/10-formats.md#100-conventions)), if a `timeline.md` event dated `1975` lists
 `harry-potter`, born in 1980 ([§4.13](../spec/04-temporal.md#413-in-world-time)), if Ines reaches `lowmere` too fast (M1, [§9.4](../spec/09-modules.md#94-travel)), if a
 mystery's needed clue comes after its reveal or it has none before ([§9.5](../spec/09-modules.md#95-mysteries)), or if a
 parent is under 12 at a birth, a child is born more than a year after a parent's death,
-or a title is held outside its holder's lifetime ([§9.6](../spec/09-modules.md#96-lineage)).
+or a title is held outside its holder's lifetime ([§9.6](../spec/09-modules.md#96-lineage)), or if a chapter readers
+have lacks a listed note that the line-editor suggests (U3, [§13.11](../spec/13-workflows.md#1311-content-notes)).

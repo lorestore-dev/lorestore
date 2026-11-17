@@ -338,7 +338,7 @@ to a package:
 | --------- | -------------------------------------------------------------------------------------------------- |
 | **major** | The ruler is reordered, a ruler point is removed, a slug is renamed or removed, a source is removed, a relied-on package is re-pinned to a new major version |
 | **minor** | Facts, works, sources, dates, or files are added                                                   |
-| **patch** | Values or citations are corrected without adding or removing anything, a relied-on package is re-pinned to a new minor or patch version, or `spec_version` changes (§10.0) |
+| **patch** | Values or citations are corrected without adding or removing anything, a relied-on package is re-pinned to a new minor or patch version, or `spec_version`, `license`, or `credit` changes (§10.0, §2.10) |
 
 Every pin names an exact version: a project's layers, a package's `relies-on`, and a
 universe's `relies-on`. When a package's version differs from a pin, the host MUST warn,
@@ -390,3 +390,28 @@ carried it back. The author reviews the result before the package is locked, and
 project then stacks the package in place of the project layers.
 
 **Example cases:** [L3](../examples/README.md#case-l3).
+
+## 2.10 Licenses and credit
+
+Packages and universes are made to be shared, so a manifest can say how its layer may
+be reused and how to credit the people who made it. Both keys are optional, in
+`package.yaml` and `universe.yaml` (§10.2):
+
+- `license`: an [SPDX license expression](https://spdx.org/licenses/) (`CC-BY-4.0`,
+  `CC-BY-SA-4.0 OR MIT`), or `LicenseRef-<id>` for terms of the package's own, which
+  then go in a `LICENSE.md` beside the manifest.
+- `credit`: free text, the credit line the makers ask for.
+
+The license covers the layer's **own records**: its facts in its own words, its
+citations, its theories, and its bridge. It never covers the source works the records
+describe, whose rights stay with their owners (§5), and it grants nothing the source
+works' owners have not. A `fanfic` package's `credit` names the fan work's author as
+they ask to be credited, beside the package's own makers (§5.6).
+
+- A layer without a `license` states no terms. A host MUST NOT read its absence as
+  permission.
+- A host SHOULD show the author each layer's `license` and `credit` when the author adds
+  it to a stack, and wherever it lists a stack's layers (§14.1).
+- Changing either key is a patch bump (§2.8): it changes no record.
+
+**Example cases:** [U1](../examples/README.md#case-u1).

@@ -448,10 +448,14 @@ rewrites.
 - **Duties:** cut filler, hedges, clichés, and repetition; vary rhythm; choose precise
   verbs; enforce POV distance and filtering rules; enforce the style guide's
   text-and-speech formatting (dialogue, thought, marked languages, telepathy, written
-  text, reveal-gated markers).
+  text, reveal-gated markers). In a project with `content_notes`, suggest the
+  chapter's notes in `content-notes-suggested` (§13.11): every note on the project's
+  list that the chapter calls for, and `new:<id>` for anything a reader would want
+  warning of that the list lacks.
 - **Guardrails:** never change what happens (flag plot or continuity changes instead);
   don't homogenize voices; preserve intentional style; edit towards the style guide,
-  not its own taste.
+  not its own taste. Never set `content-notes`: only the author confirms a chapter's
+  notes.
 
 ## 12.15 `dialogue`: distinct voices
 

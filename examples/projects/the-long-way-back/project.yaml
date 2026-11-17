@@ -22,3 +22,13 @@ setting:
 modules:
   litrpg: false
   languages: false
+
+authors:
+  - id: ade
+    name: "Ade"
+  - id: kit
+    name: "Kit"
+
+content_notes:
+  death: "The death of a character"
+  grief: "Grief and mourning"

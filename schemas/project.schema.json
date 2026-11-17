@@ -214,6 +214,27 @@
         }
       }
     },
+    "authors": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Who makes the author's decisions. See spec/11-agent-contract.md §11.13. That ids are unique is a host validation (§14.2).",
+      "items": {
+        "type": "object",
+        "required": ["id", "name"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "#/$defs/id" },
+          "name": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "content_notes": {
+      "type": "object",
+      "minProperties": 1,
+      "description": "The content notes chapters may carry: note id to the words readers see. See spec/13-workflows.md §13.11.",
+      "propertyNames": { "$ref": "#/$defs/id" },
+      "additionalProperties": { "type": "string", "minLength": 1 }
+    },
     "serial": {
       "type": "object",
       "additionalProperties": false,

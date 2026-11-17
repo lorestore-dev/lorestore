@@ -66,6 +66,12 @@ summarizes the contracts the rest of the spec defines.
 18. **Check spec versions** (§10.0). Refuse a stack with a manifest whose
     `spec_version` the host does not support, and read each directory by its own
     version's rules.
+19. **Show licenses and credit** (§2.10). When the author adds a package or universe to
+    a stack, and wherever the host lists a stack's layers, show each layer's `license`
+    and `credit`, and say plainly when a layer states no license.
+20. **Know which author is acting** (§11.13). In a project with `authors`, take
+    author-only decisions and gate signals only from a listed author, and record which
+    one.
 
 ## 14.2 Validation
 
@@ -134,6 +140,9 @@ is defined.
 | A renumbering moves a released or early-access chapter, or a chapter at or before another project's pin, or leaves a chapter id unrewritten | §13.10 |
 | A change to an early-access chapter, or a revisable released one, with no `revisions.md` row or no reader note | §10.22 |
 | A feedback file's `chapter` does not match its folder                            | §10.25    |
+| A `license` that is not a valid SPDX license expression, or a `LicenseRef-` with no `LICENSE.md` beside the manifest | §2.10 |
+| Two `authors` with the same id; a `By`, `early-access-by`, or `released-by` that is not an author's id; or, with two or more authors, one of them missing where it is required | §11.13, §10.8 |
+| A content note in a project without `content_notes`; a `content-notes` id not in `content_notes`, or a `content-notes-suggested` entry that is neither an id there nor `new:<id>`; an early-access or released chapter with no `content-notes` | §13.11, §10.18 |
 | An outline row with an unknown `Viewpoints` mode, or one not on its chapter's first row; a chapter in `chapter` mode without exactly one row and one viewpoint; a scene in `scene` mode without a viewpoint or `—`, or scenes not numbered from 1; a viewpoint in a `none` chapter; a viewpoint that is not a slug in the stack's roster | §10.23 |
 | A `Told from` (in the outline, `parameters.told_from`, or a chapter) that is not a chapter id or `end`, is before its chapter, or is given where there is no viewpoint character | §7.7, §10.23 |
 | A prompt file with an unknown `kind`, a subject that is not in the roster or `places.md`, an invalid `cutoff`, `position`, or `date`, or no `## Gaps` or `## Sources` | §10.29 |
@@ -157,7 +166,8 @@ does not register (§10.0), when a chapter as drafted records a different viewpo
 or viewpoint from its outline row (§7.7), when a journey is faster than the routes allow (§9.4), when
 a mystery is unfair (§9.5), when a parent is under 12 at a birth, a child is born more
 than a year after a parent's death, or a title is held outside its holder's lifetime
-(§9.6), and when the author releases a serial chapter that is not
+(§9.6), when a chapter readers have lacks a listed note its
+`content-notes-suggested` names (§13.11), and when the author releases a serial chapter that is not
 ready, or sends one to early access that is not `line-edited` (§13.3, §13.9).
 
 **Example cases:** the [validation cases](../examples/README.md#validation-cases).

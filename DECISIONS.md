@@ -5,6 +5,24 @@ says what was unclear or contradictory, what was decided, and where the rule now
 
 ## 0.3: in-world time
 
+**D120. Licenses, co-authors, and content notes.** Three things that publishing and
+sharing need were missing. *Licenses*: packages are made to be shared, but a manifest
+could not say on what terms. `package.yaml` and `universe.yaml` take an optional
+`license` (an SPDX expression, or `LicenseRef-` with a `LICENSE.md`) and `credit`. A
+license covers the layer's own records, never the source works, and a missing one is
+never read as permission. Changing either is a patch bump. *Co-authors*: every
+author-only decision assumed one author. `project.yaml` takes an optional `authors`
+list; any listed author may decide, and with two or more, every decision record names
+its author (`By`, `early-access-by`, `released-by`). Agents never choose between
+authors. *Content notes*: serials carry per-chapter warnings, and nothing tracked them.
+A project lists its notes in `content_notes`; the line-editor suggests a chapter's
+notes, and the author confirms them when sending it to early access or releasing it,
+which the host refuses without them. Notes may change after release, even when
+releases are locked, and the change is logged. The fanon and fan-work packages take a
+license and a patch bump; `the-long-way-back` gains two authors and content notes.
+→ §1, §2.8, §2.10, §10.1, §10.2, §10.5, §10.8, §10.18, §11.8, §11.10, §11.13, §12.14,
+§13.11, §14.1, §14.2
+
 **D119. The spec links to its examples.** The example cases cited the spec by `§` in
 plain text, and no spec section pointed back to a case, so a reader of a rule could
 not find the case that shows it. Every case now has an anchor; each spec section that a

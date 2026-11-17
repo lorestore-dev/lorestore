@@ -82,8 +82,8 @@ parameters:
 
 layers:                         # from the base up; absent or empty = self-contained
   - harry-potter@3.2.1
-  - harry-potter/fanon@1.0.3
-  - harry-potter/fanfic/example@1.2.2
+  - harry-potter/fanon@1.0.4
+  - harry-potter/fanfic/example@1.2.3
 resolution: recency             # precedence (default) | recency | fill
 
 setting:
@@ -101,8 +101,24 @@ modules:
   travel: false
   mysteries: false
   lineage: false
+
+authors:                        # optional: who makes the author's decisions (§11.13)
+  - id: ade
+    name: "Ade"
+  - id: kit
+    name: "Kit"
+
+content_notes:                  # optional: the content notes chapters may carry (§13.11)
+  death: "The death of a character"
+  grief: "Grief and mourning"
 ```
 
+- `authors`: optional. Each entry has an `id` (§10.0), unique in the list, and a
+  `name`. Absent means one author, unnamed. With two or more, every record of an
+  author's decision names who made it (§11.13).
+- `content_notes`: optional. A map from a note's id (§10.0) to what it warns of, in
+  the words readers will see. Absent means the project does not track content notes,
+  and its chapters MUST NOT carry them (§13.11).
 - `layers`: layer references, from the base up (§2.2): `<package-id>@<version>`,
   `universe:<id>@<version>`, or `project:<id>@chapter-<NN>`. The project itself is the
   implicit top layer.
@@ -149,6 +165,8 @@ version: 1.0.0
 status: open-for-extraction     # open-for-extraction | locked
 relies-on:                      # pinned; empty for a base package
   - harry-potter@3.2.1
+license: CC-BY-4.0              # optional: an SPDX license expression (§2.10)
+credit: "Compiled by the fans of the example"   # optional: how to credit the makers
 ```
 
 - `id` MUST match the package's folder (§2.3). A `base` package's id is the bare fandom
@@ -156,6 +174,8 @@ relies-on:                      # pinned; empty for a base package
 - `relies-on` lists `<package-id>@<version>` pins. Every entry MUST appear below the
   package in any stack that uses it (§2.2).
 - The tiers a package may register depend on its kind (§2.3, §5.2).
+- `license` and `credit` are optional (§2.10). `license` MUST be a valid SPDX license
+  expression; a `LicenseRef-<id>` in it needs a `LICENSE.md` beside the manifest.
 - A `base` package MAY declare its world's calendar (§4.13): `calendar: iso`, with an
   optional `notation`, or a custom calendar. Both keys are invalid in every other kind.
 
@@ -169,6 +189,7 @@ notation: gregory               # optional; a BCP 47 calendar identifier, iso on
 Schema: [`schemas/universe.schema.json`](../schemas/universe.schema.json). Example in
 §8.1. `kind` is always `universe`; `relies-on` pins two or more bases; `offsets` is
 keyed by base id. The bridge's source id is the reserved `bridge`, tier `crossover`.
+`license` and `credit` are optional, as in `package.yaml` (§2.10).
 
 ## 10.3 `index.md`
 
@@ -395,6 +416,8 @@ MAY follow the table it excuses, in `canon-timeline.md` or in any state-history 
 - `Reason`: free text, required.
 - `Citation`: required in a package, where the acceptance records what the source does.
   In a project, it MAY be empty.
+- `By` (optional column, last; projects only): the author who accepted it, an id from
+  `authors`. Required in a project with two or more authors (§11.13).
 
 An original character (`origin: original`) uses project-defined sources. Its rows MAY
 leave `As of` empty, and use `Source: project`.
@@ -531,6 +554,12 @@ Bibliography keys: `author`, `year`, `title`, `container`, `volume`, `issue`, `p
   ID of the divergence a `keep-earlier` or `other` produced, or `—`. `Decided in` is
   the chapter being written when the decision was made. `Note` is required for
   `other`.
+- `By` (optional column, last, in every table of the file): the author who made the
+  decision the row records, an id from `authors` (§11.13). In a project with two or
+  more authors it is required on every row of `## Hidden canon`, `## Theory conflicts`,
+  and `## Seam conflicts`, and on every `accepted` consequence. A divergence logged to
+  carry out an author's decision (an order inversion or a divergence conflict) SHOULD
+  name the author too.
 
 ## 10.9 `characters/_roster.md`
 
@@ -744,6 +773,23 @@ released: 2026-11-03    # serial only: set by the release skill
 ---
 ```
 
+With two or more authors (§11.13), the release skill also records who took each step:
+`early-access-by` and `released-by`, each an id from `authors`.
+
+**Content notes** (§13.11). In a project with `content_notes`:
+
+```yaml
+content-notes-suggested: [death, new:violence]   # set by the line-editor
+content-notes: [death]  # set by the release skill, from what the author confirms
+```
+
+- `content-notes-suggested`: ids from `content_notes`, or `new:<id>` for a note the
+  list lacks.
+- `content-notes`: ids from `content_notes` only. An empty list (`[]`) means the
+  author confirmed that the chapter needs none. Required on every chapter that is
+  `early-access` or `released`.
+- In a project without `content_notes`, both keys are invalid.
+
 | Status         | Meaning                                                                      | Workflows       |
 | -------------- | ---------------------------------------------------------------------------- | --------------- |
 | `drafted`      | Written, not yet polished                                                    | all             |
@@ -790,7 +836,7 @@ Markers in the prose:
 - **Seam conflicts** are marked where a beat needs an earlier book's item that is
   ahead of the chapter and undecided (§6.14): `<!-- TODO: seam conflict: <item> -->`
 
-**Example cases:** [V4](../examples/README.md#case-v4).
+**Example cases:** [V4](../examples/README.md#case-v4), [U2](../examples/README.md#case-u2), [U3](../examples/README.md#case-u3).
 
 ## 10.19 Reviews
 

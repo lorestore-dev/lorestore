@@ -505,3 +505,30 @@ step.
   project.
 
 **Example cases:** [27](../examples/README.md#case-27).
+
+## 13.11 Content notes
+
+Serials posted on fan sites, and books with early readers, usually warn readers of
+what a chapter contains. A project that wants to track this lists its notes in
+`project.yaml` under `content_notes` (§10.1), and each chapter records its own in its
+front matter (§10.18). It works the same in every workflow.
+
+- **The line-editor suggests.** Each time it edits a chapter (step 14), it sets
+  `content-notes-suggested`: the project's notes that the chapter calls for, and
+  `new:<id>` for one the list lacks (§12.14).
+- **The author confirms.** Sending a chapter to early access or releasing it is the
+  author's decision (§13.3, §13.9), and so are its notes. At that step the showrunner
+  shows the author the suggestions, the author confirms the notes, adding to the
+  project's list any new one they keep, and the `release` skill records them in
+  `content-notes`. A chapter cannot reach early access or release without them: the
+  host MUST refuse it.
+- **Notes can change after readers have the chapter.** The author may change a
+  released or early-access chapter's `content-notes`, even under
+  `serial.released: locked`: the notes are not the text. The chronicler logs the change
+  in `revisions.md` (§10.22), with a reader note, so readers can be told.
+- **A revision may call for new notes.** After a revision, the line-editor's new
+  suggestions may differ from the confirmed notes. The host SHOULD warn when a
+  suggested note from the project's list is missing from `content-notes` on a chapter
+  readers have. A `new:` suggestion the author did not keep raises nothing.
+
+**Example cases:** [U3](../examples/README.md#case-u3).
