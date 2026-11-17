@@ -204,11 +204,14 @@ language-model agents, but they obey the same one-output rule:
 | `indexer`           | `bible/index.md`           | Lists every file in its package or project, with its layer from §3.3 |
 | `cite`              | the requested output file  | Renders `sources.md` bibliography entries as APA, MLA, or Chicago |
 | `renumber`          | every chapter id in the project | Applies a mapping of old chapter ids to new ones across the project's files, refusing to move a chapter readers have seen or another project pins (§13.10) |
-| `release`           | `manuscript/chapter-<NN>.md` | At the author's word only: sets the chapter's front matter to `status: early-access` and `early-access: <date>`, or (serials) `status: released` and `released: <date>`, refusing a chapter out of order (§13.3, §13.9). Records the content notes the author confirms (§13.11), and, with two or more authors, which author it acted for (§11.13) |
+| `release`           | `manuscript/chapter-<NN>.md` (front matter only) | At the author's word only: sends a chapter, or a run of chapters, to early access, releases, re-releases, or withdraws it, now or on a schedule, and records the content notes the author confirms. Refuses a step the rules forbid (§13.12) |
+| `export`            | `export/…`                 | Writes the clean chapters, and, with a `publishing` block, the metadata a fan site asks for, for each audience (§13.13) |
 
 `compose` writes many files, but they are one output: the composed bible as a whole. No
 other step writes under `derived/bible/`. Likewise, `renumber` writes one output: the
-project's chapter ids, everywhere they occur (§13.10).
+project's chapter ids, everywhere they occur (§13.10). `release` writes the front matter
+of each chapter in the run it is given, as one step, and `export` the whole
+of `export/`, both audiences at once.
 
 ## 11.11 Writing a new agent
 

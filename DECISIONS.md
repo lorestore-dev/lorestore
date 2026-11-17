@@ -5,6 +5,29 @@ says what was unclear or contradictory, what was decided, and where the rule now
 
 ## 0.3: in-world time
 
+**D121. Releasing, and exporting for readers.** The `release` skill was thinly
+specified. The file catalog limited it to serials, though it also sent chapters to early
+access in every workflow; no novel or short-story step ran it; a short story could never
+be `final`; nothing wrote a content-note change after release; a re-release had nowhere
+to record its date; and only order was a hard refusal. Releasing is now its own section.
+The skill takes one of seven steps (early access, release, re-release, withdraw,
+schedule, unschedule, notes) for one chapter or a run of them, as one all-or-nothing
+decision. It refuses a chapter out of order, with a pending decide item or a `TODO`
+marker, or with unconfirmed notes. `released` keeps the first release, and
+`re-released` the latest. A schedule (`release-on`, `early-access-on`) is the author's
+decision taken ahead of time; the host carries it out at the time, re-checking first,
+and dates the step as scheduled. Authors may withdraw a released installment: it keeps
+its place in the run and its story in the bible, may be revised whatever the release
+mode, and comes back as a re-release. R1 runs on demand in every workflow, and a short
+story gains a finishing step. A new `export` skill writes what the author posts, per
+audience: each chapter as clean Markdown, with no front matter or comment and scene
+markers turned into breaks, and, with a `publishing` block, the metadata a fan site's
+form asks for (title, authors, fandoms, rating, tags, relationships, characters,
+content notes, the authors' notes). The metadata names characters from the timeline,
+by roster name, and never a true identity before its reveal. Posting stays the
+author's: no agent publishes. → §2.5, §2.6, §3.3, §10.1, §10.18, §10.30, §11.10,
+§12.2, §13.1, §13.2, §13.3, §13.11, §13.12, §13.13, §14.2
+
 **D120. Licenses, co-authors, and content notes.** Three things that publishing and
 sharing need were missing. *Licenses*: packages are made to be shared, but a manifest
 could not say on what terms. `package.yaml` and `universe.yaml` take an optional

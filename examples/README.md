@@ -32,7 +32,8 @@ examples/
     ├── blind-harry/             # a retelling: Harry is blind, canon still unfolds around him
     ├── three-brothers/          # a short story adopting a fan theory
     ├── the-long-way-back/       # Star Trek, established, a serial with a buffer and early access, frames;
-    │                            #   two authors, and content notes
+    │                            #   two authors, content notes, a scheduled release,
+    │                            #   and its export for readers
     ├── lantern-road/            # a self-contained book, with a story-dated row and its own calendar;
     │                            #   routes and journey times, a mystery, a map prompt, and
     │                            #   viewpoints, told from the end
@@ -592,6 +593,46 @@ in early access, carries `grief`. Chapter 4 is drafted, with no notes yet. If a
 revision of chapter 3 led the line-editor to suggest `death` too, the host would warn
 until the author confirmed or declined it.
 
+## Releasing and exports
+
+<a id="case-p1"></a>**P1. Releasing.** In `the-long-way-back`, chapters 1 and 2 are released and
+chapter 3 is in early access ([§13.12](../spec/13-workflows.md#1312-releasing)). Releasing chapter 3 sets `status: released`
+and `released`, keeps its `early-access` date, and, with two authors, records who
+released it. Chapter 4 cannot be released before chapter 3, nor while it is drafted
+unless the author insists, nor ever while it has a pending decide item, a `TODO`
+marker, or unconfirmed content notes. Released together, as the run "3 to 4", the two
+chapters share one date, and if chapter 4 fails a check, neither is released.
+
+<a id="case-p2"></a>**P2. A scheduled release.** Ade has scheduled chapter 3 for
+`2026-12-01T18:00+00:00` (`release-on`, `release-on-by: ade`). Nothing happens before
+then. A host that next runs on 2 December releases it, dated `2026-12-01` and by Ade,
+after re-checking: had a `TODO` marker appeared in the meantime, it would remove the
+schedule and tell the authors instead. Chapter 4 may be scheduled for 8 December, but
+not for 30 November, before chapter 3.
+
+<a id="case-p3"></a>**P3. Withdrawing.** If the authors withdraw chapter 2, it becomes
+`withdrawn` and keeps its `released` date. Chapters 1 and 3 are untouched, chapter 3 may
+still be released, and the run of released chapters is unbroken. Released again on 8
+December, chapter 2 takes `re-released: 2026-12-08` and keeps its first release date.
+Under locked releases, only a withdrawn chapter may be re-released.
+
+<a id="case-p4"></a>**P4. A short story's finish.** A short story ends with step 9, the
+line-editor's finishing pass, which sets `status: final`, as step 19 does in a novel
+([§13.12](../spec/13-workflows.md#1312-releasing)). A `released` status, or a `release-on` schedule, in a novel or a short
+story is an error.
+
+<a id="case-p5"></a>**P5. The export.** `the-long-way-back/export/` is what the `export`
+skill writes ([§13.13](../spec/13-workflows.md#1313-exporting-for-readers), [§10.30](../spec/10-formats.md#1030-export-chapters-for-readers)). `public/` holds chapters 1 and 2, and
+`early-access/` chapters 1 to 3. `chapter-01.md` is headed `# Narendra`, keeps the
+prose, and loses the front matter, both scene markers (the second becomes `* * *`),
+and the line-editor's comment. `chapter-01.yaml` lists the characters from
+`timeline.md` by name (Lt. Mira Oduya, Rachel Garrett, Tasha Yar (altered timeline)),
+the readers' words for its content note, and the authors' notes from
+`references/chapter-notes/`. The public `work.yaml` knows two chapters and no Picard;
+the early-access one knows three, and him. Withdrawing chapter 1 would drop it from
+`public/`. A character's true identity behind a reveal alias, such as Barty Crouch Jr.
+behind `moody-impostor`, is left out until the audience reaches `GoF:35`.
+
 ## Validation cases
 
 A conforming host MUST report each of these if introduced:
@@ -649,7 +690,9 @@ A conforming host MUST report each of these if introduced:
 - `license: free to use`, or `MIT OR`, in a manifest, or removing the fan work's `LICENSE.md` ([§2.10](../spec/02-layout.md#210-licenses-and-credit));
 - a third author with id `ade`; `released-by: sam` (not an author); or chapter 1 with no `released-by` ([§11.13](../spec/11-agent-contract.md#1113-more-than-one-author));
 - `content-notes: [violence]` (not on the list) on chapter 3, `violence` without `new:` among its suggestions, or chapter 3 with no `content-notes`; or any note on a chapter of a project without `content_notes` ([§13.11](../spec/13-workflows.md#1311-content-notes));
-- an author with no `name`, an empty `authors` list, or a content note id `Self Harm` (rejected by the schema).
+- an author with no `name`, an empty `authors` list, or a content note id `Self Harm` (rejected by the schema);
+- releasing `the-long-way-back`'s chapter 3 with a `TODO` marker left in it, or the run of chapters 3 and 4 while 4 has a pending decide item; re-releasing chapter 1 under locked releases; withdrawing chapter 3, which was never released; `release-on: next Friday`; or `status: released` in `two-witnesses` ([§13.12](../spec/13-workflows.md#1312-releasing));
+- an `export/public/chapter-03.md`, which the public does not have; a comment left in an exported chapter; or a `relationships` entry `mira-oduya&rachel-garrett` ([§13.13](../spec/13-workflows.md#1313-exporting-for-readers), rejected by the schema).
 
 A conforming host SHOULD warn if `the-long-way-back`'s `## Columns` row for `Notes` is
 deleted (an unregistered column, [§10.0](../spec/10-formats.md#100-conventions)), if a `timeline.md` event dated `1975` lists

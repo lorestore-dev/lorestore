@@ -4,6 +4,7 @@
 | Path                      | Layer | Holds                                   |
 | ------------------------- | ----- | --------------------------------------- |
 | premise.md                | story | Logline and central dramatic question   |
+| timeline.md               | story | Story events, chapter by chapter        |
 | divergences.md            | story | Divergence ledger                       |
 | timelines.md              | story | Travelers' personal timelines           |
 | branches.md               | story | World-lines and paradox ledger          |

@@ -208,10 +208,12 @@ projects/<project-id>/
 │   └── chapter-<NN>.md
 ├── reviews/                # advisory diagnostics, never canon
 ├── prompts/                # image prompts, never canon (§10.29)
+├── export/                 # clean chapters and site metadata for readers, never canon (§10.30)
 ├── derived/                # rebuildable caches, never canon (§7.6)
 │   └── bible/              # the composed bible: every layer merged (§7.6)
 ├── references/             # user-supplied input
-│   └── feedback/           # human readers' notes, per chapter (§10.25)
+│   ├── feedback/           # human readers' notes, per chapter (§10.25)
+│   └── chapter-notes/      # the author's notes to readers, per chapter (§10.30)
 └── runs/                   # orchestrator run records (format implementation-defined)
 ```
 
@@ -233,6 +235,7 @@ rooted at the project, with these prefixes:
 | `manuscript/@<q>/…` | `projects/<q>/manuscript/…`, for a project layer `q`, up to its pinned chapter (read-only) |
 | `reviews/…`         | `projects/<p>/reviews/…`                   |
 | `prompts/…`         | `projects/<p>/prompts/…`                   |
+| `export/…`          | `projects/<p>/export/…`                    |
 | `derived/…`         | `projects/<p>/derived/…`                   |
 | `references/…`      | `projects/<p>/references/…`                |
 

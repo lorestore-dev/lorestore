@@ -39,6 +39,6 @@ spec, not an implementation.
 Order inversions (§6.8), divergence conflicts (§6.6), hidden canon (§6.12), theory
 conflicts (§6.13), seam conflicts (§6.14), and accepting a chronology contradiction in a
 project (§4.13) are always the author's decision; agents
-surface them but never resolve them. So are sending a chapter to early access and
-releasing it (§13.9, §13.3). In a project that lists `authors`, any listed author may
+surface them but never resolve them. So are sending a chapter to early access,
+releasing, scheduling, and withdrawing it (§13.9, §13.12). In a project that lists `authors`, any listed author may
 make these decisions (§11.13).

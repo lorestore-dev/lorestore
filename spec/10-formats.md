@@ -111,6 +111,14 @@ authors:                        # optional: who makes the author's decisions (§
 content_notes:                  # optional: the content notes chapters may carry (§13.11)
   death: "The death of a character"
   grief: "Grief and mourning"
+
+publishing:                     # optional: what the export's metadata says (§13.13)
+  summary: "Cedric lives, and Harry is no longer the only one who saw."
+  rating: teen                  # free text, in the author's words or a site's
+  language: en                  # BCP 47
+  tags: [hurt/comfort, canon divergence]
+  relationships: [harry-potter+cedric-diggory]
+  scene_break: "* * *"          # optional; the default
 ```
 
 - `authors`: optional. Each entry has an `id` (§10.0), unique in the list, and a
@@ -119,6 +127,11 @@ content_notes:                  # optional: the content notes chapters may carry
 - `content_notes`: optional. A map from a note's id (§10.0) to what it warns of, in
   the words readers will see. Absent means the project does not track content notes,
   and its chapters MUST NOT carry them (§13.11).
+- `publishing`: optional. Without it, the export writes clean chapters but no metadata
+  (§13.13). `summary`, `rating`, and `tags` are the author's words, copied as they are.
+  `language` is a BCP 47 tag. `relationships` lists pairs of slugs in the stack's
+  roster: `a+b` for a friendship or other bond, `a/b` for a romance, as fan sites write
+  them. `scene_break` is the line that stands between scenes in an exported chapter.
 - `layers`: layer references, from the base up (§2.2): `<package-id>@<version>`,
   `universe:<id>@<version>`, or `project:<id>@chapter-<NN>`. The project itself is the
   implicit top layer.
@@ -767,14 +780,23 @@ the traveler has lived through, which bounds what they know. A ripple applies fr
 ```markdown
 ---
 chapter: 7
-status: drafted         # drafted | line-edited | final | early-access | released
+title: "The Long Road South"  # optional: the chapter's title, as readers see it
+status: drafted         # drafted | line-edited | final | early-access | released | withdrawn
 early-access: 2026-10-27  # set by the release skill when the chapter goes to early readers
-released: 2026-11-03    # serial only: set by the release skill
+released: 2026-11-03    # serial only: the first release, set by the release skill
+re-released: 2026-11-20 # serial only: the latest re-release, if any
+withdrawn: 2026-12-01   # serial only: when the author took it down, if they did
+release-on: 2026-11-03T18:00+00:00  # a scheduled release, until it is carried out
 ---
 ```
 
-With two or more authors (§11.13), the release skill also records who took each step:
-`early-access-by` and `released-by`, each an id from `authors`.
+- Every date key holds a date (`2026-11-03`). `release-on` and `early-access-on`, the
+  schedule keys, MAY hold a date and time with its offset, as fan sites schedule posts.
+- The release skill writes every key above except `chapter` and `title`; the drafter
+  writes `title`, and the line-editor may polish it (§13.12).
+- With two or more authors (§11.13), the release skill also records who took each
+  step: `early-access-by`, `released-by`, `re-released-by`, and `withdrawn-by`, and,
+  for a schedule, `early-access-on-by` or `release-on-by`. Each is an id from `authors`.
 
 **Content notes** (§13.11). In a project with `content_notes`:
 
@@ -787,7 +809,7 @@ content-notes: [death]  # set by the release skill, from what the author confirm
   list lacks.
 - `content-notes`: ids from `content_notes` only. An empty list (`[]`) means the
   author confirmed that the chapter needs none. Required on every chapter that is
-  `early-access` or `released`.
+  `early-access`, `released`, or `withdrawn`, or scheduled for either step.
 - In a project without `content_notes`, both keys are invalid.
 
 | Status         | Meaning                                                                      | Workflows       |
@@ -797,17 +819,20 @@ content-notes: [death]  # set by the release skill, from what the author confirm
 | `final`        | Approved as finished                                                         | novel, short story |
 | `early-access` | Read by early readers (beta readers, patrons, advance copies), still editable (§13.9) | all     |
 | `released`     | Published to everyone                                                        | serial          |
+| `withdrawn`    | Released, then taken down by the author (§13.12)                            | serial          |
 
 - A chapter moves `drafted` → `line-edited` → (`early-access`) → `released` in a serial,
   and `drafted` → `line-edited` → (`early-access`) → `final` otherwise. Early access is
-  optional.
-- Moving a chapter to `early-access` or `released` is always the author's decision.
-- **Both happen in order.** Released chapters form an unbroken run from chapter 1, and
-  early-access chapters form an unbroken run straight after them: no chapter is
-  `released` while an earlier one is not, and none is `early-access` while an earlier
-  one is still unreleased and not in early access.
-- `early-access` and `released` record the date of each step. A released chapter keeps
-  its `early-access` date if it had one.
+  optional. A released chapter MAY move to `withdrawn`, and back to `released`.
+- Moving a chapter to `early-access`, `released`, or `withdrawn` is always the author's
+  decision (§13.12).
+- **Both happen in order.** Released chapters, counting withdrawn ones, form an
+  unbroken run from chapter 1, and early-access chapters form an unbroken run straight
+  after them: no chapter is `released` while an earlier one has never been, and none is
+  `early-access` while an earlier one is still unreleased and not in early access.
+- `early-access` and `released` record the date of each step, and are never
+  overwritten. A released chapter keeps its `early-access` date if it had one, and a
+  withdrawn one its `released` date.
 
 **Viewpoints** (§7.7). In a project that records viewpoints, the front matter records
 them as drafted, beside the outline's plan:
@@ -990,8 +1015,9 @@ Established-world projects only. An empty or missing file means a fixed cutoff
 ## 10.22 `revisions.md`
 
 One row per change to a chapter readers have already seen, appended by the chronicler:
-any change to an `early-access` chapter, in every workflow, and any change to a
-released installment of a serial with `serial.released: revisable`.
+any change to an `early-access` chapter, in every workflow, any change to a released
+installment of a serial with `serial.released: revisable`, and any change to a
+`withdrawn` one (§13.12).
 
 ```markdown
 ## Revisions
@@ -1215,3 +1241,79 @@ date: "1995"               # family-portrait only: the in-world date it is paint
   the prompt states about a subject.
 
 **Example cases:** [M4](../examples/README.md#case-m4).
+
+## 10.30 `export/` (chapters for readers)
+
+Written by the `export` skill (§13.13), one folder per audience:
+
+```
+export/
+├── early-access/           # what early readers have
+│   ├── work.yaml
+│   ├── chapter-03.md
+│   └── chapter-03.yaml
+└── public/                 # what everyone has (serials)
+    ├── work.yaml
+    ├── chapter-01.md
+    └── chapter-01.yaml
+```
+
+**`chapter-<NN>.md`** is the chapter as readers get it: plain Markdown, with
+
+- no front matter, and no HTML comment of any kind (`<!-- … -->`), markers included;
+- a first line `# <title>`, or `# Chapter <n>` when the chapter has no `title`;
+- `publishing.scene_break` (default `* * *`) on a line of its own in place of each
+  scene marker but the first (§10.18), so the scenes stay apart;
+- runs of blank lines collapsed to one, and one newline at the end.
+
+The text is otherwise exactly the chapter's. **`chapter-<NN>.yaml`**, only with a
+`publishing` block (§10.1):
+
+```yaml
+chapter: 1
+title: "Narendra"
+audience: public            # public | early-access
+date: 2026-09-04            # the step's date: released, re-released, or early access
+words: 69                   # words in chapter-<NN>.md, less its heading and scene breaks
+characters: [Lt. Mira Oduya, Rachel Garrett]
+content_notes: [The death of a character]
+notes_before: "…"           # from references/chapter-notes/chapter-01.md
+notes_after: "…"
+revision_note: "…"          # the latest revisions.md row's Reader note for this audience (§10.22)
+```
+
+**`work.yaml`** describes the work as that audience has it:
+
+```yaml
+title: "The Long Way Back"  # the project's name
+authors: [Ade, Kit]         # the authors' names (§11.13)
+fandoms: [Star Trek]        # the names of the stack's base packages; absent when original
+summary: "…"                # publishing.summary
+rating: teen                # publishing.rating
+language: en                # publishing.language
+tags: […]                   # publishing.tags
+relationships: [Lt. Mira Oduya & Rachel Garrett]
+characters: [Lt. Mira Oduya, Rachel Garrett, Tasha Yar (altered timeline)]
+content_notes: [Grief and mourning, The death of a character]
+chapters: {count: 3, planned: 12}   # chapters this audience has; the outline's count
+credits: ["…"]              # the credit of each layer in the stack that has one (§2.10)
+```
+
+- **Names, not slugs.** Characters and relationships are given by their roster `Name`
+  (§10.9): `a+b` as `A & B`, and `a/b` as `A/B`. Lists are in order of first appearance.
+- **A chapter's characters** are the roster slugs in the `Entities` of its rows in
+  `timeline.md` (§10.15). The work's are those of every chapter the audience has.
+- **The work's content notes** are those of every chapter the audience has, in the
+  readers' words from `content_notes`.
+- **`date`** is when this audience got the chapter: for early readers, its
+  `early-access` date, or its release date if it never had one; for the public, its
+  `re-released` date, or else its `released` one.
+- **`planned`** is the number of chapters in the outline (§10.23), or absent if it has
+  none.
+- A key with no value is left out.
+
+**`references/chapter-notes/chapter-<NN>.md`** holds the author's notes to readers for
+one chapter: a `## Before` section and an `## After` section, both optional, in free
+Markdown. The author writes it; no agent does, and no agent reads it.
+
+**Example cases:** [P5](../examples/README.md#case-p5).

@@ -1,5 +1,6 @@
 ---
 chapter: 2
+title: "The Choice"
 status: released
 released: 2026-09-11
 released-by: kit

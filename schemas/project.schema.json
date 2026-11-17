@@ -235,6 +235,23 @@
       "propertyNames": { "$ref": "#/$defs/id" },
       "additionalProperties": { "type": "string", "minLength": 1 }
     },
+    "publishing": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "What the export's metadata says (spec/13-workflows.md §13.13). That relationship slugs are in the roster is a host validation (§14.2).",
+      "properties": {
+        "summary": { "type": "string", "minLength": 1 },
+        "rating": { "type": "string", "minLength": 1 },
+        "language": { "type": "string", "pattern": "^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$" },
+        "tags": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "relationships": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*[+/][a-z0-9]+(-[a-z0-9]+)*$" }
+        },
+        "scene_break": { "type": "string", "minLength": 1 }
+      }
+    },
     "serial": {
       "type": "object",
       "additionalProperties": false,

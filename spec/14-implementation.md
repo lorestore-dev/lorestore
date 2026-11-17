@@ -136,7 +136,10 @@ is defined.
 | A divergence's `Basis` cites a theory not in the stack, an unknown claim, or a discarded claim, or omits a kept or adapted one | §6.13 |
 | A theory-conflict decision of `adapt` with no note                               | §10.8     |
 | A write to a released installment in a serial whose releases are locked          | §13.3     |
-| A chapter is released, or sent to early access, out of order                     | §10.18    |
+| A chapter is released, re-released, sent to early access, or scheduled out of order, or with a pending decide item, a `TODO` marker, or (with `content_notes`) unconfirmed notes; any step in a run of chapters taken when one of them fails | §13.12 |
+| A status or front-matter key outside its workflow (`released`, `re-released`, `withdrawn`, or `release-on` outside a serial); a `withdrawn` chapter that was never released; a re-release under locked releases of a chapter that was not withdrawn; a schedule key that is not a date or a date and time with its offset | §10.18, §13.12 |
+| An `export/` folder that holds a chapter its audience does not have; an exported chapter with a comment or front matter left in; metadata without a `publishing` block, or naming a true identity before its reveal | §13.13, §10.30 |
+| A `publishing.relationships` entry that is not two roster slugs joined by `+` or `/` | §10.1 |
 | A renumbering moves a released or early-access chapter, or a chapter at or before another project's pin, or leaves a chapter id unrewritten | §13.10 |
 | A change to an early-access chapter, or a revisable released one, with no `revisions.md` row or no reader note | §10.22 |
 | A feedback file's `chapter` does not match its folder                            | §10.25    |

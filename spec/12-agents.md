@@ -68,7 +68,8 @@ deciding what happens next when the happy path forks.
     it is folded into the priorities, and schedule revisions of early-access chapters
     like any other, telling the chronicler to log each one.
   - **Serials** (§13.3): revise buffered (unreleased) chapters as in `novel`; never
-    release an installment, which is always the author's call; report the buffer's
+    release, schedule, or withdraw an installment, which is always the author's call
+    (§13.12); report the buffer's
     depth. Never schedule a revision of a released installment when releases are locked.
     Route the fix forward to an upcoming installment or the next arc. When a consequence
     invalidates a released installment, absorb it forward or surface it to the author.

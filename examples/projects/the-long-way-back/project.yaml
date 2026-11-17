@@ -32,3 +32,10 @@ authors:
 content_notes:
   death: "The death of a character"
   grief: "Grief and mourning"
+
+publishing:
+  summary: "One officer of the Enterprise-C stays behind when her ship goes back to die."
+  rating: teen
+  language: en
+  tags: [time travel, canon divergence]
+  relationships: [mira-oduya+rachel-garrett]

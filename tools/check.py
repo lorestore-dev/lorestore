@@ -1991,5 +1991,237 @@ check("U a revision's listed suggestion missing from the confirmed notes warns",
       note_warnings(TLBY, [dict(ch3, **{"content-notes-suggested": ["grief", "death"]})]), [3])
 check("U the line-editor only suggests; the release skill confirms",
       [c["chapter"] for c in chs if "content-notes" in c and c["status"] not in ("early-access", "released")], [])
+# --- releasing and exports (§13.12, §13.13, §10.18, §10.30) ---------------------------
+SCHED = re.compile(r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2})?(Z|[+-]\d{2}:\d{2}))?$")
+SERIAL_KEYS = ("released", "re-released", "withdrawn", "release-on")
+def front_errors(chapters, workflow, locked=True):
+    """§10.18: keys in their workflow, withdrawn only after a release, schedules well formed."""
+    out = []
+    for c in chapters:
+        n = c["chapter"]
+        if workflow != "serial" and (c["status"] in ("released", "withdrawn") or any(k in c for k in SERIAL_KEYS)): out.append(f"{n}: serial only")
+        if c["status"] == "withdrawn" and "released" not in c: out.append(f"{n}: withdrawn, never released")
+        if "re-released" in c and "released" not in c: out.append(f"{n}: re-released, never released")
+        for k in ("release-on", "early-access-on"):
+            if k in c and not SCHED.match(str(c[k])): out.append(f"{n}: {k}")
+    st = [c["status"] for c in sorted(chapters, key=lambda c: c["chapter"])]
+    rank = lambda s: 2 if s in ("released", "withdrawn") else 1 if s == "early-access" else 0
+    if any(rank(a) < rank(b) for a, b in zip(st, st[1:])): out.append("out of order")
+    return out
+FROM = {"early access": ("line-edited",), "release": ("line-edited", "early-access")}
+KEY = {"early access": "early-access", "release": "released", "re-release": "re-released", "withdraw": "withdrawn"}
+def taken(step, c):
+    return c["status"] in (("early-access", "released", "withdrawn") if step == "early access" else ("released", "withdrawn"))
+def release(chapters, step, run, *, workflow="serial", locked=True, notes=False, pending=(), texts=None,
+            date="2026-12-01", by=None, insist=False):
+    """One release-skill step for a run of chapters (§13.12): (chapters after, None), or (None, the refusal)."""
+    chs = {c["chapter"]: dict(c) for c in chapters}; texts = texts or {}
+    for n in run:
+        c = chs[n]
+        if step != "early access" and workflow != "serial": return None, f"{n}: serial only"
+        if step == "withdraw":
+            if c["status"] != "released": return None, f"{n}: not released"
+            continue
+        if any(not taken(step, chs[m]) for m in chs if m < n and m not in run): return None, f"{n}: out of order"
+        if n in pending or "<!-- TODO:" in texts.get(n, ""): return None, f"{n}: a pending decision or marker"
+        if notes and "content-notes" not in c: return None, f"{n}: notes not confirmed"
+        frm = (("withdrawn",) if locked else ("released", "withdrawn")) if step == "re-release" else FROM[step]
+        if c["status"] not in frm and not (insist and step != "re-release" and c["status"] == "drafted"): return None, f"{n}: from {c['status']}"
+    for n in run:
+        c = chs[n]; c["status"] = {"early access": "early-access", "withdraw": "withdrawn"}.get(step, "released")
+        c[KEY[step]] = date
+        if by: c[KEY[step] + "-by"] = by
+    return [chs[n] for n in sorted(chs)], None
+def schedule_ok(chapters, step, n, when):
+    """§13.12: every earlier chapter that has not taken the step is scheduled no later."""
+    k = "release-on" if step == "release" else "early-access-on"
+    return all(taken(step, c) or (k in c and str(c[k]) <= when) for c in chapters if c["chapter"] < n)
+def run_schedules(chapters, now, **kw):
+    """At `now`, take every scheduled step that is due, re-checking the refusals; a refused one is unscheduled (§13.12)."""
+    chs = [dict(c) for c in chapters]; told = []
+    for k, step in (("early-access-on", "early access"), ("release-on", "release")):
+        for c in sorted(chs, key=lambda c: c["chapter"]):
+            if k in c and str(c[k]) <= now:
+                when = str(c.pop(k)); by = c.pop(k + "-by", None)
+                after, why = release(chs, step, [c["chapter"]], date=when[:10], by=by, **kw)
+                if why: told.append(why)
+                else: chs = after
+    return chs, told
+
+def clean(text, title, n, brk="* * *"):
+    """The chapter as readers get it (§10.30)."""
+    body = text.split("---", 2)[2]
+    marks = re.findall(r"<!-- scene:.*?-->", body)
+    for i, m in enumerate(marks): body = body.replace(m, "" if i == 0 else f"\n{brk}\n", 1)
+    body = re.sub(r"<!--.*?-->", "", body, flags=re.S)
+    lines = [l.rstrip() for l in body.split("\n")]
+    out = []
+    for l in lines:
+        if l or (out and out[-1]): out.append(l)
+    body = "\n".join(out).strip()
+    head = f"# {title or f'Chapter {n}'}"
+    return head + ("\n\n" + body if body else "") + "\n"
+def words(md, brk="* * *"):
+    return sum(len(l.split()) for l in md.split("\n")[1:] if l.strip() != brk)
+def stack_layers(project):
+    return [l.split("@")[0] for l in pyaml(project).get("layers") or [] if not l.startswith(("project:", "universe:"))]
+def names_in(project):
+    names, aliases = {}, {}
+    for d in [pkg_dir(l) for l in stack_layers(project)] + [EX/"projects"/project/"bible"]:
+        f = d/"characters/_roster.md"
+        if f.exists():
+            for r in table(f, "## Characters"):
+                names[r["Slug"]] = r["Name"]
+                if r.get("Reveal of"): aliases[r["Reveal of"]] = r["Revealed at"]
+    return names, aliases
+def sections(path):
+    if not path.exists(): return {}
+    out, cur = {}, None
+    for l in path.read_text().split("\n"):
+        if l.startswith("## "): cur = l[3:].strip(); out[cur] = []
+        elif cur: out[cur].append(l)
+    return {k: "\n".join(v).strip() for k, v in out.items() if "\n".join(v).strip()}
+def shown_names(project, slugs, reached):
+    """Roster names for slugs, leaving out a true identity whose reveal the audience has not reached (§13.13)."""
+    names, aliases = names_in(project)
+    return [names[s] for s in slugs if s in names and (s not in aliases or reached(aliases[s]))]
+def export(project, chapters=None, texts=None, reached=lambda point: True, y=None):
+    """{audience: {file name: text or dict}} as the export skill writes it (§13.13, §10.30)."""
+    P = EX/"projects"/project; y = y or pyaml(project); pub = y.get("publishing"); brk = (pub or {}).get("scene_break", "* * *")
+    files = sorted((P/"manuscript").glob("chapter-*.md"))
+    chapters = chapters or [front(p) for p in files]
+    texts = texts or {front(p)["chapter"]: p.read_text() for p in files}
+    names, aliases = names_in(project)
+    tl = table(P/"bible/timeline.md", "## Events") if (P/"bible/timeline.md").exists() else []
+    rev = table(P/"revisions.md", "## Revisions") if (P/"revisions.md").exists() else []
+    cn = y.get("content_notes") or {}
+    uniq = lambda xs: list(dict.fromkeys(xs))
+    out = {}
+    for aud, statuses in (("public", ("released",)), ("early-access", ("early-access", "released"))):
+        chs = sorted((c for c in chapters if c["status"] in statuses), key=lambda c: c["chapter"])
+        if aud == "public" and y["workflow"] != "serial": continue
+        folder, all_chars, all_notes = {}, [], []
+        for c in chs:
+            n = c["chapter"]; cid = f"chapter-{n:02d}"
+            md = clean(texts[n], c.get("title"), n, brk); folder[f"{cid}.md"] = md
+            chars = uniq(shown_names(project, [s for r in tl if r["Chapter"] == cid for s in r["Entities"].split("; ")], reached))
+            notes = [cn[x] for x in c.get("content-notes") or []]
+            all_chars += chars; all_notes += notes
+            if pub is None: continue
+            date = c.get("early-access") if aud == "early-access" and c.get("early-access") else c.get("re-released") or c.get("released")
+            sec = sections(P/"references/chapter-notes"/f"{cid}.md")
+            rows = [r for r in rev if r["Chapter"] == cid and r["Audience"] == ("public" if aud == "public" else "early-access")]
+            meta = {"chapter": n, "title": c.get("title"), "audience": aud, "date": date, "words": words(md, brk),
+                    "characters": chars, "content_notes": notes, "notes_before": sec.get("Before"), "notes_after": sec.get("After"),
+                    "revision_note": rows[-1]["Reader note"] if rows else None}
+            folder[f"{cid}.yaml"] = {k: v for k, v in meta.items() if v not in (None, [], "")}
+        if pub is not None:
+            bases = [l for l in stack_layers(project) if "/" not in l]
+            outline = P/"bible/outline.md"
+            planned = len({r["Chapter"] for r in table(outline, "## Chapters")}) if has(outline, "## Chapters") else None
+            rel = [" & ".join(names[s] for s in r.split("+")) if "+" in r else "/".join(names[s] for s in r.split("/")) for r in pub.get("relationships", [])]
+            work = {"title": y["name"], "authors": [a["name"] for a in y.get("authors", [])],
+                    "fandoms": [load(pkg_dir(b)/"package.yaml")["name"] for b in bases],
+                    "summary": pub.get("summary"), "rating": pub.get("rating"), "language": pub.get("language"), "tags": pub.get("tags"),
+                    "relationships": rel, "characters": uniq(all_chars), "content_notes": uniq(all_notes),
+                    "chapters": {k: v for k, v in {"count": len(chs), "planned": planned}.items() if v is not None},
+                    "credits": [load(pkg_dir(l)/"package.yaml")["credit"] for l in stack_layers(project) if load(pkg_dir(l)/"package.yaml").get("credit")]}
+            folder["work.yaml"] = {k: v for k, v in work.items() if v not in (None, [], "", {})}
+        out[aud] = folder
+    return out
+def export_on_disk(project):
+    root = EX/"projects"/project/"export"; out = {}
+    for d in sorted(p for p in root.iterdir() if p.is_dir()) if root.exists() else []:
+        out[d.name] = {f.name: (f.read_text() if f.suffix == ".md" else load(f)) for f in sorted(d.iterdir())}
+    return out
+
+TLBX = export("the-long-way-back")
+check("R the export on disk is what the skill writes", export_on_disk("the-long-way-back") == TLBX, True)
+check("R public holds the released chapters; early access adds chapter 3",
+      {a: sorted(f for f in fs if f.endswith(".md")) for a, fs in TLBX.items()},
+      {"public": ["chapter-01.md", "chapter-02.md"], "early-access": ["chapter-01.md", "chapter-02.md", "chapter-03.md"]})
+X1 = TLBX["public"]["chapter-01.md"]
+check("R the clean chapter keeps no comment and no front matter", ("<!--" in X1, "---" in X1, "status:" in X1), (False, False, False))
+check("R the clean chapter: its title, then scene one, a scene break, and scene two",
+      [l for l in X1.split("\n") if l.startswith("#") or l == "* * *"], ["# Narendra", "* * *"])
+check("R blank lines collapse, and trailing space goes", ("\n\n\n" in X1, " \n" in X1, X1.endswith("war.\n")), (False, False, True))
+check("R an untitled chapter is headed by its number", clean("---\nchapter: 9\n---\nText.\n", None, 9), "# Chapter 9\n\nText.\n")
+check("R the scene break is the project's to choose", clean("---\n---\n<!-- scene: a=1 -->\nA.\n<!-- scene: a=2 -->\nB.\n", "T", 1, "~"), "# T\n\nA.\n\n~\n\nB.\n")
+M1 = TLBX["public"]["chapter-01.yaml"]
+check("R chapter 1's metadata", {k: M1.get(k) for k in ("title", "audience", "characters", "content_notes")},
+      {"title": "Narendra", "audience": "public", "characters": ["Lt. Mira Oduya", "Rachel Garrett", "Tasha Yar (altered timeline)"], "content_notes": ["The death of a character"]})
+check("R chapter 1: the author's notes to readers, and a word count", (M1["notes_before"][:9], M1["notes_after"][:9], M1["words"]), ("The story", "Thank you", words(X1)))
+check("R chapter 1's date is its release", str(M1["date"]), "2026-09-04")
+M3 = TLBX["early-access"]["chapter-03.yaml"]
+check("R chapter 3, for early readers: its date, notes, and the latest revision note",
+      (str(M3["date"]), M3["content_notes"], M3["revision_note"][:20]), ("2026-09-14", ["Grief and mourning"], "Chapter 3 revised: M"))
+WP, WE = TLBX["public"]["work.yaml"], TLBX["early-access"]["work.yaml"]
+check("R the work: names, authors, fandom, relationship", (WP["title"], WP["authors"], WP["fandoms"], WP["relationships"]),
+      ("The Long Way Back", ["Ade", "Kit"], ["Star Trek"], ["Lt. Mira Oduya & Rachel Garrett"]))
+check("R the public work knows two chapters and no Picard; early readers know three", (WP["chapters"], "Jean-Luc Picard" in WP["characters"], WE["chapters"], "Jean-Luc Picard" in WE["characters"]),
+      ({"count": 2}, False, {"count": 3}, True))
+check("R the work's notes are its chapters' notes, for each audience", (WP["content_notes"], WE["content_notes"]),
+      (["The death of a character"], ["The death of a character", "Grief and mourning"]))
+check("R a work with no credited layer lists no credits", "credits" in WP, False)
+check("R a romance is A/B", "/".join(names_in("the-long-way-back")[0][s] for s in "mira-oduya/rachel-garrett".split("/")), "Lt. Mira Oduya/Rachel Garrett")
+wd, _ = release(chs, "withdraw", [1])
+check("R a withdrawn chapter leaves the public folder", sorted(f for f in export("the-long-way-back", chapters=wd)["public"] if f.endswith(".md")), ["chapter-02.md"])
+noPub = copy.deepcopy(TLBY); noPub.pop("publishing")
+check("R without publishing, clean chapters but no metadata", sorted(f for fs in export("the-long-way-back", y=noPub).values() for f in fs), ["chapter-01.md", "chapter-01.md", "chapter-02.md", "chapter-02.md", "chapter-03.md"])
+check("R metadata never names a true identity before its reveal (Crouch, revealed at GoF:35)",
+      (shown_names("two-witnesses", ["moody-impostor", "barty-crouch-jr"], lambda point: point != "GoF:35"),
+       len(shown_names("two-witnesses", ["moody-impostor", "barty-crouch-jr"], lambda point: True))), (['"Mad-Eye Moody" (GoF)'], 2))
+for k, v, ok in [("relationships", ["mira-oduya/rachel-garrett"], True), ("relationships", ["mira-oduya&rachel-garrett"], False),
+                 ("language", "en-GB", True), ("language", "English", False), ("scene_break", "", False), ("colour", "red", False)]:
+    d = copy.deepcopy(TLBY); d["publishing"][k] = v; check(f"R schema: publishing.{k} {v!r}", schema("project").is_valid(d), ok)
+
+check("R the-long-way-back's front matter is valid", front_errors(chs, "serial"), [])
+for label, chapters, wf, want in [
+        ("released in a novel", [{"chapter": 1, "status": "released", "released": "d"}], "novel", 1),
+        ("a schedule in a novel", [{"chapter": 1, "status": "line-edited", "release-on": "2026-12-01"}], "novel", 1),
+        ("withdrawn, never released", [{"chapter": 1, "status": "withdrawn"}], "serial", 1),
+        ("a schedule that is not a date", [{"chapter": 1, "status": "line-edited", "release-on": "next Friday"}], "serial", 1),
+        ("a schedule with a time and offset", [{"chapter": 1, "status": "line-edited", "release-on": "2026-12-01T18:00+00:00"}], "serial", 0),
+        ("a withdrawn chapter keeps the run unbroken", [{"chapter": 1, "status": "withdrawn", "released": "d"}, {"chapter": 2, "status": "released", "released": "d"}], "serial", 0)]:
+    check(f"R front-matter error: {label}", len(front_errors(chapters, wf)), want)
+
+T3 = {3: (TLB/"manuscript/chapter-03.md").read_text()}
+after, why = release(chs, "release", [3], notes=True, by="kit")
+check("R releasing chapter 3: released, dated, by Kit", (why, after[2]["status"], after[2]["released"], after[2]["released-by"], after[2]["early-access"]),
+      (None, "released", "2026-12-01", "kit", chs[2]["early-access"]))
+for label, args, kw, want in [
+        ("chapter 4 before chapter 3", ("release", [4]), {"insist": True}, "4: out of order"),
+        ("chapter 4, drafted, even in a run with 3", ("release", [3, 4]), {}, "4: from drafted"),
+        ("a run refused whole when one fails", ("release", [3, 4]), {"pending": (4,), "insist": True}, "4: a pending decision or marker"),
+        ("a TODO marker left in the text", ("release", [3]), {"texts": {3: "<!-- TODO: needs bible: the date -->"}}, "3: a pending decision or marker"),
+        ("a release in a novel", ("release", [3]), {"workflow": "novel"}, "3: serial only"),
+        ("a re-release under locked of a released chapter", ("re-release", [1]), {}, "1: from released"),
+        ("withdrawing an unreleased chapter", ("withdraw", [3]), {}, "3: not released")]:
+    got, why = release(chs, *args, **kw); check(f"R refused: {label}", why, want)
+nb = [dict(c) for c in chs]; nb[2].pop("content-notes")
+check("R refused: a chapter whose notes the author has not confirmed", release(nb, "release", [3], notes=True)[1], "3: notes not confirmed")
+chs34 = [dict(c) for c in chs]; chs34[3].update({"status": "line-edited", "content-notes": []})
+after, why = release(chs34, "release", [3, 4], notes=True)
+check("R a run of chapters 3 and 4: one decision, one date", (why, [c.get("released") for c in after[2:]]), (None, ["2026-12-01", "2026-12-01"]))
+check("R the not-ready SHOULD: the author may insist", release(chs34[:3] + [dict(chs34[3], status="drafted")], "release", [3, 4], insist=True)[1], None)
+wd, why = release(chs, "withdraw", [2], by="ade")
+check("R withdrawing chapter 2: kept its release date; 1 and 3 untouched", (why, wd[1]["status"], wd[1]["released"], wd[1]["withdrawn"], wd[0]["status"], wd[2]["status"]),
+      (None, "withdrawn", chs[1]["released"], "2026-12-01", "released", "early-access"))
+check("R chapter 3 may still be released after a withdrawn chapter 2", release(wd, "release", [3])[1], None)
+rr, why = release(wd, "re-release", [2], date="2026-12-08")
+check("R re-releasing the withdrawn chapter keeps its first release", (why, rr[1]["status"], rr[1]["released"], rr[1]["re-released"]), (None, "released", chs[1]["released"], "2026-12-08"))
+check("R under revisable, a released chapter may be re-released", release(chs, "re-release", [1], locked=False)[1], None)
+
+check("R chapter 3's schedule is in order", schedule_ok(chs, "release", 3, str(chs[2]["release-on"])), True)
+check("R chapter 4 may not be scheduled before chapter 3's", schedule_ok(chs, "release", 4, "2026-11-30"), False)
+check("R chapter 4 may be scheduled after chapter 3's", schedule_ok(chs, "release", 4, "2026-12-08"), True)
+check("R chapter 4 may not be scheduled while 3 is unscheduled", schedule_ok([dict(c) for c in chs[:2]] + [{k: v for k, v in chs[2].items() if k != "release-on"}], "release", 4, "2026-12-08"), False)
+due, told = run_schedules(chs, "2026-11-30T00:00")
+check("R before its time, nothing happens", (due[2]["status"], told), ("early-access", []))
+due, told = run_schedules(chs, "2026-12-02T09:00", notes=True)
+check("R run late, the release takes the scheduled date and author", (due[2]["status"], due[2]["released"], due[2]["released-by"], "release-on" in due[2], told),
+      ("released", "2026-12-01", "ade", False, []))
+due, told = run_schedules(chs, "2026-12-02T09:00", texts={3: "<!-- TODO: seam conflict: x -->"})
+check("R a schedule that fails its re-check is removed, and the author told", (due[2]["status"], "release-on" in due[2], told), ("early-access", False, ["3: a pending decision or marker"]))
 print("\nFAILURES:", fails)
 sys.exit(1 if fails else 0)
