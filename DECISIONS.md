@@ -5,6 +5,17 @@ says what was unclear or contradictory, what was decided, and where the rule now
 
 ## 0.4: reference agents and workflows
 
+**D124. A short story shares the novel's step numbers.** Overlays position their steps
+by step number, and those numbers were the novel's: the established-world overlay's
+chapter review (E3, E4) and the frames check (T1) come "after 13". A short story
+numbered its own steps 1 to 9, so it had no step 13, and in an established-world short
+story the canon-keeper never ran. Planning a run of `short-story` on `three-brothers`
+found it. A short story's steps now keep the novel's numbers (1, 2, 4, 10, 11, 13, 16,
+14, 19), as a serial's installment steps already did; the numbers are ids, and the
+table's order is the run order. §11.7 now requires every step an overlay's positions
+name to exist in every chain the overlay applies to, except a step only some chains
+have (a serial's A1 and A2), and the checker tests it. → §11.7, §13.2
+
 **D123. Reference agent files.** `agents/` now holds one informative file per agent of
 §12, in the anatomy of §11.3. Each is written to the model, in the second person, and
 is self-contained: it restates every rule its §12 section gives, and the parts of §6,

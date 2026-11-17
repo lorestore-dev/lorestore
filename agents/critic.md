@@ -22,7 +22,7 @@ rewrites (§12.17).
 
 ## Writes
 
-- `reviews/critique.md` (§10.19; steps 16, 7 in a short story, V2).
+- `reviews/critique.md` (§10.19; steps 16, V2).
 
 ## Done when
 

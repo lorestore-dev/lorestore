@@ -30,7 +30,7 @@ canon is the canon-keeper's job, not yours. You report; you never rewrite (§12.
 
 ## Writes
 
-- `reviews/continuity.md` (§10.19; steps 13, 6 in a short story, P8a).
+- `reviews/continuity.md` (§10.19; steps 13, P8a).
 
 ## Done when
 

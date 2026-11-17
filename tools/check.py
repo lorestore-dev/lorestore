@@ -2387,5 +2387,20 @@ for name, p in AGENTS.items():
 check("agent check catches a missing section", "sections" in " ".join(anatomy_errors(ROOT / "workflows" / "novel.md")), True)
 check("agent check catches a wrong writer", catalog_writes("critic", "bible/style.md"), False)
 check("agent check joins wrapped list items", bullets(["- `a`", "  b: c", "", "- d", "x"]), ["`a` b: c", "d"])
+# --- W2. overlay positions resolve in every chain (§11.7) --------------------------
+print("\n# W2. overlay positions")
+CHAIN_ONLY = {"A1": "serial", "A2": "serial"}
+def position_errors(chain, overlay):
+    steps = {r["Step"] for r in wf_parse(ROOT / "workflows" / f"{chain}.md")[3]}
+    errs = []
+    for ov in overlay:
+        own = {r["Step"] for r in wf_parse(ROOT / "workflows" / f"{ov}.md")[3]}
+        for r in wf_parse(ROOT / "workflows" / f"{ov}.md")[3]:
+            anchor = r["Position"].split(" ", 1)[1]
+            if anchor not in steps | own and CHAIN_ONLY.get(anchor) != chain and anchor not in CHAIN_ONLY:
+                errs.append(f"{r['Step']} {r['Position']}")
+    return errs
+for chain in ("novel", "short-story", "serial"):
+    check(f"{chain}: every overlay position resolves (§11.7)", position_errors(chain, ["established-world", "frames"]), [])
 print("\nFAILURES:", fails)
 sys.exit(1 if fails else 0)

@@ -151,7 +151,11 @@ context: project     # project | package | universe
 
 An **overlay** adds a `Position` column after `Repeat`, with the value
 `before <step>`, `after <step>`, or `replace <step>`. Overlays apply in the order
-established-world, then frames.
+established-world, then frames. A position names a step of the chain or of the overlay
+itself. Every chain an overlay applies to MUST have each step its positions name, so
+chains that share a step share its number (§13.2, §13.3). The one exception is a step
+that only some chains have, such as `serial`'s arc planning (A1, A2): an overlay step
+positioned on it runs only in those chains.
 
 ## 11.8 Gates
 

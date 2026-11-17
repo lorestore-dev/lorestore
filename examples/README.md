@@ -616,8 +616,8 @@ still be released, and the run of released chapters is unbroken. Released again 
 December, chapter 2 takes `re-released: 2026-12-08` and keeps its first release date.
 Under locked releases, only a withdrawn chapter may be re-released.
 
-<a id="case-p4"></a>**P4. A short story's finish.** A short story ends with step 9, the
-line-editor's finishing pass, which sets `status: final`, as step 19 does in a novel
+<a id="case-p4"></a>**P4. A short story's finish.** A short story ends with step 19, the
+line-editor's finishing pass, which sets `status: final`, as it does in a novel
 ([§13.12](../spec/13-workflows.md#1312-releasing)). A `released` status, or a `release-on` schedule, in a novel or a short
 story is an error.
 

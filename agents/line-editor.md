@@ -26,10 +26,8 @@ step asks, you codify the story's voice into `style.md`. You never change what h
 
 One per step:
 
-- `manuscript/chapter-<NN>.md`, with `status: line-edited` (§10.18; steps 14, 8 in a
-  short story).
-- `manuscript/chapter-<NN>.md`, with `status: final`: the finishing pass (steps 19, 9 in
-  a short story).
+- `manuscript/chapter-<NN>.md`, with `status: line-edited` (§10.18; step 14).
+- `manuscript/chapter-<NN>.md`, with `status: final`: the finishing pass (step 19).
 - `bible/style.md`: the voice contract and the text-and-speech formatting table (steps
   9, P7).
 

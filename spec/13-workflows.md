@@ -100,23 +100,26 @@ because the author, not the chain, decides when they run.
 
 ## 13.2 `short-story`
 
-A compressed chain for a single scene or arc: one chapter, a lighter foundation.
+A compressed chain for a single scene or arc: one chapter, a lighter foundation. Its
+steps are a selection of `novel`'s, under the same numbers, so the established-world
+and frames overlays apply unchanged. The numbers are ids: the table's order is the
+order the steps run in, and here the critic reads the chapter before it is polished.
 
 | Step | Agent              | Writes                         | Gate      | Repeat        |
 | ---- | ------------------ | ------------------------------ | --------- | ------------- |
 | 1    | architect          | `bible/premise.md`             | milestone |               |
 | 2    | architect          | `bible/outline.md`             |           |               |
-| 3    | character-designer | `bible/characters/<slug>.md`   |           | per-character |
-| 4    | drafter            | `manuscript/chapter-01.md`     |           |               |
-| 5    | showrunner         | `showrunner-log.md`            |           |               |
-| 6    | continuity-editor  | `reviews/continuity.md`        |           |               |
-| 7    | critic             | `reviews/critique.md`          |           |               |
-| 8    | line-editor        | `manuscript/chapter-01.md`     | milestone |               |
-| 9    | line-editor        | `manuscript/chapter-01.md` (`status: final`) | milestone |  |
+| 4    | character-designer | `bible/characters/<slug>.md`   |           | per-character |
+| 10   | drafter            | `manuscript/chapter-01.md`     |           |               |
+| 11   | showrunner         | `showrunner-log.md`            |           |               |
+| 13   | continuity-editor  | `reviews/continuity.md`        |           |               |
+| 16   | critic             | `reviews/critique.md`          |           |               |
+| 14   | line-editor        | `manuscript/chapter-01.md`     | milestone |               |
+| 19   | line-editor        | `manuscript/chapter-01.md` (`status: final`) | milestone |  |
 
-Self-contained short stories that need setting add worldbuilder steps after step 2.
-Step 9 is the finishing pass, as step 19 is for a novel; the author MAY send the story
-to early access before it (§13.9). R1 and R2 run on demand, as in `novel`.
+Self-contained short stories that need setting add worldbuilder steps (step 3, as in
+`novel`) after step 2. Step 19 is the finishing pass, as in a novel; the author MAY send
+the story to early access before it (§13.9). R1 and R2 run on demand, as in `novel`.
 
 ## 13.3 `serial`
 

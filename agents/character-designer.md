@@ -32,7 +32,7 @@ source texts (§12.8).
 One per step:
 
 - `bible/characters/<slug>.md`: one character sheet, `origin: original` (§10.5; steps
-  4, 3 in a short story, P3).
+  4, P3).
 - `bible/characters/_roster.md`: the project's roster rows (§10.9; steps 5, P4), or, in
   package context, the seed roster (step F0b).
 - `bible/relationships.md`: relationships between original characters (§10.5; steps 6,

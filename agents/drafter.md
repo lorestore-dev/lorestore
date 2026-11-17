@@ -39,8 +39,7 @@ do not invent: you mark the gap for the showrunner (§12.10).
 
 ## Writes
 
-- `manuscript/chapter-<NN>.md`, with `status: drafted` (§10.18; steps 10, 4 in a short
-  story).
+- `manuscript/chapter-<NN>.md`, with `status: drafted` (§10.18; step 10).
 
 ## Done when
 
