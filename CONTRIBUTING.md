@@ -40,7 +40,7 @@ reports `FAILURES: 0`. If it doesn't, please open an issue.
 | `examples/`             | Abridged Harry Potter and Star Trek packages, a crossover universe, and projects |
 | `examples/README.md`    | The numbered example cases and the results a conforming host must give      |
 | `tools/check.py`        | The conformance checker                                                     |
-| `tools/refs.py`         | Checks that every `§` reference resolves                                    |
+| `tools/refs.py`         | Checks that every `§` reference and relative link resolves, and every example case is linked from the spec |
 | `DECISIONS.md`          | Every design decision, newest first, with its reasoning                     |
 
 ## Reporting a problem
@@ -64,7 +64,7 @@ spend time on it. Then:
 1. Create a branch from `main`.
 2. Make the change, following the rules below.
 3. Run `python tools/check.py` and make sure it reports `FAILURES: 0`, and
-   `python tools/refs.py`, which checks every `§` reference.
+   `python tools/refs.py`, which checks every `§` reference and link.
 4. Open a pull request that links the issue and says which rules changed.
 
 ### Rules for spec changes
@@ -82,7 +82,8 @@ spend time on it. Then:
   update the references to it.
 - **Change behavior, change the checker.** If the change adds or alters behavior in the
   data model, add checks for it to `tools/check.py`, and add the expected result to
-  `examples/README.md`.
+  `examples/README.md`. Give a new case an anchor (`<a id="case-<id>"></a>`), and link
+  to it from the `**Example cases:**` line at the end of the spec section it shows.
 - **Breaking changes** bump `spec_version` in the schemas and the spec.
 - Some decisions always belong to the author of a story, never to an agent: order
   inversions (§6.8), divergence conflicts (§6.6), hidden canon (§6.12), theory conflicts

@@ -52,6 +52,8 @@ Things that are **not** divergences:
 Every divergence that can be expressed as attribute values SHOULD be, so that the
 snapshot applies it mechanically (§6.4, `Overrides`).
 
+**Example cases:** [13](../examples/README.md#case-13).
+
 ## 6.3 Adherence: how the story relates to its stack
 
 How a story relates to its stack is the author's to say, so it lives in `project.yaml`
@@ -159,6 +161,8 @@ decision needs one. An earlier book's open
 consequence that the later book honors is tracked in the later book's Consequences
 table, with the divergence qualified by project: `two-witnesses:D1`.
 
+**Example cases:** [5](../examples/README.md#case-5), [L1](../examples/README.md#case-l1).
+
 ## 6.5 Ledger rules
 
 1. **Binding forward.** Once logged, an entry is canon for every chapter from its first
@@ -241,6 +245,8 @@ the canon that comes **after** that point. `setting.follow` sets this, and
 applies at all. `fidelity` decides how strictly unplanned departures from the canon
 that does apply are judged.
 
+**Example cases:** [19](../examples/README.md#case-19), [20](../examples/README.md#case-20), [20a](../examples/README.md#case-20a).
+
 ## 6.7 Following canon: sync points
 
 A long story often **keeps following canon** while it adds to it. A fanfic can run
@@ -273,6 +279,8 @@ cutoffs:
 - Sync points say **where in canon** each chapter sits. What the story **changes** is
   still the ledger's job: additions and changes made while following canon are
   divergences (§6.2).
+
+**Example cases:** [14](../examples/README.md#case-14).
 
 ## 6.8 Rearranging canon
 
@@ -365,6 +373,8 @@ Rules:
    Here `chapter-40` is where the story reaches the Shrieking Shack (`PoA:17`). From
    there the canon rows apply in the project's order.
 
+**Example cases:** [15](../examples/README.md#case-15), [16](../examples/README.md#case-16), [17](../examples/README.md#case-17), [18](../examples/README.md#case-18), [18a](../examples/README.md#case-18a), [18b](../examples/README.md#case-18b), [L2](../examples/README.md#case-l2).
+
 ## 6.9 Classifications
 
 The canon-keeper (§12.13) classifies every problem it finds. Each class has a fixed
@@ -390,6 +400,8 @@ resolution type, which a host MUST surface distinctly (§14):
 Faithfulness and leak checks run against the **composite**: the stack, read at the
 sync points, overridden by the ledgers. A story is never flagged for obeying a logged
 divergence, its own or an earlier book's.
+
+**Example cases:** [E2](../examples/README.md#case-e2).
 
 ## 6.10 Fidelity
 
@@ -470,6 +482,8 @@ becomes relevant:
   `## Hidden canon` table (§10.8), with the divergence it produced, if any. A decision
   binds later books that stack the project, as of their pin (§6.4).
 
+**Example cases:** [22](../examples/README.md#case-22).
+
 ## 6.13 Adopting a theory: theory conflicts
 
 A theory (§10.13) is an interpretation: a set of numbered **claims**, with the evidence
@@ -519,6 +533,8 @@ Dumbledore, not Snape, who once used the Resurrection Stone to try to reach his 
 Death never does (against claim 4). The author discards claim 2 and adapts claim 4:
 Dumbledore is Death as the tale's last page casts him, not throughout. The curator logs
 `D1` with `Basis: harry-potter/theories:T1 (claims 1, 3, 4)`.
+
+**Example cases:** [E3](../examples/README.md#case-e3), [Q1](../examples/README.md#case-q1).
 
 ## 6.14 Where books meet: seam conflicts
 
@@ -613,3 +629,5 @@ to 5, every one of those items is ahead. The author carries back
 `lantern-road:*.*@*`, everything that happens during book 1. So young Ines has grey
 eyes and is an apprentice. From chapter 6 nothing is ahead: she is a master, and
 nothing is raised.
+
+**Example cases:** [L3](../examples/README.md#case-l3), [L4](../examples/README.md#case-l4), [L5](../examples/README.md#case-l5), [L6](../examples/README.md#case-l6).

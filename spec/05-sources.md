@@ -79,6 +79,8 @@ the passages that differ. The corrected text is recorded as usual. The snapshot 
 erratum rows (§7.2), but agents read them: the canon-keeper flags prose that relies on
 an erratum (§6.9), and a theory may cite one as evidence (§6.13).
 
+**Example cases:** [E1](../examples/README.md#case-e1).
+
 ## 5.3 Pure bases and source leaks
 
 A base (`base` package) holds only `primary` and `secondary-official` sources whose
@@ -93,6 +95,8 @@ the films Hermione mends Harry's glasses with *Oculus Reparo* on the train, a de
 novel does not have. It lives in `harry-potter/films`. A project whose stack is
 `harry-potter` alone is a book project, so a draft that uses the spell has leaked the
 films. A project that stacks the films can use it.
+
+**Example cases:** [I1](../examples/README.md#case-i1), [A1](../examples/README.md#case-a1).
 
 ## 5.4 Resolution
 
@@ -138,6 +142,8 @@ resolved like an attribute, from the rows the stack's layers give for it.
 
 This is the "same files, different lens" mechanism: the same packages resolve to
 different characters under different stacks and modes, and no package changes.
+
+**Example cases:** [3](../examples/README.md#case-3), [3a](../examples/README.md#case-3a), [4](../examples/README.md#case-4).
 
 ## 5.5 Coexistence, not overwriting
 

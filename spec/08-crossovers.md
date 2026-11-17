@@ -63,6 +63,8 @@ stack that uses it (§2.2).
 This pairing is the clearest test of a bridge: a **magic** world and a **technology**
 world have to agree on what happens when a spell meets a tricorder.
 
+**Example cases:** [W7](../examples/README.md#case-w7).
+
 ## 8.2 The bridge
 
 `bridge.md` holds four kinds of content (format: §10.14):

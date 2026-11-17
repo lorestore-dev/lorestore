@@ -222,6 +222,8 @@ When the ruler cannot express that point (the work is undivided), the fact is da
 the **next** node from whose opening it holds. For example, with `TNG:1` undivided, a
 death late in season 1 is dated `TNG:2`.
 
+**Example cases:** [8](../examples/README.md#case-8), [9](../examples/README.md#case-9), [11](../examples/README.md#case-11).
+
 ## 4.3 The point list
 
 Read as a list, the ruler yields every ruler point a world can offer for picking, in
@@ -317,12 +319,16 @@ column, after `Citation`, records when a fact became **true** in-world:
 - Extractors SHOULD record `True from` whenever a source reveals backstory, even if no
   current project needs it. It is cheap to record and impossible to reconstruct later.
 
+**Example cases:** [1](../examples/README.md#case-1), [21](../examples/README.md#case-21), [E1](../examples/README.md#case-e1).
+
 ## 4.5 Ending a fact
 
 To record that an attribute stops holding (a character dies and loses an office, an
 item is lost, a scar heals completely), append a row whose value is the reserved token
 `(unset)`. From that point the attribute resolves to absent (§7). A later row MAY set it
 again.
+
+**Example cases:** [2](../examples/README.md#case-2).
 
 ## 4.6 Corrections
 
@@ -409,6 +415,8 @@ PS:6:2+00:41:10      book scene PS:6:2, 41 minutes 10 seconds into the film that
 `PS:6:2+00:50:00`, because the book path decides. Without the films package, all four
 points are invalid except `PS:6:2`.
 
+**Example cases:** [A1](../examples/README.md#case-a1).
+
 ## 4.10 Inserted works
 
 An `official` or `fanfic` package (§2.3) MAY have works of its own that retell nothing
@@ -452,6 +460,8 @@ the base or an earlier inserted one:
 - A project order (§6.8) is a permutation of the stack's segments, inserted ones
   included.
 
+**Example cases:** [4a](../examples/README.md#case-4a), [I1](../examples/README.md#case-i1).
+
 ## 4.11 Story-dated rows
 
 The ruler dates what the sources establish. What a story establishes about its own
@@ -481,6 +491,8 @@ holds (format: §10.5).
   project that defines it.
 - **Written by the chronicler** (§12.11), from what each chapter states. The foundation
   steps write the entity's starting state without `From chapter`.
+
+**Example cases:** [26](../examples/README.md#case-26).
 
 ## 4.12 The ruler of a series
 
@@ -523,6 +535,8 @@ The later book is then an established project like any other (§6.1). It sets a 
 and sync points on this ruler and, if it wants them, a divergence point and an order. A
 project layer whose own stack already has a ruler (a base, or an earlier book) is not a
 work. Its chapters sit on that ruler through its sync points (§6.7).
+
+**Example cases:** [L2](../examples/README.md#case-l2).
 
 ## 4.13 In-world time
 
@@ -740,3 +754,5 @@ deliberate. The continuity-editor raises them, and the author decides (§12.12):
 
 A traveler's age counts their personal time, not the world's (§9.1), so an age check on
 a traveler is left to the continuity-editor's judgment.
+
+**Example cases:** [W1](../examples/README.md#case-w1), [W2](../examples/README.md#case-w2), [W3](../examples/README.md#case-w3), [W4](../examples/README.md#case-w4), [W5](../examples/README.md#case-w5), [W6](../examples/README.md#case-w6), [W7](../examples/README.md#case-w7).

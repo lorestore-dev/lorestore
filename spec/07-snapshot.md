@@ -91,6 +91,8 @@ a `PoA` cutoff both resolve to the books' value, because the fanon row has not h
 yet. `fill` gives the books' value at every cutoff, because the books have a row. Under
 every mode, a ledger override from step 5 wins.
 
+**Example cases:** [1](../examples/README.md#case-1), [L3](../examples/README.md#case-l3).
+
 ## 7.3 Relationships and knowledge
 
 Relationships and knowledge are entities like any other, and resolve the same way:
@@ -107,6 +109,8 @@ separate entities, and each resolves only from its own rows, before and after th
 reveal. Joining them is a judgment left to agents. The roster's `Reveal of` and
 `Revealed at` columns (§10.9) tell the drafter and canon-keeper when the connection
 becomes known, and to whom `knowledge.md` says it is known.
+
+**Example cases:** [6](../examples/README.md#case-6), [7](../examples/README.md#case-7).
 
 ## 7.4 Crossovers: one cutoff per base
 
@@ -125,6 +129,8 @@ Every entity belongs to exactly one base. Resolve it against **its own base's** 
 and cutoff, through the layers of its own fandom: a Star Trek fanon package in the stack
 never touches a Harry Potter entity. Then apply the bridge (§8): concept mappings, and
 crossover-only canon (source tier `crossover`). The ledgers apply last.
+
+**Example cases:** [12](../examples/README.md#case-12).
 
 ## 7.5 Frames: two cutoffs at once
 
@@ -168,6 +174,8 @@ cutoff: that is legitimate only for a deliberate flash-forward.
   `TNG:3:15@alt-war`. Captain Garrett is a traveler whose personal cutoff is the last
   ruler point before her ship left its own time, so she knows nothing of the war her
   disappearance caused.
+
+**Example cases:** [22a](../examples/README.md#case-22a).
 
 ## 7.6 The composed bible and materialized snapshots
 
@@ -300,3 +308,5 @@ deliberate. Breaking a reader-facing rule is not a viewpoint leak: it is the lea
 always was (§6.9). A host SHOULD warn when a chapter, as drafted, records a different
 mode or viewpoint from its outline row (§10.18), since the drafter may have had a
 reason and the author decides which to keep.
+
+**Example cases:** [V1](../examples/README.md#case-v1), [V2](../examples/README.md#case-v2), [V3](../examples/README.md#case-v3), [V4](../examples/README.md#case-v4).

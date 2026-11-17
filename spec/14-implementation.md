@@ -160,6 +160,8 @@ than a year after a parent's death, or a title is held outside its holder's life
 (§9.6), and when the author releases a serial chapter that is not
 ready, or sends one to early access that is not `line-edited` (§13.3, §13.9).
 
+**Example cases:** the [validation cases](../examples/README.md#validation-cases).
+
 ## 14.3 The contracts, summarized
 
 | Contract                 | Rule                                                                                                           | Enforced by                                              | Spec  |

@@ -23,7 +23,11 @@ spec, not an implementation.
   `pip install -r tools/requirements.txt && python tools/check.py`
 - If a change adds behavior to the data model, add checks for it to `tools/check.py` and
   the expected result to `examples/README.md`.
-- Check that every `§` reference still resolves to a heading: `python tools/refs.py`.
+- A new case in `examples/README.md` starts with an anchor, `<a id="case-<id>"></a>`, and
+  the spec section it shows off ends with an `**Example cases:**` line linking to it.
+  Link § citations in `examples/README.md` to their headings.
+- Check that every `§` reference and relative link resolves, and every case is linked
+  from the spec: `python tools/refs.py`.
 - Example facts are recorded in our own words with citations; never copy source text.
 - Prose style: plain English, RFC 2119 keywords in capitals. Match the existing
   spelling, which is mostly American ("-ize", "catalog").

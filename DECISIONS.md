@@ -5,6 +5,14 @@ says what was unclear or contradictory, what was decided, and where the rule now
 
 ## 0.3: in-world time
 
+**D119. The spec links to its examples.** The example cases cited the spec by `§` in
+plain text, and no spec section pointed back to a case, so a reader of a rule could
+not find the case that shows it. Every case now has an anchor; each spec section that a
+case shows ends with an **Example cases** line linking to them; the cases' `§`
+citations are links. The examples stay in this repository, so the links are relative.
+`tools/refs.py` checks that every relative link and anchor resolves, and that every
+case is linked from at least one spec section. → every chapter with cases; §14.2
+
 **D118. Viewpoints, and narrators who look back.** `parameters.pov` named a narrative
 mode for the whole project, and the drafter was told to respect what "the POV
 character" knows, but nothing recorded who that was. A project now sets

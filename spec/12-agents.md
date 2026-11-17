@@ -150,6 +150,8 @@ deciding what happens next when the happy path forks.
   (§4.6) a human has approved; writes only its target. The sole writer for its target,
   so parallel merge instances never collide.
 
+**Example cases:** [17](../examples/README.md#case-17).
+
 ## 12.5 `theorist`: facts to cited interpretations
 
 - **Context:** package (a `theories` package, §2.3).
@@ -586,3 +588,5 @@ plain descriptive prose, for no particular image model (§1).
   the character, and never asks for a living artist's style by name. Never goes past
   the prompt's cutoff, even when the author asks for "how they end up": that is a
   later cutoff, which the author chooses.
+
+**Example cases:** [M4](../examples/README.md#case-m4).

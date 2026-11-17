@@ -224,6 +224,8 @@ released. The reviewers read that arc, plus earlier arcs where they need context
 
 There is no finishing phase: an installment is final when it is released.
 
+**Example cases:** [24](../examples/README.md#case-24).
+
 ## 13.4 `established-world` (overlay)
 
 Applies to any chain when `setting.type: established`. It makes the worldbuilder a
@@ -468,6 +470,8 @@ workflow.
 Agents never contact readers or publish anything. Early access, like release, is
 recorded in the manuscript's front matter and nowhere else.
 
+**Example cases:** [24](../examples/README.md#case-24).
+
 ## 13.10 Inserting and renumbering chapters
 
 A chapter id (`chapter-<NN>`, §10.0) is a position in the manuscript, and the project's
@@ -499,3 +503,5 @@ step.
   workspace stacks this one as `project:<id>@chapter-<NN>`, chapters up to and including
   `chapter-<NN>` keep their ids, because those ids are referenced from outside the
   project.
+
+**Example cases:** [27](../examples/README.md#case-27).

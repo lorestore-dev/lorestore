@@ -60,6 +60,8 @@ this chapter requires front matter, its keys are listed.
 | date        | an in-world date in the stack's calendar, such as `1991-07-31`, `..1991`, or `~1975` (§4.13) |
 | duration    | a length of in-world time, such as `3d`, `4d..6d`, or `~8h` (§9.4)          |
 
+**Example cases:** [25](../examples/README.md#case-25).
+
 ## 10.1 `project.yaml`
 
 Schema: [`schemas/project.schema.json`](../schemas/project.schema.json).
@@ -199,6 +201,8 @@ An optional `## Columns` table registers the columns an author has added to tabl
 - `Values` is `free text`, a cell type from §10.0 (`slug`, `point`, `chapter`, …), or an
   enumeration written `a | b | c` (escaped as `a \| b \| c` inside the cell).
 - A column name MUST NOT repeat a required column of its table.
+
+**Example cases:** [25](../examples/README.md#case-25).
 
 ## 10.4 `canon-timeline.md` (the ruler)
 
@@ -546,6 +550,8 @@ Bibliography keys: `author`, `year`, `title`, `container`, `volume`, `issue`, `p
   alternate-universe self) with its own sheet. A time-traveling copy is not a version;
   it stays on one sheet.
 
+**Example cases:** [7](../examples/README.md#case-7), [10](../examples/README.md#case-10).
+
 ## 10.10 `glossary.md`
 
 ```markdown
@@ -646,6 +652,8 @@ Quotations:
 - `quotations.md` is a package file. A project has none: its own lines are in its
   manuscript, and a later book reads an earlier book's lines there, through the project
   layer (`manuscript/@<project>/…`, §2.6).
+
+**Example cases:** [3a](../examples/README.md#case-3a).
 
 ## 10.14 `bridge.md`
 
@@ -781,6 +789,8 @@ Markers in the prose:
   `<!-- TODO: hidden canon: <slug>.<attribute> -->`
 - **Seam conflicts** are marked where a beat needs an earlier book's item that is
   ahead of the chapter and undecided (§6.14): `<!-- TODO: seam conflict: <item> -->`
+
+**Example cases:** [V4](../examples/README.md#case-v4).
 
 ## 10.19 Reviews
 
@@ -999,6 +1009,8 @@ chapters still in the buffer may be.
   looking back; `—` for "in the moment"; empty to take `parameters.told_from` (§7.7).
   Always empty where `Viewpoint` is empty or `—`.
 
+**Example cases:** [V1](../examples/README.md#case-v1).
+
 ## 10.24 `time-travel.md` (frames)
 
 One entry block per mechanism (§9.1), with the catalog fields of §10.11 plus the
@@ -1027,6 +1039,8 @@ module's own:
 - `limit` is checked by judgment (§9.1); state it as a rule the canon-keeper can apply.
 - A mechanism whose rules change over time adds a `## State history` table, as a catalog
   does (§10.11).
+
+**Example cases:** [23](../examples/README.md#case-23).
 
 ## 10.25 Human feedback
 
@@ -1153,3 +1167,5 @@ date: "1995"               # family-portrait only: the in-world date it is paint
   its cutoff's date.
 - `## Gaps` is required, and MAY be empty. `## Sources` is required: one row per fact
   the prompt states about a subject.
+
+**Example cases:** [M4](../examples/README.md#case-m4).

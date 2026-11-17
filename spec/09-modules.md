@@ -109,6 +109,8 @@ trip against its mechanism:
 The chronicler (§12.11) maintains `timelines.md` and `branches.md`, including branch
 statuses, ripples, and paradox decisions made by a human or the showrunner.
 
+**Example cases:** [23](../examples/README.md#case-23).
+
 ## 9.2 LitRPG and GameLit
 
 - `game-system.md` holds **the System's rules**: stats, levels, skills, inventory, and
@@ -173,6 +175,8 @@ story may mean it: a secret road, a magic the routes do not record.
 - It never warns where either date is approximate or open-ended, or where no path joins
   the two places.
 
+**Example cases:** [M1](../examples/README.md#case-m1).
+
 ## 9.5 Mysteries
 
 A mystery is a question the reader is invited to answer before the story does: who
@@ -202,6 +206,8 @@ reveal.
 
 The drafter MUST NOT let the narration answer a mystery before its `Revealed at`,
 even where a viewpoint character already knows the answer.
+
+**Example cases:** [M2](../examples/README.md#case-m2).
 
 ## 9.6 Lineage
 
@@ -243,3 +249,5 @@ or `descends-from` rows on the cycle: one acceptance excuses the whole cycle.
 
 A family tree is a view, never stored: start from an entity and follow `parents` and
 `descends-from` at a cutoff, which shows only the parentage a reader knows by then.
+
+**Example cases:** [M3](../examples/README.md#case-m3).

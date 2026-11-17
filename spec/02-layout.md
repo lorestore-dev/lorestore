@@ -98,6 +98,8 @@ package changing:
 | `harry-potter`, `harry-potter/fanon`, `harry-potter/fanfic/…` | The books, enriched by fan conventions and one fan work    |
 | `harry-potter`, `star-trek`, `universe:wizards-and-warp`     | A crossover (§8)                                           |
 
+**Example cases:** [L1](../examples/README.md#case-l1).
+
 ## 2.3 Packages
 
 A **package** is a reusable bible. Packages are grouped by fandom, and each package has
@@ -318,6 +320,8 @@ catalog or `time-travel.md`, the place id in `places.md`, the event id in
 
 `index.md` is a union in the same way: each layer registers its own files.
 
+**Example cases:** [4](../examples/README.md#case-4).
+
 ## 2.8 Package lifecycle and versioning
 
 `package.yaml` carries a `status` and a `version`.
@@ -384,3 +388,5 @@ override or a story-dated row at its book's cutoff at the chapter, and an origin
 entity's starting state at its book's first cutoff, earlier where a seam decision
 carried it back. The author reviews the result before the package is locked, and the
 project then stacks the package in place of the project layers.
+
+**Example cases:** [L3](../examples/README.md#case-l3).
