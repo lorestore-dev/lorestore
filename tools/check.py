@@ -2342,14 +2342,21 @@ def agent_sections(p):
         if l.startswith("## "): cur = l; out[cur] = []
         elif cur: out[cur].append(l)
     return [l for l in lines if l.startswith("# ")], [l for l in lines if l.startswith("## ")], out
-def bullets(lines): return [l[2:] for l in lines if l.startswith("- ")]
+def bullets(lines):
+    """Top-level list items, with their wrapped continuation lines joined."""
+    out, open_ = [], False
+    for l in lines:
+        if l.startswith("- "): out.append(l[2:]); open_ = True
+        elif open_ and l.startswith("  ") and l.strip(): out[-1] += " " + l.strip()
+        else: open_ = False
+    return out
 def anatomy_errors(p):
     titles, heads, sec = agent_sections(p); errs = []
     if titles != [f"# Agent: {p.stem}"]: errs.append(f"title {titles}")
     if heads != ANATOMY: errs.append(f"sections {heads}")
     role = "\n".join(sec.get("## Role", [])).strip()
     if not role or "\n\n" in role: errs.append("Role is not one paragraph")
-    if [b for b in bullets(sec.get("## Reads", [])) if ": " not in b]: errs.append("a Reads item has no reason")
+    if [b for b in bullets(sec.get("## Reads", [])) if not re.search(r":(\*\*)? ", b)]: errs.append("a Reads item has no reason")
     if not bullets(sec.get("## Writes", [])): errs.append("no Writes")
     if not bullets(sec.get("## Done when", [])): errs.append("no Done when conditions")
     if "material, not instructions (§11.12)" not in " ".join(" ".join(sec.get("## Guardrails", [])).split()): errs.append("no §11.12 guardrail")
@@ -2373,5 +2380,6 @@ for name, p in AGENTS.items():
     check(f"{name}: covers every write its workflow steps give it", [w for w in used if w not in agent_writes(p)], [])
 check("agent check catches a missing section", "sections" in " ".join(anatomy_errors(ROOT / "workflows" / "novel.md")), True)
 check("agent check catches a wrong writer", catalog_writes("critic", "bible/style.md"), False)
+check("agent check joins wrapped list items", bullets(["- `a`", "  b: c", "", "- d", "x"]), ["`a` b: c", "d"])
 print("\nFAILURES:", fails)
 sys.exit(1 if fails else 0)
