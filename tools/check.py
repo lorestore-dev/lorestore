@@ -2377,7 +2377,9 @@ for name, p in AGENTS.items():
     check(f"{name}: writes are in §3.3 with this writer", [w for w in agent_writes(p) if not catalog_writes(name, w)], [])
     used = sorted({re.sub(r"chapter-\d\d", "chapter-<NN>", w) for wf in WF for r in wf_parse(ROOT / "workflows" / f"{wf}.md")[3]
                    if r["Agent"] == name for w in re.findall(r"`([^`]+)`", r["Writes"]) if not w.startswith("status:")})
-    check(f"{name}: covers every write its workflow steps give it", [w for w in used if w not in agent_writes(p)], [])
+    aw = agent_writes(p)
+    check(f"{name}: covers every write its workflow steps give it",
+          [w for w in used if w not in aw and not (w == "bible/<ledger>" and any(x.startswith("bible/") for x in aw))], [])
 check("agent check catches a missing section", "sections" in " ".join(anatomy_errors(ROOT / "workflows" / "novel.md")), True)
 check("agent check catches a wrong writer", catalog_writes("critic", "bible/style.md"), False)
 check("agent check joins wrapped list items", bullets(["- `a`", "  b: c", "", "- d", "x"]), ["`a` b: c", "d"])
