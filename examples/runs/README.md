@@ -4,6 +4,8 @@ Each directory here is a copy of an example project with a run of
 [tools/loop.py](../../tools/loop.py) recorded in it, to show the model-agnostic claim of
 [§11.1](../../spec/11-agent-contract.md#111-the-loop) at work. The checker
 doesn't read these copies; the projects it checks are in [projects/](../projects/).
+Each copy keeps the spec version and pins it was run at, so `three-brothers` stays at
+0.3 (D131).
 
 ## `three-brothers`, run 1
 

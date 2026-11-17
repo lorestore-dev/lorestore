@@ -6,7 +6,7 @@
   "required": ["spec_version", "id", "kind", "name", "version", "status", "relies-on"],
   "additionalProperties": false,
   "properties": {
-    "spec_version": { "type": "string", "const": "0.3" },
+    "spec_version": { "type": "string", "const": "0.4" },
     "id": { "$ref": "#/$defs/packageId" },
     "kind": {
       "enum": ["base", "official", "adaptation", "fanon", "fanfic", "theories"],

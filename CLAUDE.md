@@ -1,6 +1,6 @@
 # LoreStore: notes for Claude
 
-This repository is the LoreStore specification (draft 0.3): a file-based, model-agnostic
+This repository is the LoreStore specification (draft 0.4): a file-based, model-agnostic
 canon store for fiction, plus the agent framework that reads and writes it. It holds the
 spec, not an implementation.
 

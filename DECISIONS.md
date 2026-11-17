@@ -5,6 +5,12 @@ says what was unclear or contradictory, what was decided, and where the rule now
 
 ## 0.4: reference agents and workflows
 
+**D131. The examples move to 0.4.** Under D116, moving to a new spec version is a human
+change and a patch bump for a package. Every manifest and schema now declares
+`spec_version: "0.4"`, each example package and the crossover universe takes a patch
+bump, and every exact pin is updated to match. The recorded run in `examples/runs/`
+stays at 0.3, as the record of what was run. → §2.8, §10.0
+
 **D130. A scheduled step gets its notes, and a revision reads what it revises.** §11.8
 gave notes to a step only through a gate's `revise:` signal. A revision the showrunner
 scheduled had no way to say what to change, and a re-draft read the beats, not the

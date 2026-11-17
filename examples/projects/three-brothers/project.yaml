@@ -1,4 +1,4 @@
-spec_version: "0.3"
+spec_version: "0.4"
 id: three-brothers
 name: "The Third Brother"
 workflow: short-story
@@ -6,8 +6,8 @@ gates: milestones
 seed: "King's Cross, told as the last page of the tale: Dumbledore as the Death who greets an old friend."
 
 layers:                         # from the base up
-  - harry-potter@3.2.1
-  - harry-potter/theories@1.0.3
+  - harry-potter@3.2.2
+  - harry-potter/theories@1.0.4
 
 setting:
   type: established

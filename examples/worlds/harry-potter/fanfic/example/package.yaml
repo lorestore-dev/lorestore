@@ -1,10 +1,10 @@
-spec_version: "0.3"
+spec_version: "0.4"
 id: harry-potter/fanfic/example
 kind: fanfic
 name: "An imported fan work (placeholder)"
-version: 1.2.3
+version: 1.2.4
 status: locked
 relies-on:
-  - harry-potter@3.2.1
+  - harry-potter@3.2.2
 license: LicenseRef-fan-author-terms
 credit: "The fan work's author, as they ask to be credited (a placeholder)"

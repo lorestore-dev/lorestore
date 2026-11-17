@@ -1,4 +1,4 @@
-spec_version: "0.3"
+spec_version: "0.4"
 id: the-long-way-back
 name: "The Long Way Back"
 workflow: serial                # released installments are locked (the default)
@@ -10,7 +10,7 @@ parameters:
   target_length: 85000
 
 layers:                         # from the base up
-  - star-trek@2.1.1
+  - star-trek@2.1.2
 
 setting:
   type: established

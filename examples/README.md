@@ -48,12 +48,12 @@ stacks, from the base up:
 
 | Name     | Layers                                                                      | Resolution |
 | -------- | --------------------------------------------------------------------------- | ---------- |
-| canon    | `harry-potter@3.2.1`                                                         | precedence |
-| fan      | `harry-potter@3.2.1`, `harry-potter/fanon@1.0.4`, `harry-potter/fanfic/example@1.2.3` | precedence |
+| canon    | `harry-potter@3.2.2`                                                         | precedence |
+| fan      | `harry-potter@3.2.2`, `harry-potter/fanon@1.0.5`, `harry-potter/fanfic/example@1.2.4` | precedence |
 | fan, recency | the same layers                                                         | recency    |
 | fan, fill    | the same layers                                                         | fill       |
-| trek     | `star-trek@2.1.1`                                                            | precedence |
-| animated | `star-trek@2.1.1`, `star-trek/animated@1.0.2`                                | precedence |
+| trek     | `star-trek@2.1.2`                                                            | precedence |
+| animated | `star-trek@2.1.2`, `star-trek/animated@1.0.3`                                | precedence |
 
 `two-witnesses` uses the fan stack with recency.
 
@@ -272,7 +272,7 @@ substitute his Nimbus Two Thousand (D4, `Overrides`: `—`). The fourth is Harry
 `two-witnesses` has no candidates.
 
 <a id="case-18b"></a>**18b. A stack change.** A Star Trek project order that swaps `TOS:3` and `TMP` is no
-longer a permutation once `star-trek/animated@1.0.2` joins the stack. The host refuses
+longer a permutation once `star-trek/animated@1.0.3` joins the stack. The host refuses
 to run and proposes `TOS:1, TOS:2, TMP, TOS:3, TAS:1, TAS:2, …`: each inserted segment
 right after the one it follows on the new ruler. Removing the package again proposes
 the original order.
@@ -411,7 +411,7 @@ finds no value seam for Harry, Cedric, Hermione, or Snape. Switched to `preceden
 finds one: `harry-potter.broom`. Book 1 (`recency`) gave the Firebolt from the books,
 and `precedence` gives the fan work's Cleansweep Seven.
 
-<a id="case-l6"></a>**L6. Inherited settings.** A stack of `harry-potter@3.2.1` and
+<a id="case-l6"></a>**L6. Inherited settings.** A stack of `harry-potter@3.2.2` and
 `project:second-year-tournament@chapter-03` sets no order, and so uses book 1's: `GoF:1`
 sorts before `CoS:1`. A sequel to the `no-horcruxes` branch MUST be a branch, with a
 divergence point no later than `PS:17`.
@@ -643,9 +643,9 @@ A conforming host MUST report each of these if introduced:
 
 - citing the `films` source from the Harry Potter base (a tier its kind does
   not allow, [§2.3](../spec/02-layout.md#23-packages));
-- removing `harry-potter/fanon@1.0.4` from `two-witnesses-ii` (a package layer not
+- removing `harry-potter/fanon@1.0.5` from `two-witnesses-ii` (a package layer not
   relisted, [§2.2](../spec/02-layout.md#22-layers-and-stacks));
-- moving `harry-potter/fanon@1.0.4` below `harry-potter@3.2.1` in any stack (a layer
+- moving `harry-potter/fanon@1.0.5` below `harry-potter@3.2.2` in any stack (a layer
   below what it relies on, [§2.2](../spec/02-layout.md#22-layers-and-stacks));
 - a `PS:6:2+00:41:10` as-of in a stack without `harry-potter/films` ([§4.9](../spec/04-temporal.md#49-adaptations-base-points-with-the-adaptations-timecode));
 - changing the animated package's `TAS:1` row to insert after `TOS:4` (an unknown
@@ -672,7 +672,7 @@ A conforming host MUST report each of these if introduced:
 - a `lantern-road:13` point in `lantern-road-before`, past its pin ([§4.12](../spec/04-temporal.md#412-the-ruler-of-a-series));
 - a `lantern-road-before` Seam conflicts row with decision `accept` for a project item, or `other` with no note ([§10.8](../spec/10-formats.md#108-divergencesmd));
 - a sequel to `no-horcruxes` that is a retelling, or a branch diverging after `PS:17` ([§6.14](../spec/06-divergence.md#614-where-books-meet-seam-conflicts));
-- adding `star-trek/animated@1.0.2` to a Star Trek project with a `setting.order` that lacks `TAS:1` and `TAS:2` ([§6.8](../spec/06-divergence.md#68-rearranging-canon));
+- adding `star-trek/animated@1.0.3` to a Star Trek project with a `setting.order` that lacks `TAS:1` and `TAS:2` ([§6.8](../spec/06-divergence.md#68-rearranging-canon));
 - `lantern-road` with a `setting.cutoff` ([§4.7](../spec/04-temporal.md#47-self-contained-worlds-without-a-ruler), rejected by the schema);
 - registering `gof-first-printing` as `primary` (two tied rows in one package, [§4.4](../spec/04-temporal.md#44-state-histories)), or an `erratum` source in `harry-potter/fanon` ([§2.3](../spec/02-layout.md#23-packages));
 - a `calendar` in `harry-potter/fanon` or `two-witnesses`, a `notation` beside `lantern-road`'s custom calendar, or `calendar: gregorian` (rejected by the schema, [§4.13](../spec/04-temporal.md#413-in-world-time));

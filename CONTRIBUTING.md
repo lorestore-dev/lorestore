@@ -147,7 +147,7 @@ packages/
 ```
 
 Every published version is kept as a Git tag, `<id>@<version>` (for example
-`harry-potter@3.2.1` or `harry-potter/fanon@1.0.4`). The tag is exactly the pin a project
+`harry-potter@3.2.2` or `harry-potter/fanon@1.0.5`). The tag is exactly the pin a project
 writes in its `layers:` (§2.2), so a project names a registry package by its bare id
 and version, with no registry prefix, and a host fetches that pin by checking out the
 tag.

@@ -1,4 +1,4 @@
-spec_version: "0.3"
+spec_version: "0.4"
 id: no-horcruxes
 name: "No Horcruxes"
 workflow: novel
@@ -6,7 +6,7 @@ gates: milestones
 seed: "There are no Horcruxes. When Quirrell dies at the end of first year, Voldemort dies with him. What does the wizarding world do with a peace it didn't expect?"
 
 layers:                         # from the base up
-  - harry-potter@3.2.1
+  - harry-potter@3.2.2
 
 setting:
   type: established
