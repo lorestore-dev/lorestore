@@ -80,8 +80,8 @@ ser["serial"] = {"released": "revisable"}; check("schema serial revisable accept
 ser["serial"] = {"released": "frozen"}; check("schema serial unknown policy rejected", schema("project").is_valid(ser), False)
 for name, doc in [("project", pyaml("two-witnesses")), ("package", load(EX/"worlds/harry-potter/base/package.yaml")), ("universe", load(EX/"universes/wizards-and-warp/universe.yaml"))]:
     check(f"schema {name}: spec version 0.4", doc["spec_version"], "0.4")
-    doc["spec_version"] = "0.2"; check(f"schema {name}: a 0.2 manifest is not 0.3", schema(name).is_valid(doc), False)
-check("schema: this document is version 0.3", "This document is version `0.4`." in (ROOT/"spec/10-formats.md").read_text(), True)
+    doc["spec_version"] = "0.2"; check(f"schema {name}: a 0.2 manifest is not 0.4", schema(name).is_valid(doc), False)
+check("schema: this document is version 0.4", "This document is version `0.4`." in (ROOT/"spec/10-formats.md").read_text(), True)
 nov = pyaml("two-witnesses"); nov["serial"] = {"released": "locked"}
 check("schema serial block on novel rejected", schema("project").is_valid(nov), False)
 
