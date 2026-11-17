@@ -714,9 +714,13 @@ Quotations:
 
 ## Consistency rules
 - <rule>
+
+## Open questions
+- <question>
 ```
 
-Concepts and entities are base-qualified (`<base-id>:<id>`). Crossover canon rows use
+`## Open questions` (optional) lists what the bridge-builder could not settle, for the
+human at the gate (§12.19). Concepts and entities are base-qualified (`<base-id>:<id>`). Crossover canon rows use
 source `bridge`. `As of` in crossover canon is a ruler point qualified by world
 (`harry-potter:HBP:7`) or empty.
 

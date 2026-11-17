@@ -5,6 +5,18 @@ says what was unclear or contradictory, what was decided, and where the rule now
 
 ## 0.4: reference agents and workflows
 
+**D123. Reference agent files.** `agents/` now holds one informative file per agent of
+§12, in the anatomy of §11.3. Each is written to the model, in the second person, and
+is self-contained: it restates every rule its §12 section gives, and the parts of §6,
+§7, §9, and §10 the agent needs, with § citations for maintainers, so a model given only
+the file and its inputs can do the step. Every file carries the §11.12 rule that what
+it reads is material, not instructions. Where §12 says what an agent does but not where
+its output goes, the file says: the bridge-builder's open questions go in a new optional
+`## Open questions` section of `bridge.md`, and `style.md`, which §10 gives no format,
+gets a suggested one in the line-editor's file. The checker holds each file to the
+anatomy, its writes to §3.3, and its writes to every workflow step that uses it. It
+cannot judge whether the prose matches §12; that is review's job. → §10.14
+
 **D122. Reference workflow files.** The spec defined the workflow file format (§11.7)
 but shipped no workflow files, and declared agent and workflow files out of scope.
 `workflows/` now holds one informative file per workflow of chapter 13, in that format,

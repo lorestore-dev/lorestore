@@ -2371,7 +2371,11 @@ def catalog_writes(name, path):
     return any(re.search(rf"(?<![a-z-]){re.escape(name)}(?![a-z-])", c) for c in CAT.get(path, {}).values())
 REVIEWERS["dialogue"] = "dialogue"
 AGENTS = {p.stem: p for p in sorted((ROOT / "agents").glob("*.md"))}
-check("every agent file is a §12 agent", sorted(set(AGENTS) - ROSTER_AGENTS), [])
+check("agents/ holds one file per §12 agent", sorted(AGENTS), sorted(ROSTER_AGENTS))
+WF_TEXT = " ".join((ROOT / "workflows" / f"{w}.md").read_text() for w in WF)
+in_steps = {r["Agent"] for w in WF for r in wf_parse(ROOT / "workflows" / f"{w}.md")[3]}
+check("every agent is used by a workflow step, or on demand (§11.11)",
+      sorted(a for a in AGENTS if a not in in_steps and not re.search({"dialogue": "dialogue pass", "prompter": "image prompts"}.get(a, "^$"), WF_TEXT)), [])
 for name, p in AGENTS.items():
     check(f"{name}: anatomy (§11.3, §11.11)", anatomy_errors(p), [])
     check(f"{name}: writes are in §3.3 with this writer", [w for w in agent_writes(p) if not catalog_writes(name, w)], [])

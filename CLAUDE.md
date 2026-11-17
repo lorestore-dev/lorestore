@@ -13,6 +13,8 @@ spec, not an implementation.
 - `examples/`: abridged Harry Potter and Star Trek packages under
   `worlds/<fandom>/<package>/` (each base in `base/`), a crossover universe, and eight
   projects. `examples/README.md` lists the numbered cases and their expected results.
+- `agents/`: the reference agent files (informative, §1.2), in the second person, each
+  restating its §12 section in full with § citations. Change §12 first, then the file.
 - `workflows/`: the reference workflow files (informative, §1.2). Each mirrors its §13
   table, and the checker holds them to it: change §13 first, then the file.
 - `DECISIONS.md`: decisions D1 onwards, newest first. Add an entry for every rule change.
