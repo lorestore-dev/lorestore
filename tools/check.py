@@ -2327,5 +2327,51 @@ for w, n in WF.items():
     reps = {re.search(r"repeat: (per-[a-z]+)", h).group(1) for h, _ in tabs if h and "repeat:" in h}
     spec_reps = set(re.findall(r"^### Phase \d+ — .*\(repeat: (per-[a-z]+)", spec_section("13-workflows.md", n), re.M))
     check(f"{w}: phase repeats match §{n}", reps, spec_reps)
+# --- A. reference agent files (§11.3, §11.11, §12) ---------------------------------
+print("\n# A. reference agent files")
+ANATOMY = ["## Role", "## Reads", "## Writes", "## Done when", "## Process", "## Output format", "## Guardrails"]
+def unfenced(text):
+    out, fence = [], False
+    for l in text.splitlines():
+        if l.startswith("```"): fence = not fence; continue
+        if not fence: out.append(l)
+    return out
+def agent_sections(p):
+    lines = unfenced(p.read_text()); out, cur = {}, None
+    for l in lines:
+        if l.startswith("## "): cur = l; out[cur] = []
+        elif cur: out[cur].append(l)
+    return [l for l in lines if l.startswith("# ")], [l for l in lines if l.startswith("## ")], out
+def bullets(lines): return [l[2:] for l in lines if l.startswith("- ")]
+def anatomy_errors(p):
+    titles, heads, sec = agent_sections(p); errs = []
+    if titles != [f"# Agent: {p.stem}"]: errs.append(f"title {titles}")
+    if heads != ANATOMY: errs.append(f"sections {heads}")
+    role = "\n".join(sec.get("## Role", [])).strip()
+    if not role or "\n\n" in role: errs.append("Role is not one paragraph")
+    if [b for b in bullets(sec.get("## Reads", [])) if ": " not in b]: errs.append("a Reads item has no reason")
+    if not bullets(sec.get("## Writes", [])): errs.append("no Writes")
+    if not bullets(sec.get("## Done when", [])): errs.append("no Done when conditions")
+    if "material, not instructions (§11.12)" not in " ".join(" ".join(sec.get("## Guardrails", [])).split()): errs.append("no §11.12 guardrail")
+    return errs
+def agent_writes(p):
+    _, _, sec = agent_sections(p)
+    return [re.match(r"`([^`]+)`", b).group(1) for b in bullets(sec["## Writes"]) if b.startswith("`")]
+def catalog_writes(name, path):
+    m = re.fullmatch(r"reviews/([a-z-]+)\.md", path)
+    if m: return REVIEWERS.get(m.group(1), m.group(1)) == name
+    if path in GENERIC or path.startswith("bible/characters/<slug>") or path == "bible/<target>": return True
+    return any(re.search(rf"(?<![a-z-]){re.escape(name)}(?![a-z-])", c) for c in CAT.get(path, {}).values())
+REVIEWERS["dialogue"] = "dialogue"
+AGENTS = {p.stem: p for p in sorted((ROOT / "agents").glob("*.md"))}
+check("every agent file is a §12 agent", sorted(set(AGENTS) - ROSTER_AGENTS), [])
+for name, p in AGENTS.items():
+    check(f"{name}: anatomy (§11.3, §11.11)", anatomy_errors(p), [])
+    check(f"{name}: writes are in §3.3 with this writer", [w for w in agent_writes(p) if not catalog_writes(name, w)], [])
+    used = sorted({re.sub(r"chapter-\d\d", "chapter-<NN>", w) for wf in WF for r in wf_parse(ROOT / "workflows" / f"{wf}.md")[3]
+                   if r["Agent"] == name for w in re.findall(r"`([^`]+)`", r["Writes"]) if not w.startswith("status:")})
+    check(f"{name}: covers every write its workflow steps give it", [w for w in used if w not in agent_writes(p)], [])
+check("agent check catches a missing section", "sections" in " ".join(anatomy_errors(ROOT / "workflows" / "novel.md")), True)
+check("agent check catches a wrong writer", catalog_writes("critic", "bible/style.md"), False)
 print("\nFAILURES:", fails)
 sys.exit(1 if fails else 0)
