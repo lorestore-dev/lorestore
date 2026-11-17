@@ -187,6 +187,11 @@ three signals:
 - **`back: <step>`**: return to an earlier step (for example, the outline needs
   rework).
 
+A step the showrunner schedules with notes (§12.1), a revision or any other, runs as a
+`revise:` does: the showrunner's notes for it are appended to its inputs. A step that revises a file,
+by either route, also reads that file as it stands, so that it changes what the notes
+ask and keeps the rest.
+
 Gates are separate from **decisions** (§6.9): a pending decide item blocks progress past
 its chapter under every gate policy. A `TODO: hidden canon` or `TODO: seam conflict`
 marker (§10.18) still in a chapter counts as a pending decide item for it. Under `gates:

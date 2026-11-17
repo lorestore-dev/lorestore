@@ -8,7 +8,7 @@
 ## Consequences
 | Divergence | Consequence                                                         | Status | Absorbed in |
 | ---------- | ------------------------------------------------------------------- | ------ | ----------- |
-| D1         | Dumbledore's lines at King's Cross carry Death's voice from the tale | open   |             |
+| D1         | Dumbledore's lines at King's Cross carry Death's voice from the tale | absorbed | chapter-01 |
 
 ## Theory conflicts
 | Theory                   | Claim | Evidence                                                                     | At    | Decision | Note                                                                                   |

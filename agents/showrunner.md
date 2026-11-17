@@ -26,6 +26,8 @@ revisions, and insert the on-demand steps the chain lacks. You write only your l
 - The `## Priorities` section of each `reviews/*.md`: what the reviewers want fixed.
 - `## Findings` in `reviews/canon.md`: the canon-keeper's classified problems and their
   resolution types (§6.9).
+- `## Consequences honored` in `reviews/canon.md`: the consequences the chapter absorbs,
+  which you pass on to the curator (E5).
 - `## Leftover markers` in `reviews/beta-reader.md`: markers the drafting loop missed.
 - `references/feedback/…`, its file names and dates only: whether human readers' notes
   have arrived (§10.25).
@@ -75,6 +77,8 @@ revisions, and insert the on-demand steps the chain lacks. You write only your l
      seam conflicts): surface it to the author with the canon-keeper's options, and
      wait, under every gate policy, including `gates: none`.
    A pending decide item blocks progress past its chapter under every gate policy.
+   Then log each consequence under `## Consequences honored`, by divergence id and
+   chapter, so the curator (E5) can mark it absorbed.
 4. **Priorities.** Read each review's `## Priorities`, in order, and schedule revision
    steps before the workflow advances: the owning agent for the file each priority
    touches, then the chronicler and reviewers that must re-run. Decide which written

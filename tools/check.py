@@ -114,12 +114,13 @@ def pkg_dir(pid):
     fandom, *rest = pid.split("/")
     return EX/"worlds"/fandom/("/".join(rest) if rest else "base")
 
+MULTI_FILES = ("world.md", "places.md", "society.md", "culture.md", "species.md", "history.md", "titles.md")   # §10.5
 def entity_rows(d, entity):
     """An entity's state rows in one bible directory (§10.5)."""
     f = d/"characters"/f"{entity}.md"
     out = table(f, "## State history") if f.exists() else []
     if (d/"relationships.md").exists(): out += [r for r in table(d/"relationships.md", "## State history") if r["Pair"] == entity]
-    for multi in ("species.md", "history.md", "titles.md"):
+    for multi in MULTI_FILES:
         if (d/multi).exists(): out += [r for r in table(d/multi, "## State history") if r["Entity"] == entity]
     if (d/"knowledge.md").exists():
         out += [dict(r, Attribute=r["Secret"], Value=r["State"]) for r in table(d/"knowledge.md", "## Knowledge") if r["Character"] == entity]
@@ -915,7 +916,9 @@ TB = "three-brothers"; TBS = Stack.of(TB)
 theories = entries(pkg_dir("harry-potter/theories")/"theories.md")
 claims = {t: {int(k.split("-")[1]) for k in e if k.startswith("claim-")} for t, e in theories.items()}
 check("Q theory claims numbered", claims["T1"], {1, 2, 3, 4})
-check("Q theories never resolve into state", snapshot(TBS, "albus-dumbledore"), {})
+check("Q theories never resolve into state", snapshot(TBS, "albus-dumbledore"), snapshot(Stack(["harry-potter@3.2.1"]), "albus-dumbledore", "DH:36"))
+check("Q the theory's subject has canon state of his own", "hallows-hunt" in snapshot(TBS, "albus-dumbledore"), True)
+check("S a place in places.md has a snapshot (§10.5)", snapshot(TBS, "kings-cross-limbo").get("under-a-bench", "")[:24], "a small, flayed, child-l")
 def basis(d):
     m = re.fullmatch(r"(\S+):(T\d+) \(claims? ([\d, ]+)\)", d.get("Basis", ""))
     return (m[1], m[2], {int(x) for x in m[3].split(", ")}) if m else None
@@ -1223,7 +1226,7 @@ def point_date(stack, pt, base=None):
 def accepted(f):
     return [(r["Check"], r["Subject"], r) for r in table(f, "## Accepted")] if has(f, "## Accepted") else []
 
-STATE_FILES = ("relationships.md", "species.md", "history.md", "titles.md")
+STATE_FILES = ("relationships.md",) + MULTI_FILES
 def state_tables(d):
     """(file, key column or None, rows) for each state-history table in a bible directory."""
     out = [(f, None, table(f, "## State history")) for f in sorted((d/"characters").glob("[!_]*.md"))] if (d/"characters").exists() else []
@@ -2403,6 +2406,23 @@ def position_errors(chain, overlay):
     return errs
 for chain in ("novel", "short-story", "serial"):
     check(f"{chain}: every overlay position resolves (§11.7)", position_errors(chain, ["established-world", "frames"]), [])
+STORY_PLAN = ("bible/premise.md", "bible/outline.md", "bible/style.md")
+def unwritten_reads(chain):
+    """Story files a step reads before any earlier step of its chain writes them (§3.3)."""
+    written, errs = set(), []
+    for r in wf_parse(ROOT / "workflows" / f"{chain}.md")[3]:
+        errs += [f"{r['Step']} reads {p}" for p in re.findall(r"`([^`]+)`", r["Reads"]) if p in STORY_PLAN and p not in written]
+        written |= set(re.findall(r"`([^`]+)`", r["Writes"]))
+    return errs
+for chain in ("novel", "short-story", "serial"):
+    check(f"{chain}: every premise, outline, and style read follows its write (§3.3)", unwritten_reads(chain), [])
+def unrouted_reviews(chain):
+    """Review steps with no showrunner step after them to route their priorities (§12.1)."""
+    rows = wf_parse(ROOT / "workflows" / f"{chain}.md")[3]
+    return [r["Step"] for i, r in enumerate(rows) if "`reviews/" in r["Writes"]
+            and not any(s["Agent"] == "showrunner" for s in rows[i + 1:])]
+for chain in ("novel", "short-story", "serial"):
+    check(f"{chain}: a showrunner step follows every review step (§12.1)", unrouted_reviews(chain), [])
 def added_reads(text):
     """An overlay's `## Added reads` table (§11.7), as (step, reads) pairs."""
     part = text.split("\n## Added reads", 1)[1].split("\n## ", 1)[0] if "\n## Added reads" in text else ""

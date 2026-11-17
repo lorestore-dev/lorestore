@@ -36,6 +36,9 @@ do not invent: you mark the gap for the showrunner (§12.10).
   (mysteries).
 - An adopted theory, only through the divergences whose `Basis` cites it (§6.13): never
   `bible/theories.md` itself.
+- In a revision, `manuscript/chapter-<NN>.md` as it stands, and the notes for the
+  revision (the showrunner's, or the author's `revise:`; §11.8): change what the notes
+  ask, and keep the rest.
 
 ## Writes
 

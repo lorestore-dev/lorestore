@@ -423,7 +423,10 @@ divergence point no later than `PS:17`.
 harry-potter/theories:T1 (claims 1, 3, 4)`. The Theory conflicts table records two
 conflicts at `DH:35`: claim 2 discarded, and claim 4 adapted with a note. Claim 2
 appears in no `Basis`; claim 4 does. The theory's rows never resolve into state:
-`albus-dumbledore` has no attributes from it.
+`albus-dumbledore`'s snapshot is the base's alone, with none of it from the theory.
+The base's own rows for him (DH ch.35) resolve as usual, and so does a place in
+`places.md`: `kings-cross-limbo` has a snapshot like any entity
+([§10.5](../spec/10-formats.md#105-state-histories)).
 
 ## Frames and serials
 

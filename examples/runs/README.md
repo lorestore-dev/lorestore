@@ -7,38 +7,67 @@ doesn't read these copies; the projects it checks are in [projects/](../projects
 
 ## `three-brothers`, run 1
 
-The `short-story` workflow with the established-world overlay, run on a copy of
-[three-brothers](../projects/three-brothers/) in exchange mode. For each step,
+The `short-story` workflow with the established-world overlay, run end to end on a copy
+of [three-brothers](../projects/three-brothers/) in exchange mode, from the seed in
+`project.yaml` to a chapter with `status: final`. For each step,
 `runs/run-1/<n>-<step>.prompt.md` is exactly what the model was given: the agent file,
 the step's inputs resolved to slices, and the standing instruction. Beside it,
 `<n>-<step>.reply.md` is the reply, written from the prompt alone. The run's own record
-is in `runs/run-1/log.md`.
+is in `runs/run-1/log.md`; the prompts and replies of steps that were later re-run are
+in `runs/run-1/superseded/pass-<n>/`.
 
 ```
 python tools/loop.py examples/runs/three-brothers --approve \
   --skip "E1=the story stays at one cutoff, DH:36 (judged from the outline: one scene)"
+python tools/loop.py examples/runs/three-brothers --approve --from <step>   # a scheduled re-run
 ```
 
 `--approve` passes every gate; the log records it as a demonstration, not an author's
-signal. The steps:
+signal.
 
-| Step | Agent             | Result                                                                     |
-| ---- | ----------------- | -------------------------------------------------------------------------- |
-| E0   | `compose`         | `derived/bible/`, from the two layers                                       |
-| 1    | architect         | `bible/premise.md`                                                         |
-| 2    | architect         | `bible/outline.md`: one chapter, one scene                                 |
-| E1   | architect         | skipped, by judgment (`--skip`)                                            |
-| E1a  | canon-keeper      | skipped: the project has no order of its own                               |
-| E1b  | canon-keeper      | skipped: the project has no project layers                                 |
-| E2   | worldbuilder      | `bible/divergences.md`, unchanged: the planned divergence was already logged |
-| E2a  | canon-keeper      | `reviews/canon.md`: the theory audit, with no new conflicts                |
-| E2b  | worldbuilder      | skipped: E2a raised nothing for the author                                 |
-| 4    | character-designer | skipped: no original characters                                           |
-| 10   | drafter           | `manuscript/chapter-01.md`, with six `needs bible` markers                 |
-| 11   | showrunner        | `showrunner-log.md`: the canon gaps routed to an extraction run            |
-| 13   | continuity-editor | blocked: the markers must be resolved first (§11.9)                        |
+### How it went
 
-The run stops at step 13, as the spec requires. The story is set in DH ch.35, which
-the abridged `harry-potter` package does not cover, so the drafter could not use canon
-it does not have, and marked the gaps instead. What the run found is recorded as D124
-to D127 in [DECISIONS.md](../../DECISIONS.md).
+1. **Foundation.**
+   - E0 composes the stack.
+   - The architect writes the premise (1) and the outline (2).
+   - E1, E1a, E1b, E2b, and step 4 are skipped, each with its reason in the log.
+   - The worldbuilder confirms the ledger (E2).
+   - The canon-keeper's theory audit (E2a) finds no new conflicts.
+2. **First draft: blocked.**
+   - The story is set in DH ch.35, which the abridged `harry-potter` package didn't
+     cover, so the drafter marked six `needs bible` gaps rather than invent canon.
+   - The showrunner routed the canon gaps to a package update.
+   - The loop stopped at step 13, as §11.9 requires.
+3. **The author's part, outside the loop.**
+   - The package gained DH ch.35: `albus-dumbledore`, `places.md` (`kings-cross-limbo`),
+     two secrets in `knowledge.md`, and the Hallows terms.
+   - The chain gained step 9 (D128), which wrote the style guide.
+   - The draft was re-run, with no markers.
+4. **Reviews: two fixes, both in the package.**
+   - Continuity (13) and canon (E3) found the draft at odds with two stale or missing
+     rows: Dumbledore's hands at King's Cross, and Voldemort's body after GoF.
+   - The showrunner (E4) surfaced them to the author.
+   - The package gained both rows, and 13, E3, and E4 re-ran clean.
+   - E5 marked D1's consequence absorbed.
+5. **Critique and revision.**
+   - The critic (16) found three structural problems, and the showrunner (18) sent them
+     back to the drafter.
+   - The drafter revised, with the draft and the showrunner's notes among its inputs
+     (D130).
+   - The reviews re-ran, and the critic's two remaining notes went to the line-editor.
+6. **Finish.** The line-editor polished the chapter (14), then made the finishing pass
+   (19).
+
+### What it found
+
+Recorded in [DECISIONS.md](../../DECISIONS.md), D124 to D130:
+- three chain gaps: short-story's numbering, its missing style step, and its missing
+  routing step;
+- two reads gaps: the drafter's ledger in an established world, and the consequences E5
+  needs;
+- the rule for scheduled revisions;
+- a gap in the checker's snapshot, which ignored `places.md`.
+
+One limit stays in the loop: it finds the cast by name, so after the revision referred to
+Voldemort only as "he", his snapshot dropped out of the reviews' inputs. The canon-keeper
+said so. A host needs better cast resolution than name matching.

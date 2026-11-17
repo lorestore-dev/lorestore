@@ -10,6 +10,7 @@
 | knowledge.md                    | world  | Secrets and who knows them              |
 | relationships.md                | world  | Pairwise relationship histories         |
 | history.md                      | world  | World history: dated past events        |
+| places.md                       | world  | Atlas (one place: King's Cross at DH:35) |
 | mysteries.md                    | world  | Mysteries and their clues               |
 | titles.md                       | world  | Titles and their holders                |
 | magic/spells.md                 | world  | Spell catalog                           |
@@ -21,6 +22,7 @@
 | characters/sirius-black.md      | world  | Character sheet                         |
 | characters/lord-voldemort.md    | world  | Character sheet                         |
 | characters/severus-snape.md     | world  | Character sheet (with True from and In-world) |
+| characters/albus-dumbledore.md  | world  | Character sheet                         |
 | characters/james-potter.md      | world  | Character sheet (dates only)            |
 | characters/lily-potter.md       | world  | Character sheet (dates only)            |
 | characters/merope-gaunt.md      | world  | Character sheet (parentage only)        |

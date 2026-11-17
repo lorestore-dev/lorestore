@@ -103,17 +103,20 @@ because the author, not the chain, decides when they run.
 A compressed chain for a single scene or arc: one chapter, a lighter foundation. Its
 steps are a selection of `novel`'s, under the same numbers, so the established-world
 and frames overlays apply unchanged. The numbers are ids: the table's order is the
-order the steps run in, and here the critic reads the chapter before it is polished.
+order the steps run in, and here the critic reads the chapter before it is polished,
+and the showrunner routes its priorities (step 18) before the line-editor runs.
 
 | Step | Agent              | Writes                         | Gate      | Repeat        |
 | ---- | ------------------ | ------------------------------ | --------- | ------------- |
 | 1    | architect          | `bible/premise.md`             | milestone |               |
 | 2    | architect          | `bible/outline.md`             |           |               |
 | 4    | character-designer | `bible/characters/<slug>.md`   |           | per-character |
+| 9    | line-editor        | `bible/style.md`               | milestone |               |
 | 10   | drafter            | `manuscript/chapter-01.md`     |           |               |
 | 11   | showrunner         | `showrunner-log.md`            |           |               |
 | 13   | continuity-editor  | `reviews/continuity.md`        |           |               |
 | 16   | critic             | `reviews/critique.md`          |           |               |
+| 18   | showrunner         | `showrunner-log.md`            |           |               |
 | 14   | line-editor        | `manuscript/chapter-01.md`     | milestone |               |
 | 19   | line-editor        | `manuscript/chapter-01.md` (`status: final`) | milestone |  |
 
@@ -303,7 +306,8 @@ what the story changes in canon:
   entities (§6.2), the reordering itself, and the author's chosen resolution for each
   order inversion, with its fallout as open consequences.
 - **E3** classifies the chapter's problems (§6.9). **E4** routes fix items and resolves
-  or surfaces decide items. A pending decide item blocks step 14 (§11.8).
+  or surfaces decide items. It also logs the consequences E3 reports honored, so that
+  E5 can mark them absorbed. A pending decide item blocks step 14 (§11.8).
 - **E5** runs only when E4 accepted an emergent divergence or consequences were
   absorbed. It logs the divergence and updates consequence statuses. The showrunner then
   schedules revisions for any already-written chapter an open consequence invalidates.

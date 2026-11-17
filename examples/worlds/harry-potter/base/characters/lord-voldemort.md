@@ -9,4 +9,5 @@ origin: canon
 | Attribute | Value                                                  | As of | Source | Citation  |
 | --------- | ------------------------------------------------------ | ----- | ------ | --------- |
 | status    | disembodied; flees as a spirit when Quirrell dies      | PS:17 | books  | PS ch.17  |
+| status    | restored to a body, made in part with Harry's blood    | GoF:32 | books | GoF ch.32 |
 | parents   | merope-gaunt; tom-riddle-sr                            | HBP:10 | books | HBP ch.10, Dumbledore's memories of the Gaunts |

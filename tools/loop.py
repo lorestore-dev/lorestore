@@ -71,12 +71,15 @@ def audit_entries(p):
 def decide_findings(p):
     f = p / "reviews" / "canon.md"
     return f.exists() and any(r.get("Resolution") == "decide" for t in tables(f.read_text(encoding="utf-8")) for r in t)
+def absorbed(p):
+    f = p / "reviews" / "canon.md"
+    return f.exists() and re.search(r"^- D\d+", section(f.read_text(encoding="utf-8"), "## Consequences honored"), re.M)
 WHEN = {
     "E1a": (lambda y, p: "order" in y["setting"], "the project has its own order"),
     "E1b": (lambda y, p: any(str(l).startswith("project:") for l in y.get("layers", [])), "the project has project layers"),
     "E2a": (lambda y, p: y["setting"].get("follow") == "retelling" or ledger_cites_theory(p), "a retelling, or a divergence's Basis cites a theory"),
     "E2b": (lambda y, p: bool(audit_entries(p)), "E2a raised entries for the author"),
-    "E5":  (lambda y, p: decide_findings(p), "E4 had a decide item to accept"),
+    "E5":  (lambda y, p: decide_findings(p) or absorbed(p), "E4 had a decide item to accept, or E3 found consequences absorbed"),
     "T1":  (lambda y, p: y["setting"].get("type") != "established", "the project is not established-world"),
 }
 
@@ -198,6 +201,11 @@ def cast_of(project, text=None):
         names = [r["Slug"], r["Name"]] + [a.strip() for a in r.get("Aliases", "").split(";") if a.strip()]
         names += [w for w, s in words.items() if s == {r["Slug"]} and w in r["Name"]]
         if any(n and re.search(rf"\b{re.escape(n)}\b", text) for n in names): out.append(r["Slug"])
+    places = project / "derived" / "bible" / "places.md"     # places are entities too: by a proper name in their name row
+    for r in [r for t in tables(places.read_text(encoding="utf-8")) for r in t] if places.exists() else []:
+        if r.get("Attribute") == "name" and r["Entity"] not in out and any(
+                n in text for n in re.findall(r"[A-Z][\w']+(?: [A-Z][\w']+)*", r["Value"])):
+            out.append(r["Entity"])
     return out
 def cited_theories(project):
     """The theory entries that the ledger's Basis column cites (§6.13)."""
@@ -295,10 +303,14 @@ def main():
     skips = dict(s.split("=", 1) for s in a.skip)
     if a.start and a.start in state["done"]:
         later = state["done"][state["done"].index(a.start):]
-        old = run / "superseded"; old.mkdir(exist_ok=True)
+        passes = run / "superseded"; passes.mkdir(exist_ok=True)
+        old = passes / f"pass-{len(list(passes.glob('pass-*'))) + 1}"; old.mkdir()
         for f in run.glob("*.md"):
             if f.name.split(".")[0].split("-", 1)[-1] in later: f.rename(old / f.name)
         state["done"] = state["done"][:state["done"].index(a.start)]
+        state["revising"] = later                 # scheduled revisions (§11.8)
+        state["log"].append(f"re-run from {a.start}, as the showrunner scheduled; the earlier prompts and replies "
+                            f"for {', '.join(later)} are kept in superseded/")
     def log(msg): state["log"].append(msg); print(msg)
     def save():
         state_f.write_text(json.dumps(state, indent=1), encoding="utf-8")
@@ -329,6 +341,13 @@ def main():
         reply_f = run / f"{stem}.reply.md"
         if not reply_f.exists():
             blocks, unresolved = resolve_reads(project, y, step["Reads"], chapter, target)
+            revising = sid in state.get("revising", []) and (project / target).exists()
+            if revising and not any(name.startswith(target) for name, _ in blocks):
+                blocks.append((f"{target}, as it stands: you are revising it (§11.8)", (project / target).read_text(encoding="utf-8")))
+            log_f = project / "showrunner-log.md"
+            entries = log_f.read_text(encoding="utf-8").split("\n## ") if log_f.exists() and agent != "showrunner" else []
+            if len(entries) > 1 and (revising or f"(step {sid})" in entries[1]):
+                blocks.append(("the notes for this step: the showrunner's newest entry (§11.8)", "## " + entries[1]))
             prompt = [(ROOT / "agents" / f"{agent}.md").read_text(encoding="utf-8"), "\n---\n\n# This step\n",
                       f"Workflow `{y['workflow']}`, step **{sid}** ({agent}). Write `{target}`"
                       + (f", {step['Writes'].split('`', 2)[2].strip()}" if step["Writes"].split("`", 2)[2].strip() else "") + ".\n",
@@ -355,7 +374,9 @@ def main():
             a.signal = None
             if not signal.startswith("approve"): sys.exit(f"{sid}: signal {signal!r} needs a host; re-run with --from")
             log(f"gate after {sid}: {signal}")
-        state["done"].append(sid); save()
+        state["done"].append(sid)
+        if sid in state.get("revising", []): state["revising"].remove(sid)
+        save()
     (run / "log.md").write_text("# Run log\n\n" + "".join(f"- {l}\n" for l in state["log"]), encoding="utf-8")
     print("workflow complete")
 

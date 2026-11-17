@@ -1,91 +1,121 @@
 ---
 chapter: 1
 title: "As an Old Friend"
-status: drafted
+status: final
 ---
-<!-- TODO: needs bible: bible/style.md is absent; drafted in close third person, past tense, on Harry, pending a voice contract -->
+And at the end of it all the youngest brother did not hide any longer, and he set down
+what had hidden him, and he went to meet the one who had been waiting, and he did not
+go as a stranger, and he did not go afraid.
 
-And at the end of it all, the youngest brother did not hide any longer. He set down what
-had kept him hidden, and he went to meet the one who had been waiting for him, and he
-did not go as a stranger.
+That was how the story ended. Harry had heard it once as a story about other people.
 
-That was how the story ended. Harry had heard it as a child would, as a story about
-other people.
+He lay on his back in a light that came from nowhere. There was no ground he could feel,
+only the certainty of lying down. Nothing hurt. He waited for something to hurt, and
+nothing did.
 
-He woke, if it was waking, lying on his back in a light that had no source. There was
-no ground under him that he could feel, only the certainty that he was lying down. He
-was alone, and there was nothing in the light but the light, and he waited for it to
-hurt and it did not.
+He had nothing on. He thought of clothes, and they were there, soft and warm, as if the
+place had been listening.
 
-He sat up. Nothing ached. He was dressed in nothing, then he was not; the place seemed
-to give him things the moment he wanted them, as a dream does.
-<!-- TODO: needs bible: what Harry finds at King's Cross on waking, in canon's order (DH ch.35); the stack has no rows for the chapter -->
+He sat up. Mist hung in the brightness, and as he looked, it thinned and gave up its
+edges: a high pale roof, long platforms, clean and silent, benches no one had ever sat
+on. A station. He knew which one before he could have said how.
 
-Slowly the brightness took on edges. A roof, very high, vaulted and pale. Long
-platforms, clean and empty. Benches that no one had sat on. It was a railway station,
-he thought, and then, because the shape was too familiar to be anything else, he knew
-which one.
+"King's Cross," he said. The words did not echo.
 
-"King's Cross," he said aloud, and his voice did not echo.
+Something whimpered.
 
-Someone laughed, quietly and kindly, behind him.
+It lay under a bench, small and raw, the size of a child and the shape of something
+that had been flayed. It shuddered with each breath, and every breath seemed to cost it.
+Harry went toward it, and stopped, and could not make himself touch it, and was ashamed
+that he could not.
 
-He turned, and Albus Dumbledore was walking toward him along the platform, unhurried,
-tall and upright and well. Nothing in the way he moved was old or hurt.
-<!-- TODO: needs bible: albus-dumbledore has no sheet in the stack; his status and condition at DH:36, and how he appears at King's Cross -->
+"Leave it, Harry. Nothing you could do would reach it."
 
-He did not stop at a distance, as a teacher stops. He came all the way, and he held out
-both hands, and he looked at Harry the way the story said the last brother was looked
-at, at the end: as an old friend who had kept an appointment.
+He turned. Albus Dumbledore was coming along the platform, upright and unhurried, and
+well. Both his hands were whole. He did not stop at a distance, as a teacher stops. He
+came all the way and held them out, and he looked at Harry as the story said the last
+brother was looked at, at the end: as an old friend come to keep an appointment.
 
 "Harry," he said, as if the name were good news. "Come. We have a little time."
 
-They walked. The station went on, and so did they, and Harry found he was not afraid,
-and that not being afraid was the strangest thing in that place.
+They sat on a bench away from the crying thing. Harry asked the only question there
+was.
 
-Dumbledore talked, and Harry asked, and the answers came the way answers come at the
-end of a story, each one fitting a gap he had not known was there.
-<!-- TODO: needs bible: the substance of the King's Cross conversation in canon's order (DH ch.35): what Dumbledore explains, and what Harry asks; the stack holds none of it, so it is not written here -->
+"Am I dead?"
 
-Harry watched him while he spoke, and the old shape kept fitting over him: the figure who
-waits for everyone, who cannot be outrun and is not cruel, and who greets the one who
-did not run as an equal. It fitted so well that Harry almost said so.
+"I don't think so," said Dumbledore, and he looked very happy.
 
-Then Dumbledore stopped walking.
+"But he hit me. I let him."
 
-"There is something I must tell you," he said, "before you decide anything. I sought them
-too. The things in the story. Long ago, I wanted them, and wanting them did harm."
-<!-- TODO: needs bible: Dumbledore's hunt for the Hallows (DH ch.35): what he sought, when, and the harm; the ledger records only that he sought them (theory conflict, T1 claim 4, adapt). Also glossary entries for the Deathly Hallows -->
+"You did. And what his curse struck was not you." Dumbledore glanced toward the bench,
+and away. "A piece of his own soul has lived in you since the night his curse rebounded.
+Tonight, in the Forest, he destroyed it himself."
 
-He said it simply, without asking to be forgiven, and Harry saw the likeness break. The
-one who waits at the end of the story wants nothing. He has never wanted anything. This
-man had wanted, and had grieved for it, and was standing in front of him with his hands
-open, ashamed.
+Harry looked at the bench for a long moment. "Then that..."
+
+"Yes. And there is nothing either of us can do for it."
+
+"Then why am I still here? Why aren't I..."
+
+"Because of your mother." Dumbledore said it gently. "When he made himself a body again,
+he took your blood to do it, and her protection was in your blood. He carries it now.
+While he lives, it holds you to life."
+
+Harry thought about that, and found it did not frighten him. It felt like something he
+had always half known.
+
+Then Dumbledore's hands, which had been still, moved, and he looked down at them.
+
+"I owe you the truth about the Hallows," he said, "since you have paid more for them than
+I ever did. When I was young, Grindelwald and I meant to find all three. We talked of
+mastering death as if it were a thing a clever boy might do. Years later, when I held the
+ring that bore the Stone, I knew what it was, and I knew what it would cost, and I put it
+on anyway. I wanted to see my family. I wanted to tell them I was sorry. The curse on it
+was my answer."
+
+He said it plainly, without asking to be forgiven, and Harry watched the likeness
+break. The one who waits at the end wants nothing. He has never wanted anything. This
+man had wanted, and grieved, and sat beside him now with his hands open and his eyes
+wet.
 
 He was not Death. He was only standing where Death stands, on the last page, because
 someone had to meet Harry there, and it was him.
 
-"I know," Harry said, though he had not known until then. "It's all right."
+"It's all right," Harry said, and found he meant it.
 
-Behind them, at the platform's end, there was a train. Harry had not seen it arrive. It
-was not doing anything. It simply waited, the way the station waited, the way the old
-man waited.
+Far down the platform there was a train. Harry had not seen it arrive. It was doing
+nothing; it waited, as the station waited.
 
-"You could go on," Dumbledore said. "If you wished. It would take you on."
-<!-- TODO: needs bible: the choice at King's Cross as canon gives it (DH ch.35), and where "on" would lead -->
+"If you chose not to go back," said Dumbledore, "I think you could board it. It would
+take you on."
 
-Harry looked at the train for a long time. He thought about rest, and how easily it
-could be taken here, and how the youngest brother in the story had taken it gladly,
-having lived a whole life first.
+"And if I go back?"
 
-He had not lived a whole life first.
+"Then the people waiting for you will not have to finish this without you."
 
-"I'm going back," he said.
+Harry looked at the train for a long time. He thought of the Forest and the cold ground,
+and of the curse that would be waiting if he went back, and the fight that would not be
+over. He thought of the people who had gone on
+already, who might be at the other end of the line: his mother, his father. Nobody here
+would ask anything of him again. He could sit down in a clean carriage, and the train
+would move, and he would never be tired.
 
-Dumbledore smiled, and it was the smile of someone who had hoped for exactly that and
-would not have said so.
+He thought about how gladly the youngest brother in the story had gone, after a whole
+life lived.
 
-And so the youngest brother did not go with his old friend that day. He turned around
-and walked back the way he had come, toward the forest and the cold and the people who
-were waiting, and the old friend stood on the empty platform and watched him go, as
-equals part, until the light closed between them.
+He had not lived a whole life yet.
+
+"Is any of this real?" he asked. "Or is it all inside my head?"
+
+"It is inside your head, certainly," said Dumbledore. "I have never understood why
+people think that makes a thing less true."
+
+"I'm going back," Harry said.
+
+Dumbledore smiled, the smile of someone who had hoped for exactly that and would not
+have said so.
+
+And so the youngest brother did not go on with his old friend that day. He stood, and
+turned, and walked back the way he had come, toward the cold and the forest and the
+people who were waiting; and the old friend stayed on the white platform and watched
+him go, as equals part, until the light closed between them.

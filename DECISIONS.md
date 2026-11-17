@@ -5,20 +5,52 @@ says what was unclear or contradictory, what was decided, and where the rule now
 
 ## 0.4: reference agents and workflows
 
+**D130. A scheduled step gets its notes, and a revision reads what it revises.** §11.8
+gave notes to a step only through a gate's `revise:` signal. A revision the showrunner
+scheduled had no way to say what to change, and a re-draft read the beats, not the
+draft, so it would have started again from nothing. Now a step the showrunner schedules
+with notes, a revision or any other, runs as `revise:` does, with the notes appended to
+its inputs. A step that revises a file also reads that file as it stands, so it changes
+what the notes ask and keeps the rest. The drafter's reads say so. → §11.8, §12.10
+
+**D129. The showrunner passes absorbed consequences on.** E5 marks consequences
+absorbed from the showrunner's log, but E4 read only the canon review's `## Findings`,
+and the consequences a chapter honors are listed under `## Consequences honored`.
+Nothing carried them from the review to the log. E4 now reads both sections, and the
+showrunner logs each honored consequence by divergence id and chapter. → §12.2, §13.4
+
+**D128. A short story gets a style step and a routing step.** `short-story` dropped two
+of the novel's steps that its other steps depend on. Without step 9, no step wrote
+`bible/style.md`, though the drafter and the line-editor both read it. Without step 18,
+no showrunner step followed the critic, so a critique was written and never acted on,
+though the chain's notes said the showrunner routes it. Both steps are back, under the
+novel's numbers. The checker now holds every chain to two rules: each premise, outline,
+and style read comes after a step that writes the file, and a showrunner step follows
+every review step. → §13.2
+
 **D127. A tool-less loop, and its first run.** `tools/loop.py` runs a project's
 workflow with any model, or with none: in exchange mode it writes each step's prompt
 (the agent file, the resolved inputs, the standing instruction) and waits for a reply
 file beside it. Its first run, `short-story` on `three-brothers`
-(`examples/runs/three-brothers/`), took the project from its seed through the premise,
-outline, ledger, theory audit, draft, and showrunner step. Each reply was written from
-its prompt alone. The run stopped at step 13, as §11.9 requires: the story is set in
-DH ch.35, and the abridged package has no rows for it, so the drafter marked six gaps
-and the showrunner routed the canon ones to an extraction run. It found D124, D125, and
-D126. It also found that most step conditions in the workflows' notes are mechanical
-(the project has an order, a ledger row cites a theory, an audit raised entries), while
-E1's "the story stays at one cutoff" is judgment; and that a few Reads phrases with no
-path ("the canon ahead", "the host's reach candidates", "the cited theories' claims")
-each need a host resolver. The loop is informative; nothing in the spec depends on it.
+(`examples/runs/three-brothers/`), went from the project's seed to a final chapter. Each
+reply was written from its prompt alone.
+
+Twice, the run stopped where the spec says it must. First at step 13, while six
+`needs bible` markers stood: the story is set in DH ch.35, which the abridged package
+didn't cover. Then at E4, which surfaced two stale or missing package rows. The
+`harry-potter` package gained DH ch.35: Dumbledore's sheet, a `places.md`, two secrets,
+and the Hallows terms, plus Voldemort's return to a body. The checker's reference
+snapshot now reads every multi-entity file that §10.5 names, `places.md` included.
+
+The run found D124 to D126 and D128 to D130. It also found:
+- Most step conditions in the workflows' notes are mechanical (the project has an
+  order, a ledger row cites a theory, an audit raised entries), while E1's "the story
+  stays at one cutoff" is judgment.
+- A few Reads phrases with no path ("the canon ahead", "the host's reach candidates",
+  "the cited theories' claims") each need a host resolver.
+- A cast found by name loses a character the prose refers to only by pronoun.
+
+The loop is informative; nothing in the spec depends on it.
 
 **D126. An overlay can add reads to the chain's steps.** An overlay inserts steps, but
 its condition can also give a chain step more to read. In an established world the
