@@ -7,6 +7,9 @@ editing it; and how a team of narrow AI agents reads and writes those files.
 
 **Status:** draft, spec version `0.4`. Breaking changes are still expected.
 
+**Reviewing the spec?** Start with [REVIEWING.md](REVIEWING.md): what to read, what to look
+for, and how to report it.
+
 ## Reading order
 
 | #  | Chapter                                             | Covers                                                               |
@@ -39,6 +42,7 @@ agents/          the reference agent files, one per agent of chapter 12 (informa
 workflows/       the reference workflow files, one per workflow of chapter 13 (informative)
 tools/           the conformance checker, and a minimal tool-less loop (loop.py)
 DECISIONS.md     design decisions taken, and the questions still open
+REVIEWING.md     a guide for outside reviewers
 ROADMAP.md       the path from this draft to 1.0
 CONTRIBUTING.md  how to set up the repository, propose changes, and submit packages
 LICENSE          Apache License 2.0
