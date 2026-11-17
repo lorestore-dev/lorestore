@@ -244,6 +244,7 @@ curator, adds the canon-keeper to review, and runs the living-canon loop (§6.11
 
 | Step | Agent             | Writes                     | Gate      | Position          |
 | ---- | ----------------- | -------------------------- | --------- | ----------------- |
+| E0   | `compose`         | `derived/bible/…`          |           | before 1          |
 | E1   | architect         | `bible/sync-points.md`     | milestone | after 2           |
 | E1a  | canon-keeper      | `reviews/canon.md`         | milestone | after E1          |
 | E1b  | canon-keeper      | `reviews/canon.md`         | milestone | after E1a         |
@@ -303,8 +304,9 @@ curator, adds the canon-keeper to review, and runs the living-canon loop (§6.11
   gate waits for the author, under every gate policy. E6b logs the author's choices,
   and the showrunner repeats E6a and E6b until E6a finds nothing new.
 - Steps 4 and 5 (character-designer) write original characters and their roster rows only.
-- A `compose` step (§7.6) runs before step 1, and again whenever a layer's pin or the
-  project's own `bible/` changes, so the agents read a current composed bible.
+- **E0**, the `compose` skill (§7.6), runs before step 1, and the showrunner runs it
+  again whenever a layer's pin or the project's own `bible/` changes, so the agents read
+  a current composed bible.
 - When the stack's packages are extracted, a `temporal-snapshot` step MAY precede step
   10 to materialize the cast's snapshots (§7.6).
 
@@ -312,13 +314,17 @@ curator, adds the canon-keeper to review, and runs the living-canon loop (§6.11
 
 Applies when `setting.temporal_model: frames`.
 
+| Step | Agent        | Writes             | Gate | Position |
+| ---- | ------------ | ------------------ | ---- | -------- |
+| T1   | canon-keeper | `reviews/canon.md` |      | after 13 |
+
+- **T1** runs only in a project that is not established-world, for the frame,
+  mechanism, and paradox checks alone (§9.1). In an established world, E3 makes them.
 - The rules of time travel come from `time-travel.md` (§9.1). In a self-contained
   project, the worldbuilder writes it at step 3, alongside the rest of the world.
 - Step 12 (chronicler) also maintains `timelines.md` and `branches.md`.
 - The drafter marks every scene's world point and travelers (§10.18).
-- The canon-keeper runs its frame, mechanism, and paradox checks (§9.1). In a project
-  that is not established-world, the overlay inserts the canon-keeper after step 13 for
-  those checks only.
+- The canon-keeper runs its frame, mechanism, and paradox checks (§9.1), at E3 or T1.
 - An accepted paradox is recorded by a chronicler step on `branches.md`, scheduled by
   the showrunner.
 

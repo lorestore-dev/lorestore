@@ -3,6 +3,21 @@
 This log records the design decisions behind the spec, most recent first. Each entry
 says what was unclear or contradictory, what was decided, and where the rule now lives.
 
+## 0.4: reference agents and workflows
+
+**D122. Reference workflow files.** The spec defined the workflow file format (§11.7)
+but shipped no workflow files, and declared agent and workflow files out of scope.
+`workflows/` now holds one informative file per workflow of chapter 13, in that format,
+each with a `Reads` column condensed from the agents' retrieval specs (§12) and its
+notes carried over as prose; `agents/` will follow. A host MAY use them, adapt them, or
+write its own; where they and the spec disagree, the spec holds. Writing the files
+exposed two gaps in the chapter 13 tables, which now gain rows: the established-world
+overlay's `compose` step (E0, before step 1), and the frames overlay's canon-keeper step
+(T1, after step 13, when the project is not established-world). §11.7 now names the
+`Reads` column, the optional `Parallel` column, phases that run once, and a `## Notes`
+section. The checker holds each file to its table, its agents to §12 and §11.10, and
+its writes to the file catalog. → §1.2, §11.7, §13.4, §13.5
+
 ## 0.3: in-world time
 
 **D121. Releasing, and exporting for readers.** The `release` skill was thinly

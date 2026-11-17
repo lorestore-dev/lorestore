@@ -35,6 +35,7 @@ Integrated Writing Environment) should also read chapters 10, 11, and 14.
 spec/            the specification, one chapter per file
 schemas/         JSON Schemas for project.yaml, package.yaml, universe.yaml
 examples/        a small conforming workspace, with expected snapshot results
+workflows/       the reference workflow files, one per workflow of chapter 13 (informative)
 tools/           the conformance checker for the examples
 DECISIONS.md     design decisions taken, and the questions still open
 ROADMAP.md       the path from this draft to 1.0
@@ -66,10 +67,10 @@ every pull request.
 
 - It checks the bundled examples only. Paths and expected values are hard-coded, so it is
   not a validator for workspaces of your own.
-- It is a reference for the data model only. It does not test the agent contract, the
-  agents, or the workflows (chapters 11–13).
+- It is a reference for the data model. Of the agent framework (chapters 11–13), it
+  checks only that the reference workflow files match the chapter 13 tables and the
+  file catalog (§3.3); it does not run them.
 - It parses only the tables it needs, not every format in chapter 10.
-- It does not check markdown links.
 - A passing run means the examples are consistent with the checker's reading of the
   spec. Where the two disagree, the spec is the authority.
 

@@ -135,12 +135,19 @@ context: project     # project | package | universe
 | 1    | architect | project.yaml               | bible/premise.md   | milestone |        |
 ```
 
+- `Reads`: the step's retrieval spec (§11.6): agent paths, globs, and the snapshots it
+  needs, each narrowed to the slice the step uses.
 - `Gate`: `milestone` or empty (§11.8).
 - `Repeat`: empty, or one of `per-arc`, `per-chapter`, `per-character`, `per-file`,
   `per-unit`, `per-target`. The instance value substitutes into placeholders in `Reads`
   and `Writes` (`<NN>`, `<slug>`, `<file>`, `<work>`, `<target>`).
+- `Parallel` (optional column, after `Repeat`): `yes` where the instances of a repeated
+  step write different files and MAY run at once (§11.5); empty otherwise.
 - A **phase** is a group of steps that repeats together (the per-chapter drafting loop).
-  Mark it with a `### Phase <n> — <name> (repeat: <kind>)` heading above its table.
+  Mark it with a `### Phase <n> — <name> (repeat: <kind>)` heading above its table, or
+  `### Phase <n> — <name>` for a phase that runs once.
+- A `## Notes` section MAY follow the steps: when a step runs or is skipped, and what
+  the showrunner routes between them, in prose.
 
 An **overlay** adds a `Position` column after `Repeat`, with the value
 `before <step>`, `after <step>`, or `replace <step>`. Overlays apply in the order

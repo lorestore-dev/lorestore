@@ -2223,5 +2223,109 @@ check("R run late, the release takes the scheduled date and author", (due[2]["st
       ("released", "2026-12-01", "ade", False, []))
 due, told = run_schedules(chs, "2026-12-02T09:00", texts={3: "<!-- TODO: seam conflict: x -->"})
 check("R a schedule that fails its re-check is removed, and the author told", (due[2]["status"], "release-on" in due[2], told), ("early-access", False, ["3: a pending decision or marker"]))
+# --- W. reference workflow files (§11.7, §13) -------------------------------------
+print("\n# W. reference workflow files")
+SPEC = ROOT / "spec"
+def tables_in(text):
+    """Every pipe table in text, as (preceding heading, rows as dicts)."""
+    out, cur, head = [], [], None
+    for l in text.splitlines() + [""]:
+        if l.startswith("|"): cur.append(l); continue
+        if cur:
+            cells = [[c.strip() for c in re.split(r"(?<!\\)\|", x)[1:-1]] for x in cur]
+            out.append((head, [dict(zip(cells[0], r)) for r in cells[2:]])); cur = []
+        if l.startswith("#"): head = l
+    return out
+def spec_section(fname, number):
+    lines = (SPEC / fname).read_text().splitlines(); out, on = [], False
+    for l in lines:
+        if l.startswith("## "): on = l.startswith(f"## {number} ")
+        if on: out.append(l)
+    return "\n".join(out)
+def spec_steps(number):
+    rows = [r for _, t in tables_in(spec_section("13-workflows.md", number)) for r in t if "Step" in r]
+    for r in rows:
+        if "Agent / skill" in r: r["Agent"] = r.pop("Agent / skill")
+    return rows
+ROSTER_AGENTS = {m.group(1) for m in re.finditer(r"^## 12\.\d+ `([a-z-]+)`", (SPEC / "12-agents.md").read_text(), re.M)}
+SKILLS = {m.group(1) for m in re.finditer(r"^\| `([a-z-]+)` +\|", spec_section("11-agent-contract.md", "11.10"), re.M)}
+REPEATS = {"", "per-arc", "per-chapter", "per-character", "per-file", "per-unit", "per-target"}
+check("§12 defines nineteen agents", len(ROSTER_AGENTS), 19)
+check("§11.10 lists the skills", {"compose", "indexer", "release", "export"} <= SKILLS, True)
+
+def wf_parse(p):
+    text = p.read_text(); fm = front(p)
+    steps_part = text.split("\n## Steps", 1)[1].split("\n## ", 1)[0]
+    tabs = tables_in(steps_part)
+    rows = [dict(r, _phase=h) for h, t in tabs for r in t]
+    return fm, text, tabs, rows
+
+WF = {"novel": "13.1", "short-story": "13.2", "serial": "13.3", "established-world": "13.4",
+      "frames": "13.5", "extraction": "13.6", "crossover": "13.7", "adopt": "13.8"}
+check("workflows/ holds one file per §13 workflow", sorted(p.stem for p in (ROOT / "workflows").glob("*.md")), sorted(WF))
+spec_rows = {w: spec_steps(n) for w, n in WF.items()}
+spec_rows["serial"] = spec_rows["novel"][:9] + spec_rows["serial"]          # Phase 1 is steps 1-9 of novel
+check("§13.4 has a compose step before step 1", [(r["Agent"], r["Position"]) for r in spec_rows["established-world"] if r["Step"] == "E0"], [("`compose`", "before 1")])
+check("§13.5 has a frames table", [r["Step"] for r in spec_rows["frames"]], ["T1"])
+
+def catalog():
+    """§3.3: path -> {context: writer cell}."""
+    out = {}
+    for head, t in tables_in(spec_section("03-layers.md", "3.3")):
+        for r in t:
+            path = next(v for k, v in r.items() if k.startswith(("File", "Path")))
+            path = re.sub(r"^`(universes/<u>/|extraction/<pkg>/)", "`", path)
+            path = re.sub(r"`(.*?)`.*", r"\1", path)
+            if head.startswith(("### World", "### Story")): path = "bible/" + path
+            w = out.setdefault(path, {})
+            for k, v in r.items():
+                if k == "Writer": w["package"] = w["project"] = w["universe"] = w.get("project", "") + v
+                elif k == "Writer: package": w["package"] = w.get("package", "") + v
+                elif k == "Writer: project": w["project"] = w.get("project", "") + v
+    return out
+CAT = catalog()
+REVIEWERS = {"continuity": "continuity-editor", "canon": "canon-keeper", "research": "researcher",
+             "critique": "critic", "pacing": "pacing-analyst", "beta-reader": "beta-reader"}
+GENERIC = {"bible/<file>", "bible/<ledger>", "bible/<target>"}
+def write_errors(agent, writes, context):
+    errs = []
+    for path in re.findall(r"`([^`]+)`", writes):
+        if path.startswith("status:") or path in GENERIC: continue
+        name = agent.strip("`")
+        m = re.fullmatch(r"reviews/([a-z-]+)\.md", path)
+        if m:
+            if REVIEWERS.get(m.group(1)) != name: errs.append(f"{name} writes {path}")
+            continue
+        key = re.sub(r"chapter-\d\d", "chapter-<NN>", path)
+        cell = CAT.get(key, {}).get(context)
+        if cell is None: errs.append(f"{path} not in §3.3"); continue
+        if not re.search(rf"(?<![a-z-]){re.escape(name)}(?![a-z-])", cell): errs.append(f"{name} may not write {path}")
+    return errs
+check("§3.3 writer check catches a wrong writer", write_errors("drafter", "`bible/style.md`", "project"), ["drafter may not write bible/style.md"])
+check("§3.3 writer check catches a wrong reviewer", write_errors("critic", "`reviews/pacing.md`", "project"), ["critic writes reviews/pacing.md"])
+
+for w, n in WF.items():
+    p = ROOT / "workflows" / f"{w}.md"
+    fm, text, tabs, rows = wf_parse(p)
+    kind = "overlay" if w in ("established-world", "frames") else "chain"
+    ctx = {"extraction": "package", "crossover": "universe"}.get(w, "project")
+    check(f"{w}: front matter", fm, {"id": w, "kind": kind, "context": ctx})
+    check(f"{w}: heading", next(l for l in text.splitlines() if l.startswith("# ")), f"# Workflow: {w}")
+    cols = {tuple(t[0].keys()) for _, t in tabs}
+    want = ("Step", "Agent", "Reads", "Writes", "Gate", "Repeat") + (("Position",) if kind == "overlay" else ("Parallel",) if w == "extraction" else ())
+    check(f"{w}: step-table columns (§11.7)", cols, {want})
+    phase_ok = all(h is None or re.fullmatch(r"### Phase \d+ — [^()]+( \(repeat: (per-[a-z]+)\))?", h or "") for h, _ in tabs)
+    check(f"{w}: phase headings (§11.7)", phase_ok, True)
+    check(f"{w}: repeat values", all(r["Repeat"] in REPEATS for r in rows), True)
+    check(f"{w}: agents exist (§12, §11.10)", [r["Agent"] for r in rows if not (r["Agent"] in ROSTER_AGENTS or (r["Agent"].startswith("`") and r["Agent"].strip("`") in SKILLS))], [])
+    check(f"{w}: every step reads something", [r["Step"] for r in rows if not r["Reads"]], [])
+    check(f"{w}: writes match §3.3", [e for r in rows for e in write_errors(r["Agent"], r["Writes"], ctx)], [])
+    keys = ("Step", "Agent", "Writes", "Gate") + (("Position",) if kind == "overlay" else ("Parallel",) if w == "extraction" else ())
+    got = [tuple(r.get(k, "") for k in keys) + (r.get("Repeat", ""),) for r in rows]
+    exp = [tuple(r.get(k, "") for k in keys) + (r.get("Repeat", ""),) for r in spec_rows[w]]
+    check(f"{w}: steps match §{n}", got, exp)
+    reps = {re.search(r"repeat: (per-[a-z]+)", h).group(1) for h, _ in tabs if h and "repeat:" in h}
+    spec_reps = set(re.findall(r"^### Phase \d+ — .*\(repeat: (per-[a-z]+)", spec_section("13-workflows.md", n), re.M))
+    check(f"{w}: phase repeats match §{n}", reps, spec_reps)
 print("\nFAILURES:", fails)
 sys.exit(1 if fails else 0)
