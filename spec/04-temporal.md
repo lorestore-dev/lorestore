@@ -69,7 +69,8 @@ Segment rules:
 
 The order is an **editorial choice**, made once per base. Broadcast or release order is
 usually best, because it matches what someone following the source could know at each
-point. In-universe chronology belongs to story time, not the ruler.
+point. In-universe chronology is recorded as in-world dates (§4.13), never by the
+ruler's order.
 
 Where series overlap, their segments interleave. *Deep Space Nine* premiered midway
 through the sixth season of *The Next Generation*. **Season-level** segments give an
@@ -162,7 +163,7 @@ the counts in the Counts table.
 A point is **valid** if:
 
 1. its work is on the stack's ruler: in the Works table of the base, or of an official
-   package in the stack that inserts it (§4.10); or, in a series begun by a
+   or fanfic package in the stack that inserts it (§4.10); or, in a series begun by a
    self-contained book, the work of a project layer, or a work that a project layer or
    the project itself inserts (§4.12);
 2. it has no more indices than the work has levels;
@@ -220,6 +221,8 @@ its premiere.
 When the ruler cannot express that point (the work is undivided), the fact is dated at
 the **next** node from whose opening it holds. For example, with `TNG:1` undivided, a
 death late in season 1 is dated `TNG:2`.
+
+**Example cases:** [8](../examples/README.md#case-8), [9](../examples/README.md#case-9), [11](../examples/README.md#case-11).
 
 ## 4.3 The point list
 
@@ -307,7 +310,8 @@ column, after `Citation`, records when a fact became **true** in-world:
 
 - `True from` MUST NOT be later than `As of`. Empty means the same as `As of`.
 - A fact true from before canon begins uses the first work's own point (`PS`), which
-  sorts at the very start of canon.
+  sorts at the very start of canon. When it became true in-world, if the source says,
+  goes in the `In-world` column (§4.13).
 - **`As of` still governs visibility.** The snapshot resolves a row only once its
   `As of` is reached. `True from` does not reveal anything early. It lets the system
   recognize a **hidden truth**: a fact that is already true at the cutoff but not yet
@@ -315,12 +319,16 @@ column, after `Citation`, records when a fact became **true** in-world:
 - Extractors SHOULD record `True from` whenever a source reveals backstory, even if no
   current project needs it. It is cheap to record and impossible to reconstruct later.
 
+**Example cases:** [1](../examples/README.md#case-1), [21](../examples/README.md#case-21), [E1](../examples/README.md#case-e1).
+
 ## 4.5 Ending a fact
 
 To record that an attribute stops holding (a character dies and loses an office, an
 item is lost, a scar heals completely), append a row whose value is the reserved token
 `(unset)`. From that point the attribute resolves to absent (§7). A later row MAY set it
 again.
+
+**Example cases:** [2](../examples/README.md#case-2).
 
 ## 4.6 Corrections
 
@@ -336,8 +344,9 @@ A self-contained original world has no source works, so it MAY omit the ruler. I
 rows then leave `As of` empty, meaning **timeless**: always visible. Change during the
 story is recorded as story-time events in `timeline.md` and, for the state of its
 entities, as story-dated rows (§4.11). A self-contained world that needs dated backstory
-(eras, a prior war) MAY define a ruler whose works are eras; all rules in this chapter
-then apply. The book's own chapters are set after every era, so its cutoff is the end of
+(eras, a prior war) SHOULD declare a calendar and record its past in `history.md`
+(§4.13). It MAY instead, or as well, define a ruler whose works are eras; all rules in
+this chapter then apply. The book's own chapters are set after every era, so its cutoff is the end of
 that ruler (§7.1): every era row is visible, and it has no `setting.cutoff` and no sync
 points.
 
@@ -406,12 +415,17 @@ PS:6:2+00:41:10      book scene PS:6:2, 41 minutes 10 seconds into the film that
 `PS:6:2+00:50:00`, because the book path decides. Without the films package, all four
 points are invalid except `PS:6:2`.
 
-## 4.10 Official works: inserted segments
+**Example cases:** [A1](../examples/README.md#case-a1).
 
-An `official` package (§2.3) MAY have works of its own: episodes, novels, or films that
-retell nothing in the base but sit beside it in canon time. They need places on the
-ruler, but the ruler belongs to the base, which MUST NOT change to suit a package that
-some projects leave out. So the package **inserts** segments into the base's ruler.
+## 4.10 Inserted works
+
+An `official` or `fanfic` package (§2.3) MAY have works of its own that retell nothing
+in the base but sit beside it in canon time: an official animated series or line of
+novels, or a fan work set between the base's works or after them. They need places on
+the ruler, but the ruler belongs to the base, which MUST NOT change to suit a package
+that some projects leave out. So the package **inserts** segments into the base's
+ruler. No other kind inserts: an adaptation retells the base's own works, so its
+material is dated on their paths (§4.9), and fanon and theories have no works.
 
 The package's `canon-timeline.md` (§10.4) lists its works in a `## Works` table, as a
 base does, and its segments in an `## Insert` table, each placed **after** a segment of
@@ -434,11 +448,19 @@ the base or an earlier inserted one:
 - **Placement is an editorial choice**, like the base's own order (§4.1): here, the
   animated series is placed in the last part of the five-year mission, before *The
   Motion Picture*.
+- **A fan work inserts only what the base cannot hold.** Most fan works retell or
+  depart from canon inside the base's works, and date their rows on the base's points.
+  A fan work set after the base ends, or in a stretch between its works, has no points
+  of its own there: without an insert, all its rows would fall on one point and tie
+  (§4.4). It inserts its own work instead, such as one set after *Deathly Hallows*
+  (`After: DH`), so that its chapters order its rows.
 - Inserted work ids MUST NOT repeat a work already on the ruler: the base's, or one that
   another package, a project layer, or the project inserts. Two packages inserting after
   the same segment are placed in stack order, the lower layer first.
 - A project order (§6.8) is a permutation of the stack's segments, inserted ones
   included.
+
+**Example cases:** [4a](../examples/README.md#case-4a), [I1](../examples/README.md#case-i1).
 
 ## 4.11 Story-dated rows
 
@@ -469,6 +491,8 @@ holds (format: §10.5).
   project that defines it.
 - **Written by the chronicler** (§12.11), from what each chapter states. The foundation
   steps write the entity's starting state without `From chapter`.
+
+**Example cases:** [26](../examples/README.md#case-26).
 
 ## 4.12 The ruler of a series
 
@@ -511,3 +535,224 @@ The later book is then an established project like any other (§6.1). It sets a 
 and sync points on this ruler and, if it wants them, a divergence point and an order. A
 project layer whose own stack already has a ruler (a base, or an earlier book) is not a
 work. Its chapters sit on that ruler through its sync points (§6.7).
+
+**Example cases:** [L2](../examples/README.md#case-l2).
+
+## 4.13 In-world time
+
+The ruler orders **reading**: what someone following the source could know at each
+point (§4.1). It does not say when things happen in the world. *Philosopher's Stone*
+opens in 1981 and jumps ten years in its second chapter, and a flashback is read after
+the events that follow it. **In-world time** is this second axis. A world records it as
+**dates** in a **calendar** it declares. Both are optional: without a calendar, in-world
+time stays free text, like `Story time` in `timeline.md` (§10.15), and the rest of this
+section does not apply.
+
+Dates never decide visibility. A fact is visible from its `As of`, on the ruler,
+whatever its date (§7.2).
+
+### Calendars
+
+The package or project that owns the ruler declares the calendar, in its manifest:
+
+- a **base** package, in `package.yaml` (§10.2), for every stack built on it;
+- an **original** project, in `project.yaml` (§10.1), for itself and for every later
+  book that stacks it (§4.12).
+
+No other package and no established project declares one. They date in their stack's
+calendar, as they date on its ruler. A fan work whose world counts time differently
+keeps its own dates as free text. A calendar is one of two kinds.
+
+**`iso`: real-world dates.** Dates are those of ISO 8601: the proleptic Gregorian
+calendar, with a year 0 and negative years before it. It suits any world set on Earth,
+whatever calendar its characters use:
+
+```yaml
+calendar: iso
+notation: japanese     # optional
+```
+
+`notation` names the calendar the work itself writes dates in, as a Unicode BCP 47
+calendar identifier: `gregory` (the default), `japanese`, `chinese`, `dangi`, `hebrew`,
+`islamic`, `persian`, `buddhist`, `ethiopic`, and so on. It tells agents how to read the
+source's dates and how to write dates in prose. It never changes how dates are stored:
+every date is ISO, converted from the work's own form. A row MAY keep the work's own
+form (Shōwa 64, a Julian date) as free text in its `Citation`. So MAY a notation that
+does not convert exactly, such as a stardate, beside an ISO date as precise as the
+source allows.
+
+**Custom: a world's own calendar**, declared as a mapping:
+
+```yaml
+calendar:
+  eras:
+    - { id: BL, name: before the Lamps, counts: down }
+    - { id: OR, name: the Old Road, years: 300 }
+    - { id: NR, name: the New Road }
+  months:
+    - { name: Thaw, days: 90 }
+    - { name: Bloom, days: 92 }
+    - { name: Ember, days: 91 }
+    - { name: Dark, days: 92 }
+```
+
+- `eras` (required, at least one) lie end to end on one line of years, in the order
+  listed, each beginning where the one before it ends. There is no year 0 between eras.
+  - `id` is capital letters and digits, starting with a letter (`AC`, `TA`), and is
+    unique in the calendar.
+  - `counts: down` marks an era counted backward, like BC. Only the first era MAY count
+    down, and another era MUST follow it. Its year 1 is the year just before the next
+    era begins.
+  - `years` is an era's length. Every era that counts up MUST give it, except the last,
+    which is open-ended. An era that counts down has none.
+- `months` (optional) lists the months of every year in order, each with a `name` and a
+  fixed number of `days`. Without months, a date names a year and nothing finer.
+- There are no leap rules, weeks, or hours.
+
+Here `BL 2` and `OR 5` are six years apart, and `OR 300` is the year before `NR 1`.
+
+### Dates
+
+A **date** names a span of time:
+
+| Form                    | `iso`              | Custom        | Covers                                                  |
+| ----------------------- | ------------------ | ------------- | ------------------------------------------------------- |
+| `<year>`                | `1991`             | `NR 12`       | the whole year                                          |
+| `<year>-<MM>`           | `1991-07`          | `NR 12-02`    | the whole month                                         |
+| `<year>-<MM>-<DD>`      | `1991-07-31`       | `NR 12-02-14` | the day                                                 |
+| `<date>..<date>`        | `1971..1978`       | `BL 5..OR 3`  | from the start of the first date to the end of the second |
+| `..<date>`, `<date>..`  | `..1991`, `1998..` | `..NR 12`     | open at one end: in or before, or in or after           |
+| `~<date>`               | `~1975`            | `~OR 120`     | about then (below)                                      |
+
+- In `iso`, a year is an integer with no leading zeros, and a `-` before year 0
+  (`991`, `-43`). In a custom calendar, a year is an era id, a space, and a positive
+  integer. Months and days are two digits, numbered from `01`.
+- A date MUST name a month and day its calendar has: `1991-02-30` is invalid, and so is
+  `NR 12-05`, in a calendar of four months. A range's first date MUST NOT be after its
+  second.
+- `~` marks a single date, never a range, as approximate. It records a source that says
+  "about", without inventing bounds the source does not give.
+
+**Comparing dates.** A date is **before** another if its span ends before the other's
+begins, and **after** it if its span begins after the other's ends. Otherwise the
+comparison **can't tell**: `1991` against `1991-09-01`, say. An approximate date can't
+tell against any date, and sorts at the date it states. The checks below report only
+definite contradictions. Can't tell is never one.
+
+**Ages and durations.** The age, on a date, of someone born on another is the number of
+whole years from the second to the first, in the calendar's own years. Where either date
+is a span, the age is a range: every age that some moment of each could give. Someone
+born on `1980-07-31` is 10 or 11 in `1991`. Durations are counted the same way.
+
+Relative times ("three days later", "the next spring") are not dates. They stay free
+text, and placing them is a judgment for agents. The cell type `date` (§10.0) is a date
+in the stack's calendar.
+
+### Where dates are recorded
+
+Each of these is optional.
+
+1. **On the ruler.** A `## Dates` table in `canon-timeline.md` (§10.4) dates nodes of
+   the ruler: when the events that a node shows take place.
+
+   ```
+   | Node  | Date       | Notes                                      |
+   | ----- | ---------- | ------------------------------------------ |
+   | PS:1  | 1981-11    | The night Harry is left with the Dursleys  |
+   | PS:2  | 1991-06    |                                            |
+   | DH    | 1997..1998 |                                            |
+   | DH:33 | ..1998     | Mostly memories, reaching back to childhood |
+   ```
+
+   - A base dates its own works. An official or fanfic package dates the works it
+     inserts (§4.10). An original project dates the works of its own ruler of eras
+     (§4.7) and, for the books that stack it, its own chapters (`lantern-road:9`,
+     §4.12). A later book dates the works it inserts. An adaptation dates nothing: its
+     material is on base paths (§4.9), which carry the base's dates.
+   - Dates are sparse and never interpolated. A point's date is the date of the deepest
+     dated node that contains it, if any.
+   - Order and date need not agree. A flashback chapter is dated before the chapter
+     that precedes it.
+   - A node dated outside the date of a dated node above it is a contradiction (below).
+
+2. **On rows: `In-world`.** A state-history row (§10.5) MAY add an `In-world` column,
+   after `True from`: the date on which the fact became true. It holds what the ruler
+   cannot. A fact true since before canon begins has `True from: PS`, the first work's
+   point, and its date goes here: `~1975`. `As of` still governs visibility, and
+   `True from` still finds hidden truths (§4.4). `In-world` changes neither.
+
+3. **Date-valued attributes.** In a stack with a calendar, the attributes `born` and
+   `died`, of any entity, and `date`, of an event, hold dates. Their rows leave
+   `In-world` empty: the value is the date. Without a calendar, they are free text, like
+   any attribute.
+
+4. **World history.** Events of the world's past, or off the page (a war, a founding, a
+   treaty), are entities in `history.md` (§10.5). An event is an entity like any other,
+   so the rest of the model applies unchanged: it is visible from its `As of`; higher
+   layers add rows to it; a ledger can override or unset it (§6.4). Three of its
+   attributes are reserved:
+   - `date` (required): when the event took place;
+   - `summary`: what happened, in a sentence;
+   - `participants`: the slugs of those involved, separated by `; `.
+
+   The **chronology** at a cutoff lists the events that resolve there (§7.2), sorted by
+   their resolved `date`: by the start of its span, or by the date stated for an
+   approximate date, with ties kept in the composed bible's order (§7.6). An event that
+   takes place on the page needs no entry unless other facts refer to it: `## Dates`
+   already dates the canon itself.
+
+5. **Story events.** `timeline.md` (§10.15) MAY add a `Date` column after its required
+   columns.
+
+With a universe layer, a date of one base is moved by that base's offset into the
+universe's time (§8.1).
+
+### Checks
+
+**Format errors** make a package or project invalid (§14.2), and nothing excuses them:
+
+- a date that does not parse, or names an era, month, or day its calendar does not have;
+- a date where the stack has no calendar (in `## Dates`, `In-world`, or `Date`);
+- an event in `history.md` with no `date` row;
+- a calendar that breaks the rules above, or a calendar or `notation` declared where
+  this section does not allow one;
+- a universe offset between bases without the same calendar (§8.1).
+
+**Chronology contradictions** also make a package or project invalid, unless they are
+accepted:
+
+| Check            | Fails when                                                                                                                             |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `outside-parent` | A `## Dates` node's date is definitely outside the date of the nearest dated node above it                                             |
+| `in-world-after` | A row's `In-world`, or an event's `date`, is definitely after the date of its `True from` point or its `As of` point: the fact becomes true only after the ruler shows it |
+| `born-died`      | An entity's `born` is definitely after its `died`                                                                                      |
+
+Each can be what the story means: a flashback chapter, a prophecy shown before its
+event, a time traveller who dies before being born. An **`## Accepted`** table (§10.5),
+in the file that holds the node or row, excuses one check on one subject and gives the
+reason:
+
+- It excuses only that check, on that subject. Any other contradiction, on the same
+  entity or node, is still an error.
+- In a **package**, an acceptance records what the source does, and cites it. A
+  contradiction found at extraction is flagged, and a human settles it, by accepting it
+  or correcting the row, before it is written (§12.4).
+- In a **project**, an acceptance is the author's decision, which the file's writer
+  (§3.3) records. Agents MAY surface the contradiction, but MUST NOT accept it
+  themselves.
+- A layer accepts only a contradiction that involves one of its own rows or nodes. A
+  fan work cannot excuse a mistake inside its base.
+
+**Warnings** concern the story, where a flashback or an unreliable narrator can be
+deliberate. The continuity-editor raises them, and the author decides (§12.12):
+
+- a `timeline.md` event dated before the `born`, or after the `died`, of an entity it
+  lists;
+- an age stated in the manuscript, or in a row, outside the range the dates give;
+- in an established project, a story event dated before the date of its chapter's
+  cutoff.
+
+A traveler's age counts their personal time, not the world's (§9.1), so an age check on
+a traveler is left to the continuity-editor's judgment.
+
+**Example cases:** [W1](../examples/README.md#case-w1), [W2](../examples/README.md#case-w2), [W3](../examples/README.md#case-w3), [W4](../examples/README.md#case-w4), [W5](../examples/README.md#case-w5), [W6](../examples/README.md#case-w6), [W7](../examples/README.md#case-w7).

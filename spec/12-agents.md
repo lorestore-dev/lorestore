@@ -29,6 +29,7 @@ established.
 | `critic`             | Review          | Structural developmental feedback                                       | `reviews/critique.md`                                                      |
 | `beta-reader`        | Review          | A target reader's felt experience                                       | `reviews/beta-reader.md`                                                   |
 | `bridge-builder`     | Crossover       | Drafts the bridge that reconciles a universe's worlds                   | `bridge.md`                                                                |
+| `prompter`           | Illustration    | Image prompts for characters, family portraits and trees, maps, and locations, as known at a cutoff | `prompts/<id>.md`                                         |
 
 Each specification below gives the agent's **Reads** as a retrieval spec (§11.6). "The
 chapter's cast" means the entities the chapter's outline beat names, plus anyone the
@@ -54,8 +55,9 @@ deciding what happens next when the happy path forks.
     step-14 gate like a pending decide item (§11.8). Once the author decides, hand the
     decision to the curator to record, then re-run the draft for the marked passage.
   - Read review priorities and schedule revision steps before advancing.
-  - Insert on-demand steps the chain lacks (a dialogue pass, a research check), and decide
-    which chapters a changed outline invalidates.
+  - Insert on-demand steps the chain lacks (a dialogue pass, a research check, an image
+    prompt the author asks for), and decide which chapters a changed outline
+    invalidates.
   - **Decide items** (§6.9): under `gates: none`, make the call and log the reasoning;
     otherwise surface it to the human. **Order inversions**, **divergence conflicts**,
     **hidden canon**, **theory conflicts**, and **seam conflicts**
@@ -66,7 +68,8 @@ deciding what happens next when the happy path forks.
     it is folded into the priorities, and schedule revisions of early-access chapters
     like any other, telling the chronicler to log each one.
   - **Serials** (§13.3): revise buffered (unreleased) chapters as in `novel`; never
-    release an installment, which is always the author's call; report the buffer's
+    release, schedule, or withdraw an installment, which is always the author's call
+    (§13.12); report the buffer's
     depth. Never schedule a revision of a released installment when releases are locked.
     Route the fix forward to an upcoming installment or the next arc. When a consequence
     invalidates a released installment, absorb it forward or surface it to the author.
@@ -93,6 +96,12 @@ deciding what happens next when the happy path forks.
     number scenes as §4.2 defines them.
   - Record `True from` whenever the unit reveals backstory: when a fact became true
     before the point that reveals it (§4.4).
+  - In a world with a calendar (§4.13), record in-world dates as precisely as the source
+    gives them, and no more: the unit's own date, an `In-world` date for backstory,
+    `born` and `died`, and past events as entities of `history.md`. Convert dates
+    written in the work's notation to the calendar's form, keeping the original in the
+    citation. Flag a fact that contradicts a date (a flashback, a prophecy) under
+    `## Needs a human`.
   - Name every character through the roster. File facts under a **reveal alias's**
     surface slug until the reveal (§10.9). Give canon-distinct **versions** their own
     slug. List unknown names under `## New names`, with a proposed slug that the facts
@@ -127,7 +136,10 @@ deciding what happens next when the happy path forks.
     with the error as an erratum, the fan consensus, or a separate package.
   - **Validate:** points against the ruler, sources against the registry, slugs against
     the roster, and that `True from` is not later than `As of`. Carry `True from` through
-    unchanged. Invalid rows go to `## Unresolved conflicts`.
+    unchanged. Check dates against the calendar and for chronology contradictions
+    (§4.13). Invalid rows go to `## Unresolved conflicts`. A human settles a
+    contradiction by correcting the row or accepting it, with the source's citation;
+    the merger then writes the acceptance in the target's `## Accepted` table.
   - **Roster target:** accept `New names` that are unambiguous; record a proposed slug
     that duplicates an existing character as an alias of the existing slug, so that the
     other mergers map it.
@@ -138,6 +150,8 @@ deciding what happens next when the happy path forks.
 - **Guardrails:** adds no facts of its own; append-only except for corrections
   (§4.6) a human has approved; writes only its target. The sole writer for its target,
   so parallel merge instances never collide.
+
+**Example cases:** [17](../examples/README.md#case-17).
 
 ## 12.5 `theorist`: facts to cited interpretations
 
@@ -164,7 +178,9 @@ story sits in canon, but not prose.
 
 - **Writes (one per step):** `bible/premise.md`; `bible/outline.md`;
   `bible/sync-points.md` (established worlds, §6.7); `bible/knowledge.md` (in a project
-  with a stack, only the project's own secrets and what original characters know).
+  with a stack, only the project's own secrets and what original characters know);
+  `bible/mysteries.md` (mysteries, §9.5: the project's own mysteries, and clues it adds
+  to canon ones).
 - **Reads:** `project.yaml` (seed, parameters, `setting`); `bible/premise.md` when writing
   the outline; the roster and `world.md` summary sections; for established worlds,
   `bible/divergences.md`, the ruler, and `plot-architecture.md` rows
@@ -173,8 +189,15 @@ story sits in canon, but not prose.
   - Interrogate the seed into a logline; find the **central dramatic question**.
   - Break the story into acts, chapters, and scenes. Each scene is **goal, conflict,
     turn**; a scene with no turn is description, so cut or merge it.
+  - **Viewpoints** (§7.7): where the project or a chapter records them, give each
+    chapter or scene its viewpoint character in the outline's table (§10.23), and its
+    `Told from` where the narrator looks back. Choose the viewpoint that serves the
+    scene's turn, and set a chapter's override where its shape changes.
   - Track setups and payoffs in the outline's ledger so nothing is planted and
     forgotten.
+  - **Mysteries** (§9.5): plan each mystery's clues and red herrings with the outline,
+    so that every needed clue is planted before the reveal, and record them in
+    `mysteries.md`. Each mystery's answer is a secret in `knowledge.md`.
   - **Sync points:** map chapters to the cutoffs they follow, never past
     `setting.divergence_point` in a branch (§6.6), and in the project order
     (`setting.order`) if there is one. The order is the author's (§6.8): when the story
@@ -192,7 +215,7 @@ Three modes. The workflow step selects one.
 
 | Mode         | When                                | Writes                                                                                                                                                                              |
 | ------------ | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **inventor** | Self-contained projects; in a project with a stack, its own additions only (§2.7) | One of `bible/world.md`, `places.md`, `society.md`, `culture.md`, `languages.md`, `lang/<language>.md`, `magic/<catalog>.md`, `game-system.md`, `glossary.md`, `canon-timeline.md` |
+| **inventor** | Self-contained projects; in a project with a stack, its own additions only (§2.7) | One of `bible/world.md`, `history.md`, `places.md`, `routes.md`, `society.md`, `culture.md`, `languages.md`, `lang/<language>.md`, `magic/<catalog>.md`, `game-system.md`, `time-travel.md`, `titles.md`, `glossary.md`, `canon-timeline.md` |
 | **curator**  | `setting.type: established`         | `bible/divergences.md`                                                                                                                                                              |
 | **ruler**    | Extraction, step F0 (package context) | `bible/canon-timeline.md`                                                                                                                                                         |
 
@@ -204,6 +227,12 @@ Three modes. The workflow step selects one.
     breaks later plotting.
   - Build factions as engines of conflict; give recurring locations a sensory signature
     and a dramatic function.
+  - **Ruler:** write the `## Dates` table from what the source states, and from the
+    extraction records' `date` fields when F0 re-runs (§13.6). **Inventor:** in a world
+    with a calendar, date its past in `history.md`, and date the eras of its ruler, if
+    it has one (§4.13). With the travel module, give every route between places the
+    story uses a duration for each mode that can make it (§9.4); with the lineage
+    module, record the succession of titles in `titles.md` (§9.6).
   - **Curator:** do not invent. Log divergences and their consequences in
     `divergences.md` (§6.4) when planned during foundation, or when the showrunner or a
     human accepts an emergent one. Mark consequences absorbed when the chronicler or
@@ -255,7 +284,9 @@ Three modes. The workflow step selects one.
 ## 12.10 `drafter`: the only prose generator
 
 - **Reads:**
-  - this chapter's beat from `bible/outline.md`;
+  - this chapter's rows from `bible/outline.md`: its beats, and its viewpoints (§7.7);
+  - for each viewpoint character, their snapshot at the scene's knowledge point (§7.7),
+    with their `knowledge.md` rows;
   - `bible/style.md`;
   - the **snapshot** (§7) of each entity in the chapter's cast, and of each relationship
     between them, at this chapter's cutoff (from the sync points) and position (from
@@ -268,7 +299,8 @@ Three modes. The workflow step selects one.
   - per module: the latest `bible/game-state.md` rows and the relevant
     `game-system.md` entries (LitRPG); the travelers' rows in `timelines.md` and the
     branch in `branches.md` (frames); entries in `languages.md` and `lang/` for languages
-    spoken in the chapter (languages);
+    spoken in the chapter (languages); the routes between the chapter's places
+    (travel); the mysteries the chapter touches, with their clues (mysteries);
   - an adopted theory only through the divergences whose `Basis` cites it (§6.13);
     never `bible/theories.md` itself.
 - **Writes:** `manuscript/chapter-<NN>.md`, with `status: drafted`.
@@ -276,6 +308,11 @@ Three modes. The workflow step selects one.
   - Render each scene as **goal, rising conflict, turn**; enter late, leave early.
   - Keep POV and tense discipline; plant and pay off per the outline's ledger; use
     glossary spellings.
+  - **Viewpoints** (§7.7): narrate each scene within its viewpoint character's knowledge
+    at its knowledge point, and never past the reader-facing rules, however much a
+    narrator who is told from later knows. Record the chapter's viewpoints, as drafted,
+    in its front matter and scene markers (§10.18). A viewpoint that differs from the
+    outline is the author's to keep or undo (§7.7).
   - **Respect the snapshot:** use only canon true at the chapter's cutoff, from the
     stack's layers, as amended by the ledgers.
   - **Don't add to canon entities silently.** A new physical detail, possession, or
@@ -291,6 +328,9 @@ Three modes. The workflow step selects one.
     `TODO: seam conflict` (§6.14).
   - **Frames:** mark each scene's world point and travelers (§10.18); write each
     character to their own frame.
+  - **Mysteries** (§9.5): plant the clues the outline gives this chapter. Never let the
+    narration answer a mystery before its `Revealed at`, even through a viewpoint
+    character who knows the answer.
 - **Guardrails:** don't invent canon: mark gaps with `TODO: needs bible`. Don't drift POV
   or tense; don't summarize the exciting parts; write the beat given, raising
   structural concerns to the showrunner; never reproduce source passages.
@@ -303,14 +343,17 @@ snapshot, and the reviewers can rely on them.
 - **Reads:** the chapter just drafted (or revised); the target ledger or file; the
   showrunner's logged decisions (for paradoxes).
 - **Writes (one per step):** `bible/timeline.md`; `bible/game-state.md` (LitRPG);
-  `bible/timelines.md` or `bible/branches.md` (frames); `revisions.md` (early-access
+  `bible/timelines.md` or `bible/branches.md` (frames); the `Planted at` cells of the
+  project's own clues in `bible/mysteries.md` (mysteries); `revisions.md` (early-access
   chapters, and serials with revisable releases, §10.22); or the story-dated rows of
   an original character's sheet, `bible/relationships.md`, or `bible/knowledge.md`
   (§4.11).
 - **Duties:** append the chapter's story-time events; append game-state changes with
   their causes; append traveler legs, with the mechanism each used, and personal
   cutoffs; register new branches and update branch statuses as the mechanism's model
-  dictates (§9.1); append ripples; record paradox decisions with their rationale; log
+  dictates (§9.1); append ripples; record paradox decisions with their rationale;
+  with the travel module, fill each event's `Place` (§9.4); with the mysteries module,
+  move a clue's `Planted at` when a revision moves the clue to another chapter (§9.5); log
   each revision of a released or early-access chapter, with its audience, date, and a
   reader note (§10.22). Append a story-dated row, with the chapter's id as its
   `From chapter`, for each change the chapter makes to the state of an original
@@ -327,12 +370,20 @@ snapshot, and the reviewers can rely on them.
 - **Reads:** the chapter under review; snapshots for its cast; `bible/timeline.md`; the
   union glossary; earlier chapters only where a check needs them (found by search);
   relevant `relationships.md` and `languages.md` rows; `game-state.md` and
-  `game-system.md` (LitRPG).
+  `game-system.md` (LitRPG); `routes.md` (travel); `mysteries.md` (mysteries); the
+  cast's lineage rows and `titles.md` (lineage).
 - **Writes:** `reviews/continuity.md`.
 - **Duties:** flag **manuscript vs. bible**, **manuscript vs. manuscript**, and
   **drift** (spelling or terminology); for LitRPG, check the game-state invariants
   (§9.2); rank by severity (a reader-breaking contradiction outranks a minor slip, which
-  outranks cosmetic drift).
+  outranks cosmetic drift). Where viewpoints are recorded, flag each **viewpoint
+  leak** (§7.7): narration that states what its viewpoint character does not know at the
+  scene's knowledge point. In a world with a calendar, raise the date warnings of
+  §4.13: events outside a participant's lifetime, ages that the dates rule out, and
+  story events dated before the cutoff's date. Raise the module warnings too: journeys
+  faster than the routes allow (travel, §9.4), unfair mysteries (§9.5), and parents,
+  births, and title holders that the dates rule out (lineage, §9.6). Each is the
+  author's to decide, because a flashback or an unreliable narrator can be deliberate.
 - **Guardrails:** internal consistency only (fidelity to the source is the
   canon-keeper's job); report, never rewrite or edit the bible; distinguish a genuine
   contradiction from a deliberate mystery or an unreliable narrator.
@@ -380,7 +431,9 @@ rewrites.
   item of the earlier books ahead of a chapter that no Seam conflicts table decides,
   grouped where a pattern would cover them, with the options (carry back, not yet,
   other), and every value seam, with both values and the options (keep earlier, accept,
-  other). Flag a chapter that uses an undecided item as a seam conflict. **Source
+  other). Flag a chapter that uses an undecided item as a seam conflict. **Mysteries**
+  (§9.5): in an order audit or a divergence audit, list each canon mystery whose needed
+  clue the change moves to after its reveal, or removes. **Source
   leaks**: flag a fact found only in a same-fandom package the stack does not include
   (§5.3). Join reveal aliases to their true identities from the `Revealed at` point
   (§10.9) when judging what characters could know. Report consequences the chapter
@@ -396,10 +449,14 @@ rewrites.
 - **Duties:** cut filler, hedges, clichés, and repetition; vary rhythm; choose precise
   verbs; enforce POV distance and filtering rules; enforce the style guide's
   text-and-speech formatting (dialogue, thought, marked languages, telepathy, written
-  text, reveal-gated markers).
+  text, reveal-gated markers). In a project with `content_notes`, suggest the
+  chapter's notes in `content-notes-suggested` (§13.11): every note on the project's
+  list that the chapter calls for, and `new:<id>` for anything a reader would want
+  warning of that the list lacks.
 - **Guardrails:** never change what happens (flag plot or continuity changes instead);
   don't homogenize voices; preserve intentional style; edit towards the style guide,
-  not its own taste.
+  not its own taste. Never set `content-notes`: only the author confirms a chapter's
+  notes.
 
 ## 12.15 `dialogue`: distinct voices
 
@@ -488,3 +545,53 @@ a human approves at the gate.
   a mapping would force one world to change; flags open questions for the human instead
   of settling them.
 
+## 12.20 `prompter`: image prompts
+
+Writes prompts for image generators: pictures of characters, family portraits, family
+trees, maps, and locations, each drawn from the bible as a reader knows it at a chosen
+point in the story. It runs only when the author asks for a picture. A prompt is
+plain descriptive prose, for no particular image model (§1).
+
+- **Context:** project.
+- **Reads:** the author's request (the kind, the subjects, the cutoff or chapter, and
+  any art direction); `references/art-direction.md`, if the author keeps one; the
+  **snapshot** (§7) of each subject at the prompt's cutoff and position; the roster's
+  reveal aliases for the subjects (§10.9); and per kind:
+  - `character`: the subject's sheet, and `born`, for their age at the prompt's date
+    (§4.13);
+  - `family-portrait`: each sitter's snapshot, and their `parents`, `guardians`, and
+    `born` and `died` rows (lineage, §9.6);
+  - `family-tree`: the family-tree view (§9.6) from the subject, with each member's
+    name and dates;
+  - `map`: `places.md`, and `routes.md` (travel, §9.4), for the places the map shows;
+  - `location`: the place's rows in `places.md`, and the `world.md`, `culture.md`,
+    and catalog rows that the place's description names.
+- **Writes:** `prompts/<id>.md` (§10.29).
+- **Duties:**
+  - **Respect the snapshot.** Depict only what the snapshot returns at the prompt's
+    cutoff and position: a character's look, possessions, and age as they stand then,
+    and a place as it stands then. Name a revealed identity only from its `Revealed at`
+    (§10.9). Never depict a hidden truth (§7.2) or a seam conflict.
+  - **Family portraits and trees** show only the parentage visible at the cutoff (§9.6).
+    A portrait has a date, and leaves out anyone not alive on it: born after it or dead
+    before it, by the dates (§4.13). A tree gives each member's name and the dates the
+    snapshot knows. It never adds members to fill the tree out.
+  - **Maps** show only places the snapshot knows at the cutoff. Their layout follows
+    what `places.md` says about where places lie, and the routes' journey times, as
+    relative distances. Where neither says, the map leaves the layout open and notes it.
+  - **Locations** show the place's state at the cutoff (a ruin is a ruin only from its
+    row on), with the culture and systems that are visible there.
+  - **Facts, not flourishes.** Composition, lighting, framing, and mood are the
+    prompt's to choose, within the author's art direction. Facts about a subject are
+    not. A physical detail that the bible does not give goes under `## Gaps`, and the
+    prompt either leaves it unstated or marks the choice as the prompter's.
+  - Record where each fact comes from in `## Sources`, so the author can check the
+    prompt against the bible.
+- **Guardrails:** never writes the bible, the manuscript, or reviews. A prompt is never
+  canon, and no agent reads one. Never copies source text: it describes in its own
+  words (§5). Never describes a real person's likeness, such as an actor who played
+  the character, and never asks for a living artist's style by name. Never goes past
+  the prompt's cutoff, even when the author asks for "how they end up": that is a
+  later cutoff, which the author chooses.
+
+**Example cases:** [M4](../examples/README.md#case-m4).

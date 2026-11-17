@@ -6,9 +6,11 @@
   "required": ["spec_version", "id", "kind", "name", "version", "relies-on", "bridge"],
   "additionalProperties": false,
   "properties": {
-    "spec_version": { "type": "string", "const": "0.2" },
+    "spec_version": { "type": "string", "const": "0.3" },
     "id": { "$ref": "#/$defs/id" },
     "kind": { "const": "universe" },
+    "license": { "type": "string", "pattern": "^[A-Za-z0-9.+()\\- ]+$", "description": "An SPDX license expression for the layer's own records (spec §2.10). That it parses as SPDX, and that a LicenseRef- has a LICENSE.md, are host validations (§14.2)." },
+    "credit": { "type": "string", "minLength": 1, "description": "The credit line the layer's makers ask for (spec §2.10)." },
     "name": { "type": "string", "minLength": 1 },
     "version": {
       "$ref": "#/$defs/semver",

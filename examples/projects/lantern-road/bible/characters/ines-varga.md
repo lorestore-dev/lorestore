@@ -12,5 +12,6 @@ Wants to keep every lamp on the road lit. Needs to let one of the towns go dark.
 | Attribute | Value                  | As of | Source  | Citation | From chapter |
 | --------- | ---------------------- | ----- | ------- | -------- | ------------ |
 | eyes      | grey                   |       | project | premise  |              |
+| born      | NR 12-02-14            |       | project | premise  |              |
 | role      | apprentice lamplighter |       | project | premise  |              |
 | role      | master lamplighter     |       | project | ch.9     | chapter-09   |

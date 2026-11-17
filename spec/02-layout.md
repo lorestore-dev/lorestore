@@ -29,16 +29,16 @@ the base up. The project itself is always the top layer and is never listed.
   │ project:my-book-1@chapter-30                 │  an earlier book: read-only
   │ harry-potter/fanfic/harry-crowe@1.0.0        │  a fan work
   │ harry-potter/fanon@1.3.0                     │  fan conventions
-  │ harry-potter/films@1.0.0                     │  an adaptation
-  │ harry-potter@3.0.0                           │  the base: holds the ruler
+  │ harry-potter/films@1.0.3                     │  an adaptation
+  │ harry-potter@3.2.1                           │  the base: holds the ruler
   └──────────────────────────────────────────────┘
                     ▲ bottom: the base, which everything is built on
 ```
 
 ```yaml
 layers:                                   # from the base up
-  - harry-potter@3.0.0
-  - harry-potter/films@1.0.0
+  - harry-potter@3.2.1
+  - harry-potter/films@1.0.3
   - harry-potter/fanon@1.3.0
   - harry-potter/fanfic/harry-crowe@1.0.0
   - project:my-book-1@chapter-30
@@ -98,6 +98,8 @@ package changing:
 | `harry-potter`, `harry-potter/fanon`, `harry-potter/fanfic/…` | The books, enriched by fan conventions and one fan work    |
 | `harry-potter`, `star-trek`, `universe:wizards-and-warp`     | A crossover (§8)                                           |
 
+**Example cases:** [L1](../examples/README.md#case-l1).
+
 ## 2.3 Packages
 
 A **package** is a reusable bible. Packages are grouped by fandom, and each package has
@@ -141,7 +143,7 @@ its own:
 worlds/<fandom>/<package>/
 ├── package.yaml            # identity, kind, version, status, relies-on (§10.2)
 ├── index.md                # endpoint registry (§10.3)
-├── canon-timeline.md       # base: the ruler (§4). Official: works it inserts (§4.10). Adaptation: what it adapts (§4.9)
+├── canon-timeline.md       # base: the ruler (§4). Official, fanfic: works it inserts (§4.10). Adaptation: what it adapts (§4.9)
 ├── sources.md              # source registry (§5)
 ├── glossary.md
 ├── …                       # the rest of the world layer (§3.3)
@@ -151,7 +153,8 @@ worlds/<fandom>/<package>/
 ```
 
 Only a base has a ruler. Every other package dates its rows on its base's ruler. An
-`official` package with works of its own MAY insert them into that ruler (§4.10).
+`official` or `fanfic` package with works of its own MAY insert them into that ruler
+(§4.10).
 
 **The base holds what is not in dispute.** Official material whose canon status fans or
 the rights holders dispute goes in an `official` package, so that the package never has
@@ -204,10 +207,13 @@ projects/<project-id>/
 ├── manuscript/
 │   └── chapter-<NN>.md
 ├── reviews/                # advisory diagnostics, never canon
+├── prompts/                # image prompts, never canon (§10.29)
+├── export/                 # clean chapters and site metadata for readers, never canon (§10.30)
 ├── derived/                # rebuildable caches, never canon (§7.6)
 │   └── bible/              # the composed bible: every layer merged (§7.6)
 ├── references/             # user-supplied input
-│   └── feedback/           # human readers' notes, per chapter (§10.25)
+│   ├── feedback/           # human readers' notes, per chapter (§10.25)
+│   └── chapter-notes/      # the author's notes to readers, per chapter (§10.30)
 └── runs/                   # orchestrator run records (format implementation-defined)
 ```
 
@@ -228,6 +234,8 @@ rooted at the project, with these prefixes:
 | `manuscript/…`      | `projects/<p>/manuscript/…`                |
 | `manuscript/@<q>/…` | `projects/<q>/manuscript/…`, for a project layer `q`, up to its pinned chapter (read-only) |
 | `reviews/…`         | `projects/<p>/reviews/…`                   |
+| `prompts/…`         | `projects/<p>/prompts/…`                   |
+| `export/…`          | `projects/<p>/export/…`                    |
 | `derived/…`         | `projects/<p>/derived/…`                   |
 | `references/…`      | `projects/<p>/references/…`                |
 
@@ -287,7 +295,10 @@ then each higher layer's, in stack order, then the project's own. Each row keeps
 naming its layer.
 
 Each file has a **key**: the slug in a roster, the term in a glossary, the entry id in a
-catalog or `time-travel.md`, the place id in `places.md`, the path in `index.md`.
+catalog or `time-travel.md`, the place id in `places.md`, the event id in
+`history.md`, the mode and the route in `routes.md`, the mystery in `mysteries.md`
+(whose clues a higher layer MAY add to, §10.27), the title in `titles.md`, the path in
+`index.md`.
 
 - **A layer adds keys; it never redefines one.** A key already defined by a lower layer
   MUST NOT be defined again by a higher one, and the host MUST report it. A Harry Potter
@@ -312,6 +323,8 @@ catalog or `time-travel.md`, the place id in `places.md`, the path in `index.md`
 
 `index.md` is a union in the same way: each layer registers its own files.
 
+**Example cases:** [4](../examples/README.md#case-4).
+
 ## 2.8 Package lifecycle and versioning
 
 `package.yaml` carries a `status` and a `version`.
@@ -327,8 +340,8 @@ to a package:
 | Bump      | When                                                                                               |
 | --------- | -------------------------------------------------------------------------------------------------- |
 | **major** | The ruler is reordered, a ruler point is removed, a slug is renamed or removed, a source is removed, a relied-on package is re-pinned to a new major version |
-| **minor** | Facts, works, sources, or files are added                                                          |
-| **patch** | Values or citations are corrected without adding or removing anything                              |
+| **minor** | Facts, works, sources, dates, or files are added                                                   |
+| **patch** | Values or citations are corrected without adding or removing anything, a relied-on package is re-pinned to a new minor or patch version, or `spec_version`, `license`, or `credit` changes (§10.0, §2.10) |
 
 Every pin names an exact version: a project's layers, a package's `relies-on`, and a
 universe's `relies-on`. When a package's version differs from a pin, the host MUST warn,
@@ -378,3 +391,30 @@ override or a story-dated row at its book's cutoff at the chapter, and an origin
 entity's starting state at its book's first cutoff, earlier where a seam decision
 carried it back. The author reviews the result before the package is locked, and the
 project then stacks the package in place of the project layers.
+
+**Example cases:** [L3](../examples/README.md#case-l3).
+
+## 2.10 Licenses and credit
+
+Packages and universes are made to be shared, so a manifest can say how its layer may
+be reused and how to credit the people who made it. Both keys are optional, in
+`package.yaml` and `universe.yaml` (§10.2):
+
+- `license`: an [SPDX license expression](https://spdx.org/licenses/) (`CC-BY-4.0`,
+  `CC-BY-SA-4.0 OR MIT`), or `LicenseRef-<id>` for terms of the package's own, which
+  then go in a `LICENSE.md` beside the manifest.
+- `credit`: free text, the credit line the makers ask for.
+
+The license covers the layer's **own records**: its facts in its own words, its
+citations, its theories, and its bridge. It never covers the source works the records
+describe, whose rights stay with their owners (§5), and it grants nothing the source
+works' owners have not. A `fanfic` package's `credit` names the fan work's author as
+they ask to be credited, beside the package's own makers (§5.6).
+
+- A layer without a `license` states no terms. A host MUST NOT read its absence as
+  permission.
+- A host SHOULD show the author each layer's `license` and `credit` when the author adds
+  it to a stack, and wherever it lists a stack's layers (§14.1).
+- Changing either key is a patch bump (§2.8): it changes no record.
+
+**Example cases:** [U1](../examples/README.md#case-u1).

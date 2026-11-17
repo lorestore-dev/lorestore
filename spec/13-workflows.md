@@ -33,7 +33,7 @@ Workflow files (§11.7) add each step's `Reads`, as given in §12.
 | 4    | character-designer | `bible/characters/<slug>.md`                 |           | per-character |
 | 5    | character-designer | `bible/characters/_roster.md`                |           |               |
 | 6    | character-designer | `bible/relationships.md`, `bible/voice-guide.md` |       | per-file      |
-| 7    | architect          | `bible/knowledge.md`                         |           |               |
+| 7    | architect          | `bible/knowledge.md`, `bible/mysteries.md`   |           | per-file      |
 | 8    | researcher         | `reviews/research.md`                        |           |               |
 | 9    | line-editor        | `bible/style.md`                             | milestone |               |
 
@@ -63,8 +63,8 @@ place to change direction.
   chapter goes on to steps 12 and 13, but the marker blocks step 14 until the author has
   decided, the curator has recorded the decision, and the drafter has redrafted the
   passage (§11.8).
-- Step 12 runs for `timeline.md` always; for `game-state.md`, `timelines.md`, and
-  `branches.md` when their modules are enabled; and for each file of the project's own
+- Step 12 runs for `timeline.md` always; for `game-state.md`, `timelines.md`,
+  `branches.md`, and `mysteries.md` when their modules are enabled; and for each file of the project's own
   entities whose state the chapter changes, to append its story-dated rows (§4.11).
 - If step 13 reports problems, the showrunner routes fixes to the drafter and re-runs
   steps 12 and 13 before step 14.
@@ -93,6 +93,11 @@ The milestone gate applies once, after the last instance.
 Before step 19, the author MAY send line-edited chapters to early access (§13.9). Step
 19 moves an early-access chapter to `final` like any other.
 
+**On demand.** In this and every workflow, R1 (the `release` skill) runs whenever the
+author takes a publishing step (§13.12), and R2 (the `export` skill) after it, or
+whenever the author asks for an export (§13.13). Neither has a number in the chain,
+because the author, not the chain, decides when they run.
+
 ## 13.2 `short-story`
 
 A compressed chain for a single scene or arc: one chapter, a lighter foundation.
@@ -107,8 +112,11 @@ A compressed chain for a single scene or arc: one chapter, a lighter foundation.
 | 6    | continuity-editor  | `reviews/continuity.md`        |           |               |
 | 7    | critic             | `reviews/critique.md`          |           |               |
 | 8    | line-editor        | `manuscript/chapter-01.md`     | milestone |               |
+| 9    | line-editor        | `manuscript/chapter-01.md` (`status: final`) | milestone |  |
 
 Self-contained short stories that need setting add worldbuilder steps after step 2.
+Step 9 is the finishing pass, as step 19 is for a novel; the author MAY send the story
+to early access before it (§13.9). R1 and R2 run on demand, as in `novel`.
 
 ## 13.3 `serial`
 
@@ -135,10 +143,10 @@ releases it. The chapters that are ready or drafted but not yet released form th
   in the buffer and still revisable, but every change to one is logged in
   `revisions.md`, because someone has already read it.
 - Releasing is always the **author's** decision, under every gate policy: it puts the
-  installment in front of readers, which cannot be undone. Under `gates: none`, the
-  showrunner prepares installments but never releases one.
-- Installments are released in order. The host MUST refuse to release a chapter while
-  an earlier chapter is unreleased, and SHOULD refuse to release one that is not ready.
+  installment in front of readers, which cannot be undone. Withdrawing it later takes
+  it down, but its readers have still read it. Under `gates: none`, the showrunner
+  prepares installments but never releases one.
+- Installments are released in order, and the host refuses what §13.12 forbids.
 - The showrunner reports the depth of the buffer in its log, and flags any open
   consequence or pending decide item touching a chapter the author is about to release.
 
@@ -193,14 +201,16 @@ first arc.
 | 13   | continuity-editor | `reviews/continuity.md`        |           |          |
 | 14   | line-editor       | `manuscript/chapter-<NN>.md`   | milestone |          |
 | R1   | `release`         | `manuscript/chapter-<NN>.md`   |           |          |
+| R2   | `export`          | `export/…`                     |           |          |
 
 Steps 10–14 are the same as in `novel`, with the same numbers, so the
 established-world and frames overlays apply unchanged. Approving the gate at step 14
 makes the installment ready. **R1** (the `release` skill, §11.10) runs when the author
 releases it, which may be immediately or months later, and marks the chapter
-`status: released`. If the author sends the installment to early access first, R1 runs
-twice: once for early access, and again for the public release. Drafting the next
-installment does not wait for R1.
+`status: released`, or schedules it (§13.12). If the author sends the installment to
+early access first, R1 runs twice: once for early access, and again for the public
+release. R2 (the `export` skill, §13.13) follows each R1. Drafting the next installment
+does not wait for either.
 
 ### Phase 4 — Arc review (after each arc)
 
@@ -220,9 +230,12 @@ released. The reviewers read that arc, plus earlier arcs where they need context
 - notes for A1, and fix-forward items for upcoming installments, for anything that
   touches a **released** chapter;
 - under `revisable`, revisions of released installments. Each one re-runs the owning
-  agent, then R1, then a chronicler step on `revisions.md`.
+  agent, then R1 (a re-release, §13.12), then a chronicler step on `revisions.md`, then
+  R2.
 
 There is no finishing phase: an installment is final when it is released.
+
+**Example cases:** [24](../examples/README.md#case-24).
 
 ## 13.4 `established-world` (overlay)
 
@@ -331,10 +344,12 @@ with one writer per output file.
 - Before F0, a human creates `package.yaml` (with its `kind`, its `relies-on`
   pins, and `status: open-for-extraction`) and registers the package's own sources in
   `sources.md`, with tiers its kind allows (§2.3).
-- **F0** runs for a base, and for an adaptation, where it writes the `## Works` and
-  `## Adapts` tables (§4.9), and for an official package with works of its own, where
-  it writes the `## Works` and `## Insert` tables (§4.10). Other packages use their
-  base's ruler, and skip it.
+- **F0** runs for a base, and for an adaptation, where it writes the `## Works` and `##
+  Adapts` tables (§4.9), and for an official or fanfic package with works of its own,
+  where it writes the `## Works` and `## Insert` tables (§4.10). Other packages use
+  their base's ruler, and skip it. In a world with a calendar, F0 also writes the
+  `## Dates` table for the package's own works (§4.13), and MAY re-run after F1 to add
+  the dates the extraction records give.
 - **F0b** seeds the package's own roster: for a package other than a base, only the
   entities that are new in it.
 - In a package other than a base, extractors and mergers read the packages it relies
@@ -393,7 +408,7 @@ host checks the order rules on import.
 | P3   | character-designer | `bible/characters/<slug>.md`             |           | per-character |
 | P4   | character-designer | `bible/characters/_roster.md`            |           |               |
 | P4a  | character-designer | `bible/relationships.md`, `bible/voice-guide.md` |   | per-file      |
-| P4b  | architect          | `bible/knowledge.md`                     |           |               |
+| P4b  | architect          | `bible/knowledge.md`, `bible/mysteries.md` |         | per-file      |
 | P5   | worldbuilder       | `bible/<file>` (inventor)                | milestone | per-file      |
 | P6   | architect          | `bible/sync-points.md`                   | milestone |               |
 | P7   | line-editor        | `bible/style.md`                         | milestone |               |
@@ -466,6 +481,8 @@ workflow.
 Agents never contact readers or publish anything. Early access, like release, is
 recorded in the manuscript's front matter and nowhere else.
 
+**Example cases:** [24](../examples/README.md#case-24).
+
 ## 13.10 Inserting and renumbering chapters
 
 A chapter id (`chapter-<NN>`, §10.0) is a position in the manuscript, and the project's
@@ -482,7 +499,9 @@ step.
     sync points, the ledger's `First occurs`, `Until`, `Absorbed in`, and
     `Decided in`, story-dated rows' `From chapter`, and the chapters of `outline.md`,
     `timeline.md`, `game-state.md`, `timelines.md`, `branches.md`, and
-    `revisions.md`;
+    `revisions.md`, the `Planted at` and `Revealed at` cells of `mysteries.md`, the
+    outline's `Told from` cells, the chapters' and scene markers' `told-from`, and
+    `parameters.told_from`;
   - the folders and `chapter` fields of human feedback (§10.25).
 
   It does not rewrite `reviews/` or `showrunner-log.md`, which are advisory history; the
@@ -495,3 +514,141 @@ step.
   workspace stacks this one as `project:<id>@chapter-<NN>`, chapters up to and including
   `chapter-<NN>` keep their ids, because those ids are referenced from outside the
   project.
+
+**Example cases:** [27](../examples/README.md#case-27).
+
+## 13.11 Content notes
+
+Serials posted on fan sites, and books with early readers, usually warn readers of
+what a chapter contains. A project that wants to track this lists its notes in
+`project.yaml` under `content_notes` (§10.1), and each chapter records its own in its
+front matter (§10.18). It works the same in every workflow.
+
+- **The line-editor suggests.** Each time it edits a chapter (step 14), it sets
+  `content-notes-suggested`: the project's notes that the chapter calls for, and
+  `new:<id>` for one the list lacks (§12.14).
+- **The author confirms.** Sending a chapter to early access or releasing it is the
+  author's decision (§13.3, §13.9), and so are its notes. At that step the showrunner
+  shows the author the suggestions, the author confirms the notes, adding to the
+  project's list any new one they keep, and the `release` skill records them in
+  `content-notes`. A chapter cannot reach early access or release without them: the
+  host MUST refuse it.
+- **Notes can change after readers have the chapter.** The author may change a
+  released or early-access chapter's `content-notes`, even under
+  `serial.released: locked`: the notes are not the text. The `release` skill records the
+  change at the author's word (§13.12), the chronicler logs it in `revisions.md`
+  (§10.22), with a reader note, so readers can be told, and R2 exports the chapter
+  again.
+- **A revision may call for new notes.** After a revision, the line-editor's new
+  suggestions may differ from the confirmed notes. The host SHOULD warn when a
+  suggested note from the project's list is missing from `content-notes` on a chapter
+  readers have. A `new:` suggestion the author did not keep raises nothing.
+
+**Example cases:** [U3](../examples/README.md#case-u3).
+
+## 13.12 Releasing
+
+The `release` skill (§11.10) is the only writer of a chapter's publishing front matter
+(§10.18). It runs only at the author's word, under every gate policy, and does one of
+these:
+
+| Step               | From                          | Sets                                                     | Workflows |
+| ------------------ | ----------------------------- | -------------------------------------------------------- | --------- |
+| **early access**   | `line-edited`                 | `status: early-access`, `early-access`                   | all       |
+| **release**        | `line-edited`, `early-access` | `status: released`, `released`                           | serial    |
+| **re-release**     | `released` (revisable), `withdrawn` | `status: released`, `re-released`                  | serial    |
+| **withdraw**       | `released`                    | `status: withdrawn`, `withdrawn`                         | serial    |
+| **schedule**       | as for the step it schedules  | `early-access-on` or `release-on`                        | as above  |
+| **unschedule**     | a scheduled chapter           | removes the schedule key                                 | as above  |
+| **notes**          | any chapter                   | `content-notes`, from what the author confirms (§13.11)  | all       |
+
+Every step records its author when the project has two or more (§11.13).
+
+### What the skill refuses
+
+For early access, a release, a re-release, or a schedule of either, the host MUST
+refuse a chapter
+
+1. out of order (§10.18): an earlier chapter that has not taken the step, and is not
+   in the same run or scheduled no later;
+2. with a pending decide item for it (§6.9), or a `TODO` marker left in its text
+   (§10.18), since a marker is a comment that would reach readers;
+3. in a project with `content_notes`, without `content-notes` the author has confirmed
+   (§13.11).
+
+It SHOULD refuse, and MAY proceed if the author insists, a chapter that is not
+`line-edited` (not ready), or one with an open consequence the showrunner flagged. A
+re-release under `serial.released: locked` is refused unless the chapter is withdrawn.
+
+### Runs of chapters
+
+The author MAY take one step for a run of consecutive chapters ("release 5 to 9"), as
+one decision. The skill checks every chapter in the run before writing any, and
+refuses the whole run if one fails, naming it. Each chapter in the run gets the same
+date and author, and its own confirmed notes.
+
+### Schedules
+
+A schedule is the author's decision taken ahead of time: the author confirms the notes
+and the skill records the time (`release-on`, `early-access-on`) and, with two or more
+authors, who scheduled it.
+
+- At the scheduled time, or as soon after it as the host can, the host runs the skill
+  for the scheduled step without asking again. It re-checks every refusal first. If
+  one fails, it takes no step, removes the schedule, and tells the author why.
+- The step's date is the scheduled date, so a host that runs late records the day the
+  author chose.
+- A schedule is in order if every earlier chapter that has not taken the step is in
+  the same run, or scheduled no later.
+- Unscheduling is the author's too.
+
+### Re-releasing
+
+Under `serial.released: revisable`, a revised installment is released again: the skill
+sets `re-released` to the date and keeps `released` as the first release. Each
+re-release has a `revisions.md` row with `Audience: public` (§10.22), whose date
+matches it.
+
+### Withdrawing
+
+The author MAY withdraw a released installment: take it down from the public. The
+skill sets `status: withdrawn` and the date, and keeps `released`.
+
+- A withdrawn chapter is still one readers have seen: it stays in the run of released
+  chapters, its story stays in the bible, and renumbering never moves it (§13.10). The
+  chapters after it stay released.
+- A withdrawn chapter MAY be revised, whatever `serial.released` says, with each
+  change logged in `revisions.md`, and released again, which is a re-release.
+- Withdrawing undoes nothing the chapter established. If the author wants the story
+  without it, that is a revision of later chapters or a divergence, decided as usual.
+
+**Example cases:** [P1](../examples/README.md#case-p1), [P2](../examples/README.md#case-p2), [P3](../examples/README.md#case-p3), [P4](../examples/README.md#case-p4).
+
+## 13.13 Exporting for readers
+
+The `export` skill turns chapters into what the author posts: clean text, and, if the
+project has a `publishing` block (§10.1), the metadata a fan site's posting form asks
+for. It writes `export/` (§10.30), never canon and read by no agent. It is
+deterministic, so the same chapters give the same export.
+
+- **When it runs.** After every step of the `release` skill (R2, §13.3), and whenever
+  the author asks for one.
+- **Per audience.** `export/early-access/` holds every chapter early readers have:
+  those in early access, and those released. `export/public/` holds the released
+  ones. A withdrawn chapter leaves `public/`, and stays out of the work's metadata
+  until it is released again. The skill rewrites an audience's folder whole, so it
+  never holds a chapter that audience no longer has.
+- **Nothing for readers that readers should not see.** The clean text drops every
+  comment, so no marker, scene marker, or note to agents survives (§10.30). The
+  metadata never names a character's true identity behind a reveal alias before the
+  audience's latest chapter reaches its `Revealed at` (§10.9), and takes summary,
+  rating, and tags only from the author's `publishing` block.
+- **A novel or short story** has no public release, so its export is the
+  `early-access/` folder. On the author's request, the skill also exports `final`
+  chapters, to `export/final/`, for an author who publishes the finished book
+  themselves.
+
+Turning the Markdown into HTML, an EPUB, or a site's own format, and posting it, are
+the host's and the author's: no agent ever publishes anything (§13.9).
+
+**Example cases:** [P5](../examples/README.md#case-p5).

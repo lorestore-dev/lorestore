@@ -16,9 +16,9 @@ A project uses a universe by stacking it above its bases, like any other layer (
 
 ```yaml
 layers:
-  - harry-potter@3.0.0
-  - star-trek@2.0.0
-  - universe:wizards-and-warp@2.0.0
+  - harry-potter@3.2.1
+  - star-trek@2.1.1
+  - universe:wizards-and-warp@2.0.3
 ```
 
 Each base's other packages can be stacked too, in any order that keeps every package
@@ -32,29 +32,38 @@ entities (§7.4).
 gives each an **offset** that aligns its calendar to the universe's shared "now":
 
 ```yaml
-spec_version: "0.2"
+spec_version: "0.3"
 id: wizards-and-warp
 kind: universe
 name: "Wizards and Warp"
 version: 2.0.0
 relies-on:
-  - harry-potter@3.0.0
-  - star-trek@2.0.0
+  - harry-potter@3.2.1
+  - star-trek@2.1.1
 offsets: { harry-potter: "+373y", star-trek: "+0y" }
 bridge: bridge.md
 ```
 
-`offset` is `[+-]<n><y|m|d>`: how far the base's own internal calendar is shifted to
-line up with the universe's. A base with no entry has `+0y`. Here Harry Potter is moved
-forward 373 years, so that Hogwarts in 1991 lines up with the Enterprise-D in 2364.
-Offsets relate in-world dates; they do not make ruler points from different bases
-comparable (§4.2).
+`offset` is `[+-]<n><y|m|d>`: how far the base's dates (§4.13) are shifted to line up
+with the universe's. A base with no entry has `+0y`. Here Harry Potter is moved forward
+373 years, so that Hogwarts in 1991 lines up with the Enterprise-D in 2364.
+
+- Offsets need dates to apply to. A universe MAY give offsets only if every base it
+  relies on declares the same calendar: `iso`, or identical custom calendars. A unit
+  MUST be one the calendar has: a custom calendar without months takes only `y`.
+- A base's date plus its offset is a date in **universe time**. A universe's chronology
+  merges every base's world history (§4.13), each event moved into universe time. Dates
+  in the bridge are in universe time.
+- Offsets relate in-world dates. They do not make ruler points from different bases
+  comparable (§4.2).
 
 A universe relies only on bases. Its `relies-on` pins MUST match the bases' pins in any
 stack that uses it (§2.2).
 
 This pairing is the clearest test of a bridge: a **magic** world and a **technology**
 world have to agree on what happens when a spell meets a tricorder.
+
+**Example cases:** [W7](../examples/README.md#case-w7).
 
 ## 8.2 The bridge
 

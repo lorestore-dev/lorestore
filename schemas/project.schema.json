@@ -15,7 +15,7 @@
   "properties": {
     "spec_version": {
       "type": "string",
-      "const": "0.2"
+      "const": "0.3"
     },
     "id": {
       "$ref": "#/$defs/id"
@@ -53,6 +53,16 @@
         "target_length": {
           "type": "integer",
           "minimum": 1
+        },
+        "viewpoints": {
+          "enum": ["none", "chapter", "scene"],
+          "default": "none",
+          "description": "How viewpoint characters are recorded; a chapter may override it in the outline. See spec/07-snapshot.md §7.7."
+        },
+        "told_from": {
+          "type": "string",
+          "pattern": "^(chapter-[0-9]{2,}|end)$",
+          "description": "Default point a narrator looking back tells the story from. See spec/07-snapshot.md §7.7."
         }
       }
     },
@@ -169,6 +179,12 @@
         }
       }
     },
+    "calendar": {
+      "$ref": "#/$defs/calendar"
+    },
+    "notation": {
+      "$ref": "#/$defs/notation"
+    },
     "modules": {
       "type": "object",
       "additionalProperties": false,
@@ -180,7 +196,60 @@
         "languages": {
           "type": "boolean",
           "default": false
+        },
+        "travel": {
+          "type": "boolean",
+          "default": false,
+          "description": "Routes and journey times. See spec/09-modules.md §9.4."
+        },
+        "mysteries": {
+          "type": "boolean",
+          "default": false,
+          "description": "Mysteries, clues, and fair play. See spec/09-modules.md §9.5."
+        },
+        "lineage": {
+          "type": "boolean",
+          "default": false,
+          "description": "Parentage, ancestry, and titles. See spec/09-modules.md §9.6."
         }
+      }
+    },
+    "authors": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Who makes the author's decisions. See spec/11-agent-contract.md §11.13. That ids are unique is a host validation (§14.2).",
+      "items": {
+        "type": "object",
+        "required": ["id", "name"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "#/$defs/id" },
+          "name": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "content_notes": {
+      "type": "object",
+      "minProperties": 1,
+      "description": "The content notes chapters may carry: note id to the words readers see. See spec/13-workflows.md §13.11.",
+      "propertyNames": { "$ref": "#/$defs/id" },
+      "additionalProperties": { "type": "string", "minLength": 1 }
+    },
+    "publishing": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "What the export's metadata says (spec/13-workflows.md §13.13). That relationship slugs are in the roster is a host validation (§14.2).",
+      "properties": {
+        "summary": { "type": "string", "minLength": 1 },
+        "rating": { "type": "string", "minLength": 1 },
+        "language": { "type": "string", "pattern": "^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$" },
+        "tags": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "relationships": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*[+/][a-z0-9]+(-[a-z0-9]+)*$" }
+        },
+        "scene_break": { "type": "string", "minLength": 1 }
       }
     },
     "serial": {
@@ -457,6 +526,57 @@
           }
         }
       }
+    },
+    {
+      "description": "Only an original project declares a calendar; an established one dates in its stack's (spec §4.13).",
+      "if": {
+        "properties": {
+          "setting": {
+            "properties": {
+              "type": {
+                "const": "established"
+              }
+            }
+          }
+        },
+        "required": [
+          "setting"
+        ]
+      },
+      "then": {
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "calendar"
+              ]
+            },
+            {
+              "required": [
+                "notation"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "A notation needs calendar: iso.",
+      "if": {
+        "required": [
+          "notation"
+        ]
+      },
+      "then": {
+        "required": [
+          "calendar"
+        ],
+        "properties": {
+          "calendar": {
+            "const": "iso"
+          }
+        }
+      }
     }
   ],
   "$defs": {
@@ -477,6 +597,85 @@
       "type": "string",
       "description": "<package-id>@<version>, universe:<id>@<version>, or project:<id>@chapter-<NN>. See spec/02-layout.md §2.2.",
       "pattern": "^(([a-z0-9]+(-[a-z0-9]+)*(/[a-z0-9]+(-[a-z0-9]+)*){0,2})|universe:[a-z0-9]+(-[a-z0-9]+)*)@(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$|^project:[a-z0-9]+(-[a-z0-9]+)*@chapter-\\d{2,}$"
+    },
+    "calendar": {
+      "description": "The world's calendar (spec §4.13): iso, or a custom calendar of eras and optional months. The order rules for eras (only the first counts down, and it is not last; every era counting up except the last gives years) are host validations, §14.2.",
+      "oneOf": [
+        {
+          "const": "iso"
+        },
+        {
+          "type": "object",
+          "required": [
+            "eras"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "eras": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "name"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Z][A-Z0-9]*$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "counts": {
+                    "const": "down"
+                  },
+                  "years": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "not": {
+                  "required": [
+                    "counts",
+                    "years"
+                  ]
+                }
+              }
+            },
+            "months": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "days"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "days": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "notation": {
+      "type": "string",
+      "pattern": "^[a-z0-9]{3,8}(-[a-z0-9]{3,8})*$",
+      "description": "The calendar the work writes dates in: a Unicode BCP 47 calendar identifier, such as gregory or japanese. Only with calendar: iso (spec §4.13)."
     }
   }
 }

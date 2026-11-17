@@ -51,6 +51,7 @@ author decides each inversion; this review only sets out the options.
 | Candidate                             | Addressed                                  |
 | ------------------------------------- | ------------------------------------------ |
 | cedric-diggory (PoA, GoF)             | I2 and I3                                  |
+| harry-potter (CoS, GoF)               | No inversion: `born` has one row (CoS:8), so a swap reverses nothing; the story set in GoF simply does not yet know Harry's birth year |
 | harry-potter (PoA, GoF)               | I4                                         |
 | harry-potter+sirius-black (PoA, GoF)  | I1                                         |
 

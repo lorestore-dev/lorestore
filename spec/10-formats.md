@@ -8,6 +8,22 @@ below are what tools rely on.
 
 **Manifests** are YAML 1.2. Each has a JSON Schema in [`schemas/`](../schemas/).
 
+**Spec versions.** Every manifest (`project.yaml`, `package.yaml`, `universe.yaml`)
+declares `spec_version`: the `<major>.<minor>` of this specification whose rules its
+directory follows. This document is version `0.3`.
+
+- A host MUST list the spec versions it supports, and MUST refuse a stack that holds a
+  manifest of any other version, naming it.
+- One stack MAY mix versions that the host supports. The host reads each directory by
+  the rules of its own version: a feature that version lacks is absent there (a `0.2`
+  base has no calendar).
+- Before `1.0`, any minor version may break the one before it, so a host supports each
+  version deliberately. From `1.0` on, a minor version only adds, and a host that
+  supports `1.n` reads every `1.m` with `m` up to `n`.
+- Moving a directory to a new spec version is a human change: set `spec_version` and
+  make the changes that `DECISIONS.md` lists for the versions in between. In a package,
+  it bumps the version (§2.8).
+
 **Structured markdown** uses two forms:
 
 - **Tables.** A table is identified by the `##` heading it sits under and by its
@@ -41,13 +57,17 @@ this chapter requires front matter, its keys are listed.
 | source      | a source id registered in the row's own package's `sources.md` (§5.1), or a reserved id |
 | citation    | free text that locates the evidence, for example `PS ch.6` or `TNG "Q Who"` |
 | chapter     | a manuscript chapter id, `chapter-<NN>`                                     |
+| date        | an in-world date in the stack's calendar, such as `1991-07-31`, `..1991`, or `~1975` (§4.13) |
+| duration    | a length of in-world time, such as `3d`, `4d..6d`, or `~8h` (§9.4)          |
+
+**Example cases:** [25](../examples/README.md#case-25).
 
 ## 10.1 `project.yaml`
 
 Schema: [`schemas/project.schema.json`](../schemas/project.schema.json).
 
 ```yaml
-spec_version: "0.2"
+spec_version: "0.3"
 id: two-witnesses
 name: "Two Witnesses"
 workflow: novel                 # novel | short-story | serial
@@ -57,11 +77,13 @@ parameters:
   pov: third-limited
   tense: past
   target_length: 90000          # words
+  viewpoints: chapter           # none (default) | chapter | scene (§7.7)
+  told_from: end                # optional: a chapter id or end, for a narrator looking back (§7.7)
 
 layers:                         # from the base up; absent or empty = self-contained
-  - harry-potter@3.0.0
-  - harry-potter/fanon@1.0.0
-  - harry-potter/fanfic/example@1.0.0
+  - harry-potter@3.2.1
+  - harry-potter/fanon@1.0.4
+  - harry-potter/fanfic/example@1.2.3
 resolution: recency             # precedence (default) | recency | fill
 
 setting:
@@ -76,8 +98,40 @@ setting:
 modules:
   litrpg: false
   languages: false
+  travel: false
+  mysteries: false
+  lineage: false
+
+authors:                        # optional: who makes the author's decisions (§11.13)
+  - id: ade
+    name: "Ade"
+  - id: kit
+    name: "Kit"
+
+content_notes:                  # optional: the content notes chapters may carry (§13.11)
+  death: "The death of a character"
+  grief: "Grief and mourning"
+
+publishing:                     # optional: what the export's metadata says (§13.13)
+  summary: "Cedric lives, and Harry is no longer the only one who saw."
+  rating: teen                  # free text, in the author's words or a site's
+  language: en                  # BCP 47
+  tags: [hurt/comfort, canon divergence]
+  relationships: [harry-potter+cedric-diggory]
+  scene_break: "* * *"          # optional; the default
 ```
 
+- `authors`: optional. Each entry has an `id` (§10.0), unique in the list, and a
+  `name`. Absent means one author, unnamed. With two or more, every record of an
+  author's decision names who made it (§11.13).
+- `content_notes`: optional. A map from a note's id (§10.0) to what it warns of, in
+  the words readers will see. Absent means the project does not track content notes,
+  and its chapters MUST NOT carry them (§13.11).
+- `publishing`: optional. Without it, the export writes clean chapters but no metadata
+  (§13.13). `summary`, `rating`, and `tags` are the author's words, copied as they are.
+  `language` is a BCP 47 tag. `relationships` lists pairs of slugs in the stack's
+  roster: `a+b` for a friendship or other bond, `a/b` for a romance, as fan sites write
+  them. `scene_break` is the line that stands between scenes in an exported chapter.
 - `layers`: layer references, from the base up (§2.2): `<package-id>@<version>`,
   `universe:<id>@<version>`, or `project:<id>@chapter-<NN>`. The project itself is the
   implicit top layer.
@@ -87,7 +141,9 @@ modules:
   (the base's, or the series ruler, §4.12), inserted segments included, each once
   (§6.8). Absent means the ruler's order. An original setting has no layers (§6.1), and
   `fidelity`, `fidelity_notes`, `follow`, `divergence_point`, `cutoff`, and `order`, and
-  their universe maps, are invalid in it (§4.7).
+  their universe maps, are invalid in it (§4.7). An original project MAY declare
+`calendar` and `notation` (§4.13), at the top level, as a base does (§10.2). They are
+invalid in an established project, which dates in its stack's calendar.
 
 A serial project (`workflow: serial`) MAY add:
 
@@ -114,14 +170,16 @@ Schema: [`schemas/package.schema.json`](../schemas/package.schema.json).
 Every package has one, in the package's folder:
 
 ```yaml
-spec_version: "0.2"
+spec_version: "0.3"
 id: harry-potter/fanon          # <fandom> | <fandom>/<package> | <fandom>/fanfic/<work>
 kind: fanon                     # base | official | adaptation | fanon | fanfic | theories
 name: "Harry Potter fanon"
 version: 1.0.0
 status: open-for-extraction     # open-for-extraction | locked
 relies-on:                      # pinned; empty for a base package
-  - harry-potter@3.0.0
+  - harry-potter@3.2.1
+license: CC-BY-4.0              # optional: an SPDX license expression (§2.10)
+credit: "Compiled by the fans of the example"   # optional: how to credit the makers
 ```
 
 - `id` MUST match the package's folder (§2.3). A `base` package's id is the bare fandom
@@ -129,12 +187,22 @@ relies-on:                      # pinned; empty for a base package
 - `relies-on` lists `<package-id>@<version>` pins. Every entry MUST appear below the
   package in any stack that uses it (§2.2).
 - The tiers a package may register depend on its kind (§2.3, §5.2).
+- `license` and `credit` are optional (§2.10). `license` MUST be a valid SPDX license
+  expression; a `LicenseRef-<id>` in it needs a `LICENSE.md` beside the manifest.
+- A `base` package MAY declare its world's calendar (§4.13): `calendar: iso`, with an
+  optional `notation`, or a custom calendar. Both keys are invalid in every other kind.
+
+```yaml
+calendar: iso
+notation: gregory               # optional; a BCP 47 calendar identifier, iso only
+```
 
 ### 10.2.1 `universe.yaml`
 
 Schema: [`schemas/universe.schema.json`](../schemas/universe.schema.json). Example in
 §8.1. `kind` is always `universe`; `relies-on` pins two or more bases; `offsets` is
 keyed by base id. The bridge's source id is the reserved `bridge`, tier `crossover`.
+`license` and `credit` are optional, as in `package.yaml` (§2.10).
 
 ## 10.3 `index.md`
 
@@ -167,6 +235,8 @@ An optional `## Columns` table registers the columns an author has added to tabl
 - `Values` is `free text`, a cell type from §10.0 (`slug`, `point`, `chapter`, …), or an
   enumeration written `a | b | c` (escaped as `a \| b \| c` inside the cell).
 - A column name MUST NOT repeat a required column of its table.
+
+**Example cases:** [25](../examples/README.md#case-25).
 
 ## 10.4 `canon-timeline.md` (the ruler)
 
@@ -217,8 +287,9 @@ has a `## Works` table listing its own works, each with `Timed level: work`, and
   share a node only if each covers it at a finer level (a chapter split between two
   films is mapped scene by scene).
 
-An **official** package that inserts works (§4.10) has a `## Works` table for its own
-works, in the base's format, and an `## Insert` table in place of `## Order`:
+An **official** or **fanfic** package that inserts works (§4.10) has a `## Works` table
+for its own works, in the base's format, and an `## Insert` table in place of `##
+Order`:
 
 ```markdown
 ## Insert
@@ -236,6 +307,27 @@ works, in the base's format, and an `## Insert` table in place of `## Order`:
 A later book in a series begun by a self-contained book (§4.12) has the same two tables
 in its own `bible/canon-timeline.md`. Its `After` may also name the work of a project
 layer.
+
+Any `canon-timeline.md` except an adaptation's MAY add a `## Dates` table, which dates
+its own nodes in-world (§4.13), and an `## Accepted` table (§10.5) for the dates that
+contradict their parents on purpose:
+
+```markdown
+## Dates
+| Node | Date       | Notes                                     |
+| ---- | ---------- | ----------------------------------------- |
+| PS   | 1991..1992 |                                           |
+| PS:1 | 1981-11    | The night Harry is left with the Dursleys |
+
+## Accepted
+| Check          | Subject | Reason                                                | Citation |
+| -------------- | ------- | ----------------------------------------------------- | -------- |
+| outside-parent | PS:1    | The first chapter is set ten years before the rest    | PS ch.1  |
+```
+
+- `Node`: a path on one of the file's own works (the base's, or the works the file
+  inserts), with no timecode. A node appears at most once.
+- `Date`: a date (§10.0).
 
 ## 10.5 State histories
 
@@ -297,6 +389,49 @@ origin: canon          # canon | original | crossover
 | Attribute | Value | As of | Source | Citation |
 ```
 
+**In-world dates** (§4.13). Any state-history table above MAY add an `In-world`
+column, after `True from`: a date (§10.0), on which the fact became true. The optional
+columns come in the order `True from`, `In-world`, `From chapter`, and any of them MAY
+be left out. A row whose attribute is `born`, `died`, or an event's `date` leaves
+`In-world` empty.
+
+**`history.md`** (world history, §4.13) is a multi-entity state history whose entities
+are events:
+
+```markdown
+## State history
+| Entity               | Attribute    | Value                                          | As of | Source | Citation |
+| -------------------- | ------------ | ---------------------------------------------- | ----- | ------ | -------- |
+| grindelwald-defeated | date         | 1945                                           | PS:6  | books  | PS ch.6  |
+| grindelwald-defeated | summary      | Dumbledore defeats the dark wizard Grindelwald | PS:6  | books  | PS ch.6  |
+| grindelwald-defeated | participants | albus-dumbledore; gellert-grindelwald          | PS:6  | books  | PS ch.6  |
+```
+
+`Entity` is an event id (§10.0). Every event MUST have a `date` row; `date`, `summary`,
+and `participants` (slugs) are reserved, and other attributes are free.
+
+**`## Accepted`** excuses a chronology contradiction that the story means (§4.13). It
+MAY follow the table it excuses, in `canon-timeline.md` or in any state-history file:
+
+```markdown
+## Accepted
+| Check     | Subject | Reason                                           | Citation |
+| --------- | ------- | ------------------------------------------------ | -------- |
+| born-died | born    | Born in 2051, she travels back and dies in 1990  | EP:4     |
+```
+
+- `Check`: `outside-parent`, `in-world-after`, or `born-died` (§4.13); or, with the
+  lineage module, `born-before-parent` or `ancestry-cycle` (§9.6).
+- `Subject`: for `outside-parent`, the node. Otherwise the row's key: its attribute in
+  a single-entity file, or `<entity>.<attribute>` in a multi-entity one (the `born`
+  attribute, for `born-died` and `born-before-parent`; any `parents` or
+  `descends-from` row on the cycle, for `ancestry-cycle`).
+- `Reason`: free text, required.
+- `Citation`: required in a package, where the acceptance records what the source does.
+  In a project, it MAY be empty.
+- `By` (optional column, last; projects only): the author who accepted it, an id from
+  `authors`. Required in a project with two or more authors (§11.13).
+
 An original character (`origin: original`) uses project-defined sources. Its rows MAY
 leave `As of` empty, and use `Source: project`.
 
@@ -350,7 +485,9 @@ text: texts/ps/ch06.md
 - `Entity`: the slug or entity id (empty for a single-entity target).
 - `Change`: `new`, `change`, or `confirm`.
 - `True from` (optional): when the fact became true, if the passage reveals backstory
-  (§4.4).
+  (§4.4). An `In-world` column (optional) MAY follow it, with the date (§4.13).
+- The front matter MAY add `date`: the in-world date of the unit, if the source gives
+  it, for the ruler's `## Dates` (§13.6).
 - `Rank`: 1 (most important) to 5.
 
 ## 10.7 `sources.md`
@@ -430,6 +567,12 @@ Bibliography keys: `author`, `year`, `title`, `container`, `volume`, `issue`, `p
   ID of the divergence a `keep-earlier` or `other` produced, or `—`. `Decided in` is
   the chapter being written when the decision was made. `Note` is required for
   `other`.
+- `By` (optional column, last, in every table of the file): the author who made the
+  decision the row records, an id from `authors` (§11.13). In a project with two or
+  more authors it is required on every row of `## Hidden canon`, `## Theory conflicts`,
+  and `## Seam conflicts`, and on every `accepted` consequence. A divergence logged to
+  carry out an author's decision (an order inversion or a divergence conflict) SHOULD
+  name the author too.
 
 ## 10.9 `characters/_roster.md`
 
@@ -448,6 +591,8 @@ Bibliography keys: `author`, `year`, `title`, `container`, `volume`, `issue`, `p
 - `Version of`: for a **version**, a canon-distinct instance of one identity (an
   alternate-universe self) with its own sheet. A time-traveling copy is not a version;
   it stays on one sheet.
+
+**Example cases:** [7](../examples/README.md#case-7), [10](../examples/README.md#case-10).
 
 ## 10.10 `glossary.md`
 
@@ -550,6 +695,8 @@ Quotations:
   manuscript, and a later book reads an earlier book's lines there, through the project
   layer (`manuscript/@<project>/…`, §2.6).
 
+**Example cases:** [3a](../examples/README.md#case-3a).
+
 ## 10.14 `bridge.md`
 
 ```markdown
@@ -581,7 +728,10 @@ source `bridge`. `As of` in crossover canon is a ruler point qualified by world
 ```
 
 Rows are in manuscript order. `Story time` is free text (an in-world date or "three
-days later"). `Entities` lists the slugs involved.
+days later"). `Entities` lists the slugs involved. Two optional columns MAY follow the
+required ones, in this order: in a stack with a calendar, `Date`, holding the event's
+date (§4.13) when it is known; and with the travel module, `Place`, the id in
+`places.md` of where the event happens (§9.4).
 
 ## 10.16 `timelines.md` and `branches.md` (frames)
 
@@ -630,11 +780,37 @@ the traveler has lived through, which bounds what they know. A ripple applies fr
 ```markdown
 ---
 chapter: 7
-status: drafted         # drafted | line-edited | final | early-access | released
+title: "The Long Road South"  # optional: the chapter's title, as readers see it
+status: drafted         # drafted | line-edited | final | early-access | released | withdrawn
 early-access: 2026-10-27  # set by the release skill when the chapter goes to early readers
-released: 2026-11-03    # serial only: set by the release skill
+released: 2026-11-03    # serial only: the first release, set by the release skill
+re-released: 2026-11-20 # serial only: the latest re-release, if any
+withdrawn: 2026-12-01   # serial only: when the author took it down, if they did
+release-on: 2026-11-03T18:00+00:00  # a scheduled release, until it is carried out
 ---
 ```
+
+- Every date key holds a date (`2026-11-03`). `release-on` and `early-access-on`, the
+  schedule keys, MAY hold a date and time with its offset, as fan sites schedule posts.
+- The release skill writes every key above except `chapter` and `title`; the drafter
+  writes `title`, and the line-editor may polish it (§13.12).
+- With two or more authors (§11.13), the release skill also records who took each
+  step: `early-access-by`, `released-by`, `re-released-by`, and `withdrawn-by`, and,
+  for a schedule, `early-access-on-by` or `release-on-by`. Each is an id from `authors`.
+
+**Content notes** (§13.11). In a project with `content_notes`:
+
+```yaml
+content-notes-suggested: [death, new:violence]   # set by the line-editor
+content-notes: [death]  # set by the release skill, from what the author confirms
+```
+
+- `content-notes-suggested`: ids from `content_notes`, or `new:<id>` for a note the
+  list lacks.
+- `content-notes`: ids from `content_notes` only. An empty list (`[]`) means the
+  author confirmed that the chapter needs none. Required on every chapter that is
+  `early-access`, `released`, or `withdrawn`, or scheduled for either step.
+- In a project without `content_notes`, both keys are invalid.
 
 | Status         | Meaning                                                                      | Workflows       |
 | -------------- | ---------------------------------------------------------------------------- | --------------- |
@@ -643,28 +819,49 @@ released: 2026-11-03    # serial only: set by the release skill
 | `final`        | Approved as finished                                                         | novel, short story |
 | `early-access` | Read by early readers (beta readers, patrons, advance copies), still editable (§13.9) | all     |
 | `released`     | Published to everyone                                                        | serial          |
+| `withdrawn`    | Released, then taken down by the author (§13.12)                            | serial          |
 
 - A chapter moves `drafted` → `line-edited` → (`early-access`) → `released` in a serial,
   and `drafted` → `line-edited` → (`early-access`) → `final` otherwise. Early access is
-  optional.
-- Moving a chapter to `early-access` or `released` is always the author's decision.
-- **Both happen in order.** Released chapters form an unbroken run from chapter 1, and
-  early-access chapters form an unbroken run straight after them: no chapter is
-  `released` while an earlier one is not, and none is `early-access` while an earlier
-  one is still unreleased and not in early access.
-- `early-access` and `released` record the date of each step. A released chapter keeps
-  its `early-access` date if it had one.
+  optional. A released chapter MAY move to `withdrawn`, and back to `released`.
+- Moving a chapter to `early-access`, `released`, or `withdrawn` is always the author's
+  decision (§13.12).
+- **Both happen in order.** Released chapters, counting withdrawn ones, form an
+  unbroken run from chapter 1, and early-access chapters form an unbroken run straight
+  after them: no chapter is `released` while an earlier one has never been, and none is
+  `early-access` while an earlier one is still unreleased and not in early access.
+- `early-access` and `released` record the date of each step, and are never
+  overwritten. A released chapter keeps its `early-access` date if it had one, and a
+  withdrawn one its `released` date.
+
+**Viewpoints** (§7.7). In a project that records viewpoints, the front matter records
+them as drafted, beside the outline's plan:
+
+```yaml
+viewpoints: scene         # only where the chapter overrides parameters.viewpoints
+viewpoint: ines-varga     # in chapter mode: the chapter's viewpoint character
+told-from: end            # only where it differs from parameters.told_from; — for in the moment
+```
+
+In `scene` mode, `viewpoint` and `told-from` move from the front matter to each scene's
+marker (below).
 
 Markers in the prose:
 
-- **Frames projects** open each scene with a marker:
-  `<!-- scene: at=PoA:21@main travelers=harry-potter,hermione-granger -->`
+- **Scene markers.** Each scene of a chapter in `scene` mode, and every scene of a
+  frames project, opens with a marker of `key=value` pairs: `viewpoint` and, where it
+  differs from the project's, `told-from` (viewpoints, §7.7); `at` and `travelers`
+  (frames, §9.1). For example,
+  `<!-- scene: viewpoint=tomas-hale told-from=— -->`, or
+  `<!-- scene: at=PoA:21@main travelers=harry-potter,hermione-granger viewpoint=harry-potter -->`
 - **Missing canon** is marked where the drafter needed it:
   `<!-- TODO: needs bible: <what is missing> -->`
 - **Hidden canon** is marked where a beat touches a hidden truth (§6.12):
   `<!-- TODO: hidden canon: <slug>.<attribute> -->`
 - **Seam conflicts** are marked where a beat needs an earlier book's item that is
   ahead of the chapter and undecided (§6.14): `<!-- TODO: seam conflict: <item> -->`
+
+**Example cases:** [V4](../examples/README.md#case-v4), [U2](../examples/README.md#case-u2), [U3](../examples/README.md#case-u3).
 
 ## 10.19 Reviews
 
@@ -818,8 +1015,9 @@ Established-world projects only. An empty or missing file means a fixed cutoff
 ## 10.22 `revisions.md`
 
 One row per change to a chapter readers have already seen, appended by the chronicler:
-any change to an `early-access` chapter, in every workflow, and any change to a
-released installment of a serial with `serial.released: revisable`.
+any change to an `early-access` chapter, in every workflow, any change to a released
+installment of a serial with `serial.released: revisable`, and any change to a
+`withdrawn` one (§13.12).
 
 ```markdown
 ## Revisions
@@ -835,9 +1033,26 @@ released installment of a serial with `serial.released: revisable`.
   required for every row, whatever `serial.released` says, because these readers have
   already seen the earlier text.
 
-## 10.23 `outline.md` in a serial
+## 10.23 `outline.md`
 
-The outline groups installments into arcs, one heading per arc:
+The outline is the story's plan: its acts and chapters in prose, the setup and payoff
+ledger, and a table of chapters, which agents read row by row. Free prose MAY surround
+the table.
+
+In a **novel** or a **short story**, the table sits under `## Chapters`:
+
+```markdown
+## Chapters
+| Chapter    | Beat                                         | Scene | Viewpoints | Viewpoint  | Told from |
+| ---------- | -------------------------------------------- | ----- | ---------- | ---------- | --------- |
+| chapter-01 | Ines lights her first lamp in Highcairn      |       |            | ines-varga |           |
+| chapter-02 | A lamp gutters out on the empty road, unseen |       | none       |            |           |
+| chapter-06 | The inn on a busy night                      | 1     | scene      | ines-varga |           |
+| chapter-06 | The innkeeper alone with the oil casks       | 2     |            | tomas-hale | —         |
+```
+
+In a **serial**, the outline groups installments into arcs, one heading per arc, each
+with the same table:
 
 ```markdown
 ## Arc 1 — <title>
@@ -849,6 +1064,24 @@ The outline groups installments into arcs, one heading per arc:
 An arc's installments are the chapters in its table. The architect appends a new arc at
 each planning step (A1, §13.3). Beats for released chapters are not rewritten; beats for
 chapters still in the buffer may be.
+
+- `Chapter` and `Beat` are required. The other four columns record viewpoints (§7.7).
+  They follow `Beat`, in the order shown, and are needed only where the project's mode
+  or a chapter's override is not `none`.
+- Rows are in chapter order. A chapter has one row, or, in `scene` mode, one row per
+  scene.
+- `Scene`: the scene's number within its chapter, from 1. Empty unless the chapter is in
+  `scene` mode.
+- `Viewpoints`: the chapter's override of `parameters.viewpoints`, `none`, `chapter`, or
+  `scene`, on the chapter's first row only. Empty when the chapter follows the project.
+- `Viewpoint`: the slug of the viewpoint character (§10.9): on the one row of a chapter
+  in `chapter` mode, and on each row of a chapter in `scene` mode, where `—` means that
+  scene has no viewpoint character. Empty in a chapter in `none` mode.
+- `Told from`: a chapter id or `end`, at or after the row's chapter, for a narrator
+  looking back; `—` for "in the moment"; empty to take `parameters.told_from` (§7.7).
+  Always empty where `Viewpoint` is empty or `—`.
+
+**Example cases:** [V1](../examples/README.md#case-v1).
 
 ## 10.24 `time-travel.md` (frames)
 
@@ -879,6 +1112,8 @@ module's own:
 - A mechanism whose rules change over time adds a `## State history` table, as a catalog
   does (§10.11).
 
+**Example cases:** [23](../examples/README.md#case-23).
+
 ## 10.25 Human feedback
 
 `references/feedback/chapter-<NN>/<reader>.md` holds one human reader's notes on one
@@ -896,3 +1131,189 @@ received: 2026-09-17
 
 The beta-reader folds these notes into its review's `## Priorities`, each marked as
 human (§12.18).
+
+## 10.26 `routes.md` (travel)
+
+```markdown
+## Modes
+| Mode | Name    | Notes |
+| ---- | ------- | ----- |
+| foot | On foot |       |
+| cart | By cart |       |
+
+## State history
+| Route                   | Attribute | Value | As of | Source  | Citation |
+| ----------------------- | --------- | ----- | ----- | ------- | -------- |
+| highcairn+the-halfway-inn | foot    | 3d    |       | project | premise  |
+| highcairn+the-halfway-inn | cart    | 2d    |       | project | premise  |
+```
+
+- `Mode`: an id (§10.0), and a key of the file (§2.7): a higher layer adds modes, and
+  never redefines one.
+- `Route`: two place ids from `places.md`. Joined by `+`, in alphabetical order, the
+  route runs both ways. Joined by `>`, it runs one way only, from the first to the
+  second (a river current, a one-way portal).
+- `Attribute`: a mode from `## Modes`, or `distance` (free text, for readers).
+- `Value`, for a mode: a duration (§9.4), `—` (the mode cannot make the journey), or
+  `(unset)` (the route closes to that mode).
+
+## 10.27 `mysteries.md` (mysteries)
+
+```markdown
+## Mysteries
+| Mystery        | Question                                   | Revealed at | Notes |
+| -------------- | ------------------------------------------ | ----------- | ----- |
+| moody-identity | Who is the Moody teaching Defence this year? | GoF:35    |       |
+
+## Clues
+| Mystery        | Clue | Kind        | Points to                          | Planted at | Needed | Citation |
+| -------------- | ---- | ----------- | ---------------------------------- | ---------- | ------ | -------- |
+| moody-identity | c1   | clue        | Moody drinks only from his own flask | GoF:13   | yes    | GoF ch.13 |
+| moody-identity | c3   | red-herring | Karkaroff, a former Death Eater    | GoF:27     | no     | GoF ch.27 |
+```
+
+- `Mystery`: a secret in `knowledge.md` (§10.5), which holds the answer. A key of the
+  file.
+- `Revealed at`: where the reader learns the answer: a ruler point in a package, or a
+  chapter id in a project.
+- `Clue`: an id, unique within its mystery.
+- `Kind`: `clue` or `red-herring`.
+- `Points to`: what the clue suggests, in free text.
+- `Planted at`: where the clue first appears, in the same form as `Revealed at`.
+- `Needed`: `yes` if a reader needs the clue to reach the answer, otherwise `no`. A red
+  herring is always `no`.
+- A higher layer, a project included, MAY add clues to a lower layer's mystery, under
+  the same `Mystery` id. It MUST NOT change or remove them: a project that moves or
+  drops a canon clue logs a divergence (§6.2).
+
+## 10.28 `titles.md` (lineage)
+
+A multi-entity state history (§10.5) whose entities are titles and offices:
+
+```markdown
+## State history
+| Entity                 | Attribute | Value                          | As of  | Source | Citation |
+| ---------------------- | --------- | ------------------------------ | ------ | ------ | -------- |
+| headmaster-of-hogwarts | holder    | albus-dumbledore               | PS:4   | books  | PS ch.4  |
+| headmaster-of-hogwarts | holder    | dolores-umbridge               | OotP:28 | books | OotP ch.28 |
+```
+
+- `holder`: a slug (§10.9), or `(unset)` while the title is vacant.
+- `rule`: how the title passes on, in free text.
+- Other attributes are free.
+
+## 10.29 `prompts/<id>.md` (image prompts)
+
+One image prompt, written by the prompter (§12.20). `<id>` is an id (§10.0) that the
+author chooses.
+
+```markdown
+---
+kind: family-tree          # character | family-portrait | family-tree | map | location
+subjects: [harry-potter]   # slugs, or place ids for a map or location
+cutoff: "GoF:37"           # a ruler point; or, in a project with no stack, omit it
+position: chapter-12       # optional: a chapter, for story-dated rows (§4.11)
+date: "1995"               # family-portrait only: the in-world date it is painted (§4.13)
+---
+## Prompt
+<plain descriptive prose for an image generator>
+
+## Gaps
+- <a detail the bible does not give, and how the prompt treats it>
+
+## Sources
+| Fact                         | From                                   |
+| ---------------------------- | -------------------------------------- |
+| Harry's parents              | `harry-potter.parents` (books, PS:1)   |
+```
+
+- `kind`: one of the five kinds. `family-portrait` and `family-tree` need the lineage
+  module (§9.6). A `map` that shows journey times needs travel (§9.4).
+- `subjects`: what the picture shows, or, for a `family-tree`, the entity it starts
+  from. Each MUST be a slug in the stack's roster, or, for a `map` or `location`, a
+  place id in `places.md`.
+- `cutoff` and `position`: where the snapshot is taken (§7.2). In an established
+  project, the cutoff defaults to the project's, and MUST be a valid point on the
+  stack's ruler. In a project with no stack, only `position` applies.
+- `date`: a date in the stack's calendar. Without it, a family portrait is dated at
+  its cutoff's date.
+- `## Gaps` is required, and MAY be empty. `## Sources` is required: one row per fact
+  the prompt states about a subject.
+
+**Example cases:** [M4](../examples/README.md#case-m4).
+
+## 10.30 `export/` (chapters for readers)
+
+Written by the `export` skill (§13.13), one folder per audience:
+
+```
+export/
+├── early-access/           # what early readers have
+│   ├── work.yaml
+│   ├── chapter-03.md
+│   └── chapter-03.yaml
+└── public/                 # what everyone has (serials)
+    ├── work.yaml
+    ├── chapter-01.md
+    └── chapter-01.yaml
+```
+
+**`chapter-<NN>.md`** is the chapter as readers get it: plain Markdown, with
+
+- no front matter, and no HTML comment of any kind (`<!-- … -->`), markers included;
+- a first line `# <title>`, or `# Chapter <n>` when the chapter has no `title`;
+- `publishing.scene_break` (default `* * *`) on a line of its own in place of each
+  scene marker but the first (§10.18), so the scenes stay apart;
+- runs of blank lines collapsed to one, and one newline at the end.
+
+The text is otherwise exactly the chapter's. **`chapter-<NN>.yaml`**, only with a
+`publishing` block (§10.1):
+
+```yaml
+chapter: 1
+title: "Narendra"
+audience: public            # public | early-access
+date: 2026-09-04            # the step's date: released, re-released, or early access
+words: 69                   # words in chapter-<NN>.md, less its heading and scene breaks
+characters: [Lt. Mira Oduya, Rachel Garrett]
+content_notes: [The death of a character]
+notes_before: "…"           # from references/chapter-notes/chapter-01.md
+notes_after: "…"
+revision_note: "…"          # the latest revisions.md row's Reader note for this audience (§10.22)
+```
+
+**`work.yaml`** describes the work as that audience has it:
+
+```yaml
+title: "The Long Way Back"  # the project's name
+authors: [Ade, Kit]         # the authors' names (§11.13)
+fandoms: [Star Trek]        # the names of the stack's base packages; absent when original
+summary: "…"                # publishing.summary
+rating: teen                # publishing.rating
+language: en                # publishing.language
+tags: […]                   # publishing.tags
+relationships: [Lt. Mira Oduya & Rachel Garrett]
+characters: [Lt. Mira Oduya, Rachel Garrett, Tasha Yar (altered timeline)]
+content_notes: [Grief and mourning, The death of a character]
+chapters: {count: 3, planned: 12}   # chapters this audience has; the outline's count
+credits: ["…"]              # the credit of each layer in the stack that has one (§2.10)
+```
+
+- **Names, not slugs.** Characters and relationships are given by their roster `Name`
+  (§10.9): `a+b` as `A & B`, and `a/b` as `A/B`. Lists are in order of first appearance.
+- **A chapter's characters** are the roster slugs in the `Entities` of its rows in
+  `timeline.md` (§10.15). The work's are those of every chapter the audience has.
+- **The work's content notes** are those of every chapter the audience has, in the
+  readers' words from `content_notes`.
+- **`date`** is when this audience got the chapter: for early readers, its
+  `early-access` date, or its release date if it never had one; for the public, its
+  `re-released` date, or else its `released` one.
+- **`planned`** is the number of chapters in the outline (§10.23), or absent if it has
+  none.
+- A key with no value is left out.
+
+**`references/chapter-notes/chapter-<NN>.md`** holds the author's notes to readers for
+one chapter: a `## Before` section and an `## After` section, both optional, in free
+Markdown. The author writes it; no agent does, and no agent reads it.
+
+**Example cases:** [P5](../examples/README.md#case-p5).

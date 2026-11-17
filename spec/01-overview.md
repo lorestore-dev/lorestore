@@ -90,6 +90,8 @@ illustrative only.
 | **Cutoff**              | The ruler point a project is set at (`setting.cutoff`). Facts dated later are invisible to it.                                 | §4, §7     |
 | **Sync points**         | `bible/sync-points.md`: the cutoff for each manuscript chapter, for a story that keeps following its source.                   | §6.7       |
 | **Adaptation timecode** | A timecode in an adaptation's own work, attached to a base ruler point: `PS:6:2+00:41:10`.                                     | §4.9       |
+| **In-world date**       | When something happens in the world's own chronology, in the calendar its base or original project declares (`iso`, or a custom one). Separate from the ruler, which orders reading. | §4.13      |
+| **World history**       | `history.md`: the world's past and off-page events, each an entity with a reserved `date`.                                    | §4.13      |
 | **State history**       | An append-only table of dated attribute values for one entity.                                                                 | §4         |
 | **Source**              | A registered origin of facts (`books`, `films`, …) with a tier and an attribution, local to its package.                       | §5         |
 | **Tier**                | A source's class, ordered like the stack from the base up: `primary` (lowest), `secondary-official`, `adaptation`, `fanon`, `fanfic`, `theory`; also `crossover`, `story`, and `erratum`, outside that order. | §5.2       |
@@ -104,11 +106,14 @@ illustrative only.
 | **Divergence conflict** | A later canon event, in a retelling, that a divergence in force makes impossible or changes. Only the author decides.          | §6.6       |
 | **Order inversion**     | Two rows of one attribute's history that a project order reverses. Only the author decides how the story handles it.           | §6.8       |
 | **Erratum**             | A source's acknowledged error, such as a corrected printing, kept for completeness under tier `erratum`. Never part of the lore. | §5.2       |
+| **Chronology contradiction** | A date that contradicts its parent node, the ruler point that shows it, or a death before a birth. Invalid unless accepted; in a project, only the author accepts one. | §4.13      |
 | **Seam conflict**       | An earlier book's item that a later book's chapter is set before, or a canon value the books' stacks resolve differently. Only the author decides. | §6.14      |
 | **Extraction pipeline** | The agents and steps that build a package from source texts. The only writer of a package.                                    | §3, §13    |
 | **Orchestrator**        | Whatever runs workflows: a human, a script, or the IWE.                                                                        | §11        |
 | **Agent**               | A markdown file defining one narrow role with exactly one output per step.                                                     | §11, §12   |
 | **Workflow**            | An ordered list of steps, each naming one agent and its inputs and output.                                                     | §11, §13   |
+| **Author**              | The person a project belongs to, or any of the `authors` its `project.yaml` lists. Only the author makes the author-only decisions. | §11.13     |
 | **Gate**                | A step after which the orchestrator stops for human approval.                                                                  | §11        |
-| **Module**              | An optional feature set enabled per project: frames, LitRPG, languages.                                                        | §9         |
+| **Viewpoint**           | The character a chapter or scene is seen through, which limits what its narration may know. A narrator looking back is `told from` a later point. | §7.7       |
+| **Module**              | An optional feature set enabled per project: frames, LitRPG, languages, travel, mysteries, lineage.                             | §9         |
 | **Frame**               | The temporal context a character is bound by: the world frame (scene time and branch) or a traveler's personal frame.          | §9.1       |

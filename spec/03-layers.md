@@ -12,7 +12,7 @@ project context the host MUST refuse any write that resolves into `worlds/`,
 
 **W2. Only the extraction pipeline writes a package.** The pipeline consists of the
 steps of the extraction workflow (§13.6), run in package context: the worldbuilder (a
-base's ruler, an adaptation's map, or an official package's inserts), the
+base's ruler, an adaptation's map, or an official package's or a fan work's inserts), the
 character-designer (seeding the roster), the merger (every other state-bearing file),
 the theorist (`theories.md`, in a `theories` package), and the `indexer` skill
 (`index.md`). Humans write `package.yaml` and `sources.md`. A package never writes to
@@ -73,10 +73,11 @@ any project file (§13.10).
 | ---------------------------- | ------ | -------------------------------------------------------------------------------------------------- | ------------------------------ | ---------------------- |
 | `package.yaml`               | config | Identity, kind, version, status, relies-on (§10.2)                                                 | human                          | — (`project.yaml`)     |
 | `index.md`                   | union  | Endpoint registry: which files exist, what each holds, each file's layer (§10.3)                   | `indexer` skill                | `indexer` skill        |
-| `canon-timeline.md`          | world  | Base: the ruler (§4). Official, or a later book of a series: works it inserts (§4.10, §4.12). Adaptation: its works and the base nodes each adapts (§4.9) | worldbuilder (step F0)         | worldbuilder (self-contained, optional, §4.7; a later book's inserts, §4.12) |
+| `canon-timeline.md`          | world  | Base: the ruler (§4). Official, fanfic, or a later book of a series: works it inserts (§4.10, §4.12). Adaptation: its works and the base nodes each adapts (§4.9) | worldbuilder (step F0)         | worldbuilder (self-contained, optional, §4.7; a later book's inserts, §4.12) |
 | `sources.md`                 | world  | Source registry (§5)                                                                               | human                          | human (self-contained only) |
 | `glossary.md`                | union  | Canonical names and terms; the anti-drift file                                                     | merger                         | worldbuilder           |
 | `world.md`                   | world  | Setting, era, rules and systems (each with cost and limit), as a state history                     | merger                         | worldbuilder           |
+| `history.md`                 | world  | World history: past and off-page events, each dated in-world (§4.13)                               | merger                         | worldbuilder           |
 | `places.md`                  | world  | Atlas: places, connectivity, access control, state over time                                       | merger                         | worldbuilder           |
 | `society.md`                 | world  | Law, institutions, politics, economy, customs                                                      | merger                         | worldbuilder           |
 | `culture.md`                 | world  | Food, holidays, fashion, media, sayings                                                            | merger                         | worldbuilder           |
@@ -85,6 +86,9 @@ any project file (§13.10).
 | `magic/<catalog>.md`         | world  | Catalogs (spells, potions, creatures, artifacts, games): theory vs. practice, definition level     | merger                         | worldbuilder           |
 | `game-system.md`             | world  | LitRPG: the System's rules (§9.2)                                                                  | merger                         | worldbuilder           |
 | `time-travel.md`             | world  | Frames: time-travel mechanisms, each with its model, reach, and limits (§9.1)                      | merger                         | worldbuilder           |
+| `routes.md`                  | world  | Travel: modes of travel, and routes between places with how long each mode takes (§9.4)            | merger                         | worldbuilder           |
+| `mysteries.md`               | world  | Mysteries: each mystery's question, reveal, and clues (§9.5)                                       | merger                         | architect; chronicler (`Planted at`, §9.5) |
+| `titles.md`                  | world  | Lineage: titles and offices, and who holds each, over time (§9.6)                                  | merger                         | worldbuilder           |
 | `plot-architecture.md`       | world  | Canon setups and payoffs, prophecies, foreshadowing, running mysteries                             | merger                         | — (the outline's ledger serves) |
 | `knowledge.md`               | world  | Who knows what, dated: secrets and reveals                                                         | merger                         | architect; chronicler (story-dated rows, §4.11) |
 | `relationships.md`           | world  | Pairwise relationship state histories                                                              | merger                         | character-designer; chronicler (story-dated rows, §4.11) |
@@ -99,7 +103,7 @@ any project file (§13.10).
 | File (under `bible/`)                       | Holds                                                                                | Writer             |
 | ------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------ |
 | `premise.md`                                | Logline, central dramatic question, promised experience                              | architect          |
-| `outline.md`                                | Acts, chapters, scene beats, and the setup/payoff ledger                             | architect          |
+| `outline.md`                                | Acts, chapters, scene beats with their viewpoints, and the setup/payoff ledger (§10.23) | architect       |
 | `style.md`                                  | The voice contract and the text-and-speech formatting table                          | line-editor        |
 | `divergences.md`                            | Established worlds: the divergence ledger and its consequences (§6.4)                | worldbuilder (curator mode) |
 | `sync-points.md`                            | Established worlds: the cutoff for each chapter (§6.7)                               | architect          |
@@ -115,12 +119,14 @@ any project file (§13.10).
 | ------------------------------ | ---------- | ------------------------------------------------------------ |
 | `project.yaml`                 | config     | human (the author), including the adherence settings (§6.3)  |
 | `showrunner-log.md`            | control    | showrunner                                                   |
-| `manuscript/chapter-<NN>.md`   | manuscript | drafter; line-editor; dialogue (explicit rewrite step only); `release` skill (front matter only, serials) |
+| `manuscript/chapter-<NN>.md`   | manuscript | drafter; line-editor; dialogue (explicit rewrite step only); `release` skill (front matter only, §13.12) |
 | `revisions.md`                 | control    | chronicler (early-access chapters; released installments of serials with revisable releases) |
 | `reviews/<reviewer>.md`        | review     | the named reviewer (§12)                                     |
+| `prompts/<id>.md`              | output     | prompter (§12.20); never canon, and read by no agent         |
+| `export/…`                     | output     | `export` skill (§13.13); never canon, and read by no agent   |
 | `derived/bible/…`              | cache      | `compose` skill (§7.6)                                       |
 | `derived/as-of-…`              | cache      | `temporal-snapshot` skill (§7.6)                             |
-| `references/…`                 | input      | human; `references/feedback/…` holds human readers' notes (§10.25) |
+| `references/…`                 | input      | human; `references/feedback/…` holds human readers' notes (§10.25), and `references/chapter-notes/…` the author's notes to readers (§10.30) |
 | `runs/…`                       | control    | orchestrator                                                 |
 
 ### Universe and extraction files

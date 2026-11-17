@@ -3,6 +3,196 @@
 This log records the design decisions behind the spec, most recent first. Each entry
 says what was unclear or contradictory, what was decided, and where the rule now lives.
 
+## 0.3: in-world time
+
+**D121. Releasing, and exporting for readers.** The `release` skill was thinly
+specified. The file catalog limited it to serials, though it also sent chapters to early
+access in every workflow; no novel or short-story step ran it; a short story could never
+be `final`; nothing wrote a content-note change after release; a re-release had nowhere
+to record its date; and only order was a hard refusal. Releasing is now its own section.
+The skill takes one of seven steps (early access, release, re-release, withdraw,
+schedule, unschedule, notes) for one chapter or a run of them, as one all-or-nothing
+decision. It refuses a chapter out of order, with a pending decide item or a `TODO`
+marker, or with unconfirmed notes. `released` keeps the first release, and
+`re-released` the latest. A schedule (`release-on`, `early-access-on`) is the author's
+decision taken ahead of time; the host carries it out at the time, re-checking first,
+and dates the step as scheduled. Authors may withdraw a released installment: it keeps
+its place in the run and its story in the bible, may be revised whatever the release
+mode, and comes back as a re-release. R1 runs on demand in every workflow, and a short
+story gains a finishing step. A new `export` skill writes what the author posts, per
+audience: each chapter as clean Markdown, with no front matter or comment and scene
+markers turned into breaks, and, with a `publishing` block, the metadata a fan site's
+form asks for (title, authors, fandoms, rating, tags, relationships, characters,
+content notes, the authors' notes). The metadata names characters from the timeline,
+by roster name, and never a true identity before its reveal. Posting stays the
+author's: no agent publishes. → §2.5, §2.6, §3.3, §10.1, §10.18, §10.30, §11.10,
+§12.2, §13.1, §13.2, §13.3, §13.11, §13.12, §13.13, §14.2
+
+**D120. Licenses, co-authors, and content notes.** Three things that publishing and
+sharing need were missing. *Licenses*: packages are made to be shared, but a manifest
+could not say on what terms. `package.yaml` and `universe.yaml` take an optional
+`license` (an SPDX expression, or `LicenseRef-` with a `LICENSE.md`) and `credit`. A
+license covers the layer's own records, never the source works, and a missing one is
+never read as permission. Changing either is a patch bump. *Co-authors*: every
+author-only decision assumed one author. `project.yaml` takes an optional `authors`
+list; any listed author may decide, and with two or more, every decision record names
+its author (`By`, `early-access-by`, `released-by`). Agents never choose between
+authors. *Content notes*: serials carry per-chapter warnings, and nothing tracked them.
+A project lists its notes in `content_notes`; the line-editor suggests a chapter's
+notes, and the author confirms them when sending it to early access or releasing it,
+which the host refuses without them. Notes may change after release, even when
+releases are locked, and the change is logged. The fanon and fan-work packages take a
+license and a patch bump; `the-long-way-back` gains two authors and content notes.
+→ §1, §2.8, §2.10, §10.1, §10.2, §10.5, §10.8, §10.18, §11.8, §11.10, §11.13, §12.14,
+§13.11, §14.1, §14.2
+
+**D119. The spec links to its examples.** The example cases cited the spec by `§` in
+plain text, and no spec section pointed back to a case, so a reader of a rule could
+not find the case that shows it. Every case now has an anchor; each spec section that a
+case shows ends with an **Example cases** line linking to them; the cases' `§`
+citations are links. The examples stay in this repository, so the links are relative.
+`tools/refs.py` checks that every relative link and anchor resolves, and that every
+case is linked from at least one spec section. → every chapter with cases; §14.2
+
+**D118. Viewpoints, and narrators who look back.** `parameters.pov` named a narrative
+mode for the whole project, and the drafter was told to respect what "the POV
+character" knows, but nothing recorded who that was. A project now sets
+`parameters.viewpoints` to `none` (the default), `chapter`, or `scene`, and a chapter
+overrides it in the outline, which becomes a structured table for every workflow so
+that agents can read the plan row by row. A viewpoint limits what the narration knows
+to the character's knowledge at the scene; `none` means no character limits it. The
+reader-facing rules (hidden canon, mystery reveals, reveal aliases) hold in every mode.
+`Told from` lets a narrator look back from a later chapter or the end: it moves what
+they know, never when the reader learns it. A viewpoint leak is the continuity-editor's
+finding, not an error, and a drafted viewpoint that differs from the plan is a warning.
+→ §1.6, §3.3, §7.7, §10.1, §10.18, §10.23, §12.6, §12.10, §12.12, §13.10, §14.2
+
+**D117. Text an agent reads is data, never instructions.** Agents read a great deal
+written by other people: shared packages, source texts, readers' feedback. Nothing
+said what an agent should do with text in that material that reads as an instruction
+to it. It is content: an agent never follows it, never records it as fact, and reports
+it where its output has a place for problems, for the showrunner to surface. The host
+keeps material apart from instructions, and shows the author instruction-like text in
+untrusted input before an agent reads it. Characters giving each other orders are
+story, not instructions. → §11.12, §14.1
+
+**D116. Spec versions.** Every manifest declared `spec_version: "0.2"`, but nothing said
+what a host does with another version, and 0.3 adds fields a 0.2 host does not know.
+A host lists the versions it supports and refuses a stack with any other. A stack may
+mix supported versions, each directory read by its own version's rules. Before 1.0 any
+minor version may break; from 1.0 a minor version only adds. Moving to a new spec
+version is a human change, and a patch bump for a package. The examples move to 0.3,
+and each package takes a patch bump. → §2.8, §10.0, §14.1
+
+**D115. The prompter: image prompts from the bible.** Authors wanted pictures of their
+characters, families, maps, and places, and a picture drawn from the bible can leak as
+easily as a paragraph. A nineteenth agent, the prompter, writes one prompt per step to
+`prompts/<id>.md`: a character, a family portrait, a family tree, a map, or a location,
+each from the snapshot at a cutoff the author chooses. It depicts only what the
+snapshot returns: parentage and dates as the reader knows them, places as they stand
+then, revealed identities only from their reveal. Composition and mood are the
+prompter's to choose; facts are not, and a detail the bible lacks is listed under
+`## Gaps` rather than invented. Prompts are plain prose for no particular model, are
+never canon, and are read by no agent. They never describe an actor's likeness or ask
+for a living artist's style by name. → §2.5, §2.6, §3.3, §10.29, §12.1, §12.2, §12.20,
+§14.2
+
+**D114. Lineage: parentage, ancestry, and titles.** Relationships are pairwise, so the
+spec could not hold a family tree, a dynasty, or a succession. The lineage module adds
+the reserved attributes `parents`, `guardians`, and `descends-from` (slug lists, on any
+entity) and `titles.md`, a state history of titles whose `holder` changes over time.
+Being ordinary attributes, they inherit reveals by `As of`, correction by later rows, and
+the ledger for changes. Two chronology checks join §4.13, `born-before-parent` and
+`ancestry-cycle`, and are accepted in the same way, so a time traveller can be their own
+grandparent; one acceptance excuses a whole cycle. Implausible ages and holders are
+warnings. A family tree is a view at a cutoff, never stored, so it cannot leak a
+parentage reveal. → §1.6, §2.7, §3.3, §9.6, §10.5, §10.28, §12.7, §12.12, §14.2
+
+**D113. Mysteries: clues, reveals, and fair play.** `plot-architecture.md` held running
+mysteries as prose, and nothing tied a mystery's answer to its clues. The mysteries
+module adds `mysteries.md`: each mystery's question, its reveal point, and its clues
+and red herrings, each with where it is planted and whether the reader needs it. The
+answer is a secret in `knowledge.md`, so the snapshot already keeps it hidden. Fair-play
+problems are warnings, since a writer may cheat on purpose. A higher layer adds clues to
+a lower layer's mystery but never changes them. The drafter must not let narration
+answer a mystery early, and the canon-keeper's order and divergence audits list canon
+mysteries a change makes unfair. → §2.7, §3.3, §9.5, §10.27, §12.6, §12.10, §12.11,
+§12.13, §13.1, §13.10, §14.2
+
+**D112. Travel: routes and journey times.** With in-world dates, the spec could say when
+scenes happen but not whether a character could get from one to the next. The travel
+module adds `routes.md`, which holds modes of travel and routes between `places.md`
+entries, each route a state history whose values are durations, and a `Place` column
+in `timeline.md`. A journey faster than the shortest path allows is a warning, never an
+error, because the story may mean it. Only known modes count, and an approximate
+duration counts as instant, so the check warns only when the routes rule a journey
+out. → §9.4, §10.0, §10.15, §10.26, §12.7, §12.10, §12.11, §12.12, §14.2
+
+**D111. Re-pinning to a new minor or patch version is a patch bump.** §2.8 required a
+bump on every change but did not say which one a re-pin is. Adding the calendar to the
+two example bases bumped them to minor versions, so every package relying on them had to
+re-pin. A re-pin to a new major version stays a major bump; any other re-pin is a patch.
+→ §2.8
+
+**D110. Chronology contradictions, and accepting them.** A date can contradict the
+ruler on purpose: a flashback chapter outside its book's years, a prophecy shown before
+its event, a time traveller who dies before being born. Three checks
+(`outside-parent`, `in-world-after`, `born-died`) make a package or project invalid
+unless an `## Accepted` row, in the file that holds the row or node, excuses that check
+on that subject with a reason. A package's acceptance records what the source does and
+cites it; a project's is the author's decision. A layer can accept only a contradiction
+that involves its own rows or nodes. Format errors (a date that does not parse, a date
+with no calendar, an event with no date, an offset across calendars) can never be
+accepted. Story-level problems (an event outside a participant's lifetime, an age the
+dates rule out, an event before the cutoff's date) are warnings the continuity-editor
+raises. → §1.6, §4.13, §10.5, §12.4, §12.12, §14.2
+
+**D109. World history is a file of events, and events are entities.** Backstory and
+off-page events had nowhere structured to go. `history.md` is a multi-entity state
+history whose entities are events, with the reserved attributes `date` (required),
+`summary`, and `participants`. Treating events as entities rather than giving them a
+table of their own reuses visibility by `As of`, hidden truths, layering, resolution
+modes, and the ledger unchanged; the chronology is a view, sorted by date. A universe's
+chronology merges its bases' histories in universe time. → §2.7, §3.3, §4.13, §8.1,
+§10.5
+
+**D108. Where dates are recorded.** Four optional places: a `## Dates` table in
+`canon-timeline.md`, sparse and never interpolated, written by whoever owns the works it
+dates; an `In-world` column on state-history rows; the date-valued attributes `born`,
+`died`, and an event's `date`; and a `Date` column in `timeline.md`. `True from` stays a
+ruler point, because the snapshot compares it with the cutoff to find hidden truths
+(§7.2), and a sparse `## Dates` table could not always turn a cutoff into a date. The
+snapshot returns the cutoff's date. → §4.4, §4.13, §7.2, §10.4, §10.5, §10.6, §10.15,
+§12.3, §12.7, §13.6
+
+**D107. Dates are spans, and comparisons can't always tell.** Canon rarely gives an
+exact day. A date is a span: a year, a month, a day, a range with optional open ends, or
+an approximate `~` date. One date is before another only if its span ends before the
+other's begins; otherwise the answer may be "can't tell", which is never a
+contradiction. An approximate date always can't tell, but sorts at its stated date, so
+that extraction never invents bounds the source does not give. Relative times stay free
+text. Ages are ranges. → §4.13, §10.0
+
+**D106. In-world time has a calendar of its own.** The ruler orders reading, and the
+spec had no structured in-world date: `Story time` was free text, `True from` a ruler
+point, and universe offsets shifted a calendar nothing defined. The owner of the ruler
+(a base, or an original project) MAY now declare a calendar. `iso` stores every
+real-world date as ISO 8601, whatever calendar the work uses, with an optional
+`notation` (a BCP 47 calendar identifier, such as `japanese`) telling agents how the
+work writes dates; the name is ISO, not Gregorian, so that no culture's calendar is the
+default by name. A custom calendar declares eras on one line of years, and optional
+fixed months, with no leap rules. Universe offsets apply only between bases with the
+same calendar. → §1.6, §4.1, §4.7, §4.13, §8.1, §10.1, §10.2, `schemas/`
+
+**D105. Fan works insert their own works.** Only `official` packages could insert into
+the base's ruler, so a fan work set after the books end, or between them, had no points
+of its own: every row it gave fell on the base's last point, and two values of one
+attribute there were a tie (§4.4). A `fanfic` package may now insert its works, exactly
+as an official one does. An adaptation still may not, because it retells the base's own
+works and dates even its added scenes on their paths (§4.9); fanon and theories have no
+works. The example fan work inserts `FIC` after `DH`. → §2.3, §4.2, §4.10, §6.8, §10.4,
+§13.6, §14.2
+
 ## 0.2: layered packages
 
 **D104. Book 1's story-dated rows are anchored, not time-filtered.** §4.12 dated a

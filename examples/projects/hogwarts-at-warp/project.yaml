@@ -1,4 +1,4 @@
-spec_version: "0.2"
+spec_version: "0.3"
 id: hogwarts-at-warp
 name: "Hogwarts at Warp"
 workflow: short-story
@@ -6,9 +6,9 @@ gates: milestones
 seed: "A Hogwarts sixth-year stows away on the Enterprise-D, and her wand is the one thing the ship's sensors cannot see."
 
 layers:                         # from the base up
-  - harry-potter@3.0.0
-  - star-trek@2.0.0
-  - universe:wizards-and-warp@2.0.0
+  - harry-potter@3.2.1
+  - star-trek@2.1.1
+  - universe:wizards-and-warp@2.0.3
 
 setting:
   type: established

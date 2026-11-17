@@ -57,6 +57,21 @@ summarizes the contracts the rest of the spec defines.
 16. **Stay model-agnostic.** The same workflow must run against a cloud API, a local
     model in a loop, or a human with the files, without changing the agents or the
     store.
+17. **Keep material apart from instructions** (§11.12). Pass what an agent reads to it
+    as content, marked off from its agent file and the step's request, never merged
+    into them. Treat a package, universe, or project layer from outside the author's
+    workspace, source texts, and human feedback as untrusted: before an agent first
+    reads one, SHOULD show the author any text in it that reads as an instruction to an
+    agent.
+18. **Check spec versions** (§10.0). Refuse a stack with a manifest whose
+    `spec_version` the host does not support, and read each directory by its own
+    version's rules.
+19. **Show licenses and credit** (§2.10). When the author adds a package or universe to
+    a stack, and wherever the host lists a stack's layers, show each layer's `license`
+    and `credit`, and say plainly when a layer states no license.
+20. **Know which author is acting** (§11.13). In a project with `authors`, take
+    author-only decisions and gate signals only from a listed author, and record which
+    one.
 
 ## 14.2 Validation
 
@@ -84,6 +99,7 @@ is defined.
 | A package's version differs from the stack's pin                                  | §2.8      |
 | An adaptation timecode on a point that no adaptation in the stack covers           | §4.9      |
 | An `## Insert` row placed after an unknown segment, or an inserted work that repeats a work already on the ruler | §4.10, §4.12 |
+| An `## Insert` table in a package that is not an `official` or `fanfic` package    | §4.10     |
 | A point on a project layer's work past its pinned chapter                         | §4.12     |
 | Two rows of one package share entity, attribute, tier, and point with different values (state rows or quotation columns) | §4.4 |
 | A divergence has no consequence row                                              | §6.4      |
@@ -101,15 +117,38 @@ is defined.
 | A Seam conflicts row whose item matches no item of an earlier book, a decision that does not fit its item, `other` with no note, or `keep-earlier` or `other` with no divergence | §10.8 |
 | A chapter uses an earlier book's item that is ahead of it, with no seam decision | §6.14 |
 | A row's `True from` is later than its `As of`, or not a valid ruler point        | §4.4      |
+| A calendar that breaks §4.13 (no era, an era counting down that is not first or is last, an era counting up with no `years` that is not last, a month of no days), or a `calendar` or `notation` in a package that is not a base or a project that is not original, or a `notation` with a custom calendar | §4.13 |
+| A date that does not parse, or names an era, month, or day its calendar lacks, or a range whose first date is after its second | §4.13 |
+| A date in `## Dates`, `In-world`, or a timeline `Date` where the stack has no calendar | §4.13 |
+| A `## Dates` node that is not on the file's own works, or appears twice; or a `## Dates` table in an adaptation | §10.4 |
+| An event in `history.md` with no `date` row                                      | §4.13     |
+| A chronology contradiction (`outside-parent`, `in-world-after`, `born-died`) with no `## Accepted` row for it in a layer that holds one of its rows or nodes | §4.13 |
+| A route that names a place missing from `places.md` or is not in alphabetical order (`+`), a route attribute that is neither a mode nor `distance`, a mode defined twice, or a route value that is not a duration, `—`, or `(unset)` | §9.4, §10.26 |
+| A timeline `Place` that is not in `places.md`                                    | §10.15    |
+| A mystery that is not a secret in `knowledge.md`; a `Planted at` or `Revealed at` that is not a valid point or chapter; a clue with an unknown mystery or kind, or a duplicate id; a red herring marked needed | §10.27 |
+| A higher layer that changes or removes a lower layer's clue                     | §10.27    |
+| A `parents`, `guardians`, `descends-from`, or title `holder` value that is not a slug in the stack's roster | §9.6 |
+| A lineage contradiction (`born-before-parent`, `ancestry-cycle`) with no `## Accepted` row for it in a layer that holds one of its rows | §9.6 |
+| An `## Accepted` row with an unknown check, a subject the file does not hold, no reason, or, in a package, no citation | §10.5 |
+| A universe offset between bases that do not declare the same calendar, or in a unit the calendar lacks | §8.1 |
 | A story-dated row (`From chapter`) that has an `As of`, cites a source other than `project`, or describes an entity the project does not define | §4.11 |
 | A Hidden canon decision of `reveal-early` with no divergence, or `other` with no note | §10.8 |
 | A divergence's `Basis` cites a theory not in the stack, an unknown claim, or a discarded claim, or omits a kept or adapted one | §6.13 |
 | A theory-conflict decision of `adapt` with no note                               | §10.8     |
 | A write to a released installment in a serial whose releases are locked          | §13.3     |
-| A chapter is released, or sent to early access, out of order                     | §10.18    |
+| A chapter is released, re-released, sent to early access, or scheduled out of order, or with a pending decide item, a `TODO` marker, or (with `content_notes`) unconfirmed notes; any step in a run of chapters taken when one of them fails | §13.12 |
+| A status or front-matter key outside its workflow (`released`, `re-released`, `withdrawn`, or `release-on` outside a serial); a `withdrawn` chapter that was never released; a re-release under locked releases of a chapter that was not withdrawn; a schedule key that is not a date or a date and time with its offset | §10.18, §13.12 |
+| An `export/` folder that holds a chapter its audience does not have; an exported chapter with a comment or front matter left in; metadata without a `publishing` block, or naming a true identity before its reveal | §13.13, §10.30 |
+| A `publishing.relationships` entry that is not two roster slugs joined by `+` or `/` | §10.1 |
 | A renumbering moves a released or early-access chapter, or a chapter at or before another project's pin, or leaves a chapter id unrewritten | §13.10 |
 | A change to an early-access chapter, or a revisable released one, with no `revisions.md` row or no reader note | §10.22 |
 | A feedback file's `chapter` does not match its folder                            | §10.25    |
+| A `license` that is not a valid SPDX license expression, or a `LicenseRef-` with no `LICENSE.md` beside the manifest | §2.10 |
+| Two `authors` with the same id; a `By`, `early-access-by`, or `released-by` that is not an author's id; or, with two or more authors, one of them missing where it is required | §11.13, §10.8 |
+| A content note in a project without `content_notes`; a `content-notes` id not in `content_notes`, or a `content-notes-suggested` entry that is neither an id there nor `new:<id>`; an early-access or released chapter with no `content-notes` | §13.11, §10.18 |
+| An outline row with an unknown `Viewpoints` mode, or one not on its chapter's first row; a chapter in `chapter` mode without exactly one row and one viewpoint; a scene in `scene` mode without a viewpoint or `—`, or scenes not numbered from 1; a viewpoint in a `none` chapter; a viewpoint that is not a slug in the stack's roster | §10.23 |
+| A `Told from` (in the outline, `parameters.told_from`, or a chapter) that is not a chapter id or `end`, is before its chapter, or is given where there is no viewpoint character | §7.7, §10.23 |
+| A prompt file with an unknown `kind`, a subject that is not in the roster or `places.md`, an invalid `cutoff`, `position`, or `date`, or no `## Gaps` or `## Sources` | §10.29 |
 | A `time-travel.md` entry has no `model`, or an unknown model or free-will value  | §10.24    |
 | A traveler leg names a mechanism missing from `time-travel.md`                   | §10.16    |
 | A world point names a branch missing from `branches.md`, or a branch has an unknown status | §10.16 |
@@ -123,10 +162,18 @@ A host SHOULD also warn when a project used as a layer changes at or before its 
 chapter (§2.2), when the composed bible or a materialized snapshot is
 stale (§7.6), when a project's sync points go backwards
 (§6.7), when a scene with no travelers is set later than its chapter's sync point
-(§7.5), when timecodes in one episode or film
+(§7.5), when a story event's date falls outside the lifetime of an entity it lists, or
+before its chapter's cutoff date (§4.13), when timecodes in one episode or film
 contradict its scene order (§4.2), when a table has an added column that `index.md`
-does not register (§10.0), and when the author releases a serial chapter that is not
+does not register (§10.0), when a chapter as drafted records a different viewpoint mode
+or viewpoint from its outline row (§7.7), when a journey is faster than the routes allow (§9.4), when
+a mystery is unfair (§9.5), when a parent is under 12 at a birth, a child is born more
+than a year after a parent's death, or a title is held outside its holder's lifetime
+(§9.6), when a chapter readers have lacks a listed note its
+`content-notes-suggested` names (§13.11), and when the author releases a serial chapter that is not
 ready, or sends one to early access that is not `line-edited` (§13.3, §13.9).
+
+**Example cases:** the [validation cases](../examples/README.md#validation-cases).
 
 ## 14.3 The contracts, summarized
 

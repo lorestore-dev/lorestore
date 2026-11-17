@@ -5,7 +5,7 @@ fictional world, and the stories set in it, are stored as small markdown and YAM
 how facts are dated, sourced, and resolved; how a story forks from canon without
 editing it; and how a team of narrow AI agents reads and writes those files.
 
-**Status:** draft, spec version `0.2`. Breaking changes are still expected.
+**Status:** draft, spec version `0.3`. Breaking changes are still expected.
 
 ## Reading order
 
@@ -14,15 +14,15 @@ editing it; and how a team of narrow AI agents reads and writes those files.
 | 1  | [Overview](spec/01-overview.md)                     | Purpose, principles, the golden rule, terms                          |
 | 2  | [Layout](spec/02-layout.md)                         | Layers and stacks, packages, projects; path resolution; versioning   |
 | 3  | [Layers](spec/03-layers.md)                         | The write boundary, and the catalog of every file and its writer     |
-| 4  | [Temporal model](spec/04-temporal.md)               | The ruler, ruler points, append-only state histories                 |
+| 4  | [Temporal model](spec/04-temporal.md)               | The ruler, ruler points, append-only state histories, in-world dates |
 | 5  | [Sources](spec/05-sources.md)                       | The source registry, tiers, resolution across layers                 |
 | 6  | [Divergence](spec/06-divergence.md)                 | Adherence settings, the divergence ledger, classifications           |
 | 7  | [Snapshot](spec/07-snapshot.md)                     | The query: what is true as of X, in stack S; the composed bible      |
 | 8  | [Crossovers](spec/08-crossovers.md)                 | Universes and the bridge                                             |
-| 9  | [Modules](spec/09-modules.md)                       | Frames (time travel), LitRPG, languages                              |
+| 9  | [Modules](spec/09-modules.md)                       | Frames, LitRPG, languages, travel, mysteries, lineage                |
 | 10 | [Formats](spec/10-formats.md)                       | The exact structure of every file                                    |
 | 11 | [Agent contract](spec/11-agent-contract.md)         | The orchestration loop, agent anatomy, retrieval, gates              |
-| 12 | [Agents](spec/12-agents.md)                         | The eighteen agents                                                  |
+| 12 | [Agents](spec/12-agents.md)                         | The nineteen agents                                                  |
 | 13 | [Workflows](spec/13-workflows.md)                   | Novel, short story, serial, overlays, adopt, extraction, crossover, early access |
 | 14 | [Implementation](spec/14-implementation.md)         | Host requirements, validation rules, the contracts summarized        |
 
@@ -49,7 +49,7 @@ agree. It validates every example manifest against the JSON schemas, then runs a
 reference implementation of the snapshot algorithm (§7) and compares each result with
 the expected answers in [examples/README.md](examples/README.md). It covers ruler-point
 parsing and ordering (§4.2), sync points and the project order (§6.7–6.8), branch and
-retelling modes (§6.6), and hidden truths (§4.4, §6.12).
+retelling modes (§6.6), hidden truths (§4.4, §6.12), and in-world dates (§4.13).
 
 ```
 pip install -r tools/requirements.txt

@@ -1,7 +1,8 @@
-spec_version: "0.2"
+spec_version: "0.3"
 id: harry-potter
 kind: base
 name: "Harry Potter"
-version: 3.0.0
+version: 3.2.1
 status: locked
 relies-on: []
+calendar: iso

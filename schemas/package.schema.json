@@ -6,7 +6,7 @@
   "required": ["spec_version", "id", "kind", "name", "version", "status", "relies-on"],
   "additionalProperties": false,
   "properties": {
-    "spec_version": { "type": "string", "const": "0.2" },
+    "spec_version": { "type": "string", "const": "0.3" },
     "id": { "$ref": "#/$defs/packageId" },
     "kind": {
       "enum": ["base", "official", "adaptation", "fanon", "fanfic", "theories"],
@@ -20,11 +20,15 @@
       "uniqueItems": true,
       "items": { "$ref": "#/$defs/packagePin" },
       "description": "The packages this one describes, pinned. Every one MUST appear below this package in any stack that uses it (spec §2.2)."
-    }
+    },
+    "license": { "type": "string", "pattern": "^[A-Za-z0-9.+()\\- ]+$", "description": "An SPDX license expression for the layer's own records (spec §2.10). That it parses as SPDX, and that a LicenseRef- has a LICENSE.md, are host validations (§14.2)." },
+    "credit": { "type": "string", "minLength": 1, "description": "The credit line the layer's makers ask for (spec §2.10)." },
+    "calendar": { "$ref": "#/$defs/calendar" },
+    "notation": { "$ref": "#/$defs/notation" }
   },
   "allOf": [
     {
-      "description": "A base package: its id is a bare fandom id and it relies on nothing.",
+      "description": "A base package: its id is a bare fandom id and it relies on nothing. Only a base declares a calendar (spec §4.13).",
       "if": { "properties": { "kind": { "const": "base" } } },
       "then": {
         "properties": {
@@ -36,8 +40,14 @@
         "properties": {
           "id": { "pattern": "/" },
           "relies-on": { "minItems": 1 }
-        }
+        },
+        "not": { "anyOf": [{ "required": ["calendar"] }, { "required": ["notation"] }] }
       }
+    },
+    {
+      "description": "A notation needs calendar: iso.",
+      "if": { "required": ["notation"] },
+      "then": { "required": ["calendar"], "properties": { "calendar": { "const": "iso" } } }
     },
     {
       "description": "A fanfic package lives under <fandom>/fanfic/<work>.",
@@ -46,6 +56,8 @@
     }
   ],
   "$defs": {
+    "calendar": {"description": "The world's calendar (spec §4.13): iso, or a custom calendar of eras and optional months. The order rules for eras (only the first counts down, and it is not last; every era counting up except the last gives years) are host validations, §14.2.", "oneOf": [{"const": "iso"}, {"type": "object", "required": ["eras"], "additionalProperties": false, "properties": {"eras": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["id", "name"], "additionalProperties": false, "properties": {"id": {"type": "string", "pattern": "^[A-Z][A-Z0-9]*$"}, "name": {"type": "string", "minLength": 1}, "counts": {"const": "down"}, "years": {"type": "integer", "minimum": 1}}, "not": {"required": ["counts", "years"]}}}, "months": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["name", "days"], "additionalProperties": false, "properties": {"name": {"type": "string", "minLength": 1}, "days": {"type": "integer", "minimum": 1}}}}}}]},
+    "notation": {"type": "string", "pattern": "^[a-z0-9]{3,8}(-[a-z0-9]{3,8})*$", "description": "The calendar the work writes dates in: a Unicode BCP 47 calendar identifier, such as gregory or japanese. Only with calendar: iso (spec §4.13)."},
     "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
     "packageId": {
       "type": "string",

@@ -4,3 +4,4 @@
 | Slug       | Name       | Origin   | Aliases | Reveal of | Revealed at | Version of |
 | ---------- | ---------- | -------- | ------- | --------- | ----------- | ---------- |
 | ines-varga | Ines Varga | original |         |           |             |            |
+| tomas-hale | Tomas Hale | original | the innkeeper |     |             |            |
