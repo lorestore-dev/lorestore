@@ -261,6 +261,14 @@ curator, adds the canon-keeper to review, and runs the living-canon loop (§6.11
 | E6a  | canon-keeper      | `reviews/canon.md`         | milestone | after A2          |
 | E6b  | worldbuilder      | `bible/divergences.md`     |           | after E6a         |
 
+It adds reads to two of the chain's steps (§11.7), so that the plan and the prose know
+what the story changes in canon:
+
+| Step | Reads                                                                                                    |
+| ---- | -------------------------------------------------------------------------------------------------------- |
+| 2    | `bible/divergences.md`; `bible/canon-timeline.md`; `plot-architecture.md` (the stretch the story covers) |
+| 10   | `bible/divergences.md` (the divergences and open consequences that touch the cast)                       |
+
 - Steps 3, 6, and 7 write only the project's own additions (§13.1): the world comes from
   the stack, and the adherence settings are the author's, in `project.yaml` (§6.3).
 - **E1** maps chapters to cutoffs (§6.7), in the project order if `setting.order` sets

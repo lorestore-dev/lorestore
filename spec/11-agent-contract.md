@@ -102,6 +102,12 @@ In project context, `bible/…` reads come from the composed bible (§7.6), so o
 spans every layer of the stack. Each row's `Layer` column says which layer it came
 from; an agent never needs to know where the packages live.
 
+The one exception is the step's own target. A step that writes a project file under
+`bible/` reads that file from the project's own `bible/`, as it stands, so that it
+extends the project's rows and never copies another layer's rows, or the `Layer`
+column, into them. Where it also needs the other layers' rows (the worldbuilder
+adding to the glossary, say), it reads the composed file as well, as a separate input.
+
 Two ways to retrieve, both file-only:
 
 - **Tool-capable runtime:** the agent fetches its own slice at run time with read or
@@ -156,6 +162,12 @@ itself. Every chain an overlay applies to MUST have each step its positions name
 chains that share a step share its number (§13.2, §13.3). The one exception is a step
 that only some chains have, such as `serial`'s arc planning (A1, A2): an overlay step
 positioned on it runs only in those chains.
+
+An overlay MAY also add reads to the chain's own steps, where its condition gives a
+step more to read: in an established world, the drafter reads the divergences that touch
+its cast. It lists them in an `## Added reads` table after its steps, with the columns
+`Step` and `Reads`, one row per step. The orchestrator appends each row's reads to that
+step's `Reads` in every chain that has the step.
 
 ## 11.8 Gates
 

@@ -21,6 +21,7 @@ examples/
 │       ├── base/                # the base: series, seasons, episodes, a film; technology.md,
 │       │                        #   species.md; character versions; an undivided season; dates
 │       └── animated/            # official: the animated series, inserted into the ruler
+├── runs/                      # copies of projects with a recorded run of tools/loop.py
 ├── universes/
 │   └── wizards-and-warp/        # a crossover of both: the author's brief and the bridge
 └── projects/

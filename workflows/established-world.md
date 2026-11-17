@@ -26,6 +26,16 @@ curator, adds the canon-keeper to review, and runs the living-canon loop (§13.4
 | E6a  | canon-keeper | `bible/sync-points.md`; `bible/divergences.md`; the canon the arc reaches; the host's candidates                                       | `reviews/canon.md`     | milestone |        | after A2  |
 | E6b  | worldbuilder | `bible/divergences.md`; `reviews/canon.md` (the author's decisions)                                                                    | `bible/divergences.md` |           |        | after E6a |
 
+## Added reads
+
+Appended to these steps of the chain (§11.7), so that the plan and the prose know what
+the story changes in canon:
+
+| Step | Reads                                                                                                    |
+| ---- | -------------------------------------------------------------------------------------------------------- |
+| 2    | `bible/divergences.md`; `bible/canon-timeline.md`; `plot-architecture.md` (the stretch the story covers) |
+| 10   | `bible/divergences.md` (the divergences and open consequences that touch the cast)                       |
+
 ## Notes
 
 - Steps 3, 6, and 7 of the chain write only the project's own additions; steps 4 and 5

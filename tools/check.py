@@ -2243,7 +2243,8 @@ def spec_section(fname, number):
         if on: out.append(l)
     return "\n".join(out)
 def spec_steps(number):
-    rows = [r for _, t in tables_in(spec_section("13-workflows.md", number)) for r in t if "Step" in r]
+    rows = [r for _, t in tables_in(spec_section("13-workflows.md", number)) for r in t
+            if "Step" in r and ("Agent" in r or "Agent / skill" in r)]   # not an added-reads table
     for r in rows:
         if "Agent / skill" in r: r["Agent"] = r.pop("Agent / skill")
     return rows
@@ -2402,5 +2403,17 @@ def position_errors(chain, overlay):
     return errs
 for chain in ("novel", "short-story", "serial"):
     check(f"{chain}: every overlay position resolves (§11.7)", position_errors(chain, ["established-world", "frames"]), [])
+def added_reads(text):
+    """An overlay's `## Added reads` table (§11.7), as (step, reads) pairs."""
+    part = text.split("\n## Added reads", 1)[1].split("\n## ", 1)[0] if "\n## Added reads" in text else ""
+    return [(r["Step"], r["Reads"]) for _, t in tables_in(part) for r in t]
+CHAIN_STEPS = {r["Step"] for c in ("novel", "short-story", "serial") for r in wf_parse(ROOT / "workflows" / f"{c}.md")[3]}
+for ov, n in (("established-world", "13.4"), ("frames", "13.5")):
+    text = (ROOT / "workflows" / f"{ov}.md").read_text()
+    spec_added = [(r["Step"], r["Reads"]) for _, t in tables_in(spec_section("13-workflows.md", n)) for r in t if set(r) == {"Step", "Reads"}]
+    check(f"{ov}: added reads match §{n}", added_reads(text), spec_added)
+    check(f"{ov}: added reads name chain steps (§11.7)", [s for s, _ in added_reads(text) if s not in CHAIN_STEPS], [])
+check("§13.4 adds the ledger to the drafter's reads", any(s == "10" and "divergences.md" in r for s, r in added_reads((ROOT / "workflows" / "established-world.md").read_text())), True)
+check("added-reads check catches a step no chain has", [s for s, _ in added_reads("x\n## Added reads\n| Step | Reads |\n| - | - |\n| Z9 | `a` |\n") if s not in CHAIN_STEPS], ["Z9"])
 print("\nFAILURES:", fails)
 sys.exit(1 if fails else 0)

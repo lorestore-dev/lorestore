@@ -1,0 +1,17 @@
+spec_version: "0.3"
+id: three-brothers
+name: "The Third Brother"
+workflow: short-story
+gates: milestones
+seed: "King's Cross, told as the last page of the tale: Dumbledore as the Death who greets an old friend."
+
+layers:                         # from the base up
+  - harry-potter@3.2.1
+  - harry-potter/theories@1.0.3
+
+setting:
+  type: established
+  fidelity: flexible
+  fidelity_notes: "Everything that happens at King's Cross in canon still happens; only its framing changes."
+  cutoff: "DH:36"
+  temporal_model: linear

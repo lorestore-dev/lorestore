@@ -1,0 +1,33 @@
+{
+ "done": [
+  "E0",
+  "1",
+  "2",
+  "E1",
+  "E1a",
+  "E1b",
+  "E2",
+  "E2a",
+  "E2b",
+  "4",
+  "10",
+  "11"
+ ],
+ "log": [
+  "E0 `compose`: derived/bible/ built from 24 paths",
+  "1 architect \u2192 bible/premise.md",
+  "gate after 1: approve (by the --approve flag: a demonstration, not an author)",
+  "2 architect \u2192 bible/outline.md",
+  "E1 skipped: the story stays at one cutoff, DH:36 (judged from the outline: one scene)",
+  "E1a skipped: it runs only when the project has its own order",
+  "E1b skipped: it runs only when the project has project layers",
+  "E2 worldbuilder \u2192 bible/divergences.md",
+  "E2a canon-keeper \u2192 reviews/canon.md",
+  "gate after E2a: approve (by the --approve flag: a demonstration, not an author)",
+  "E2b skipped: it runs only when E2a raised entries for the author",
+  "4 skipped: no original characters to design (step instances: 0)",
+  "10 drafter \u2192 manuscript/chapter-01.md",
+  "11 showrunner \u2192 showrunner-log.md",
+  "13 blocked: chapter-01 has 6 `needs bible` markers, and each must be resolved before its continuity-editor step runs (\u00a711.9); see showrunner-log.md for what is scheduled"
+ ]
+}

@@ -37,7 +37,7 @@ schemas/         JSON Schemas for project.yaml, package.yaml, universe.yaml
 examples/        a small conforming workspace, with expected snapshot results
 agents/          the reference agent files, one per agent of chapter 12 (informative)
 workflows/       the reference workflow files, one per workflow of chapter 13 (informative)
-tools/           the conformance checker for the examples
+tools/           the conformance checker, and a minimal tool-less loop (loop.py)
 DECISIONS.md     design decisions taken, and the questions still open
 ROADMAP.md       the path from this draft to 1.0
 CONTRIBUTING.md  how to set up the repository, propose changes, and submit packages
@@ -63,6 +63,10 @@ python tools/refs.py
 check fails. [tools/refs.py](tools/refs.py) checks that every `§` reference resolves to
 a heading. Run both after changing a rule, a schema, or an example; CI runs them on
 every pull request.
+
+[tools/loop.py](tools/loop.py) is a minimal tool-less loop (§11.1): it runs a project's
+workflow with any model, or writes each step's prompt for a reply by hand.
+[examples/runs/](examples/runs/) records a run of it.
 
 **Limitations:**
 

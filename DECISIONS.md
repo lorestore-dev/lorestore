@@ -5,6 +5,38 @@ says what was unclear or contradictory, what was decided, and where the rule now
 
 ## 0.4: reference agents and workflows
 
+**D127. A tool-less loop, and its first run.** `tools/loop.py` runs a project's
+workflow with any model, or with none: in exchange mode it writes each step's prompt
+(the agent file, the resolved inputs, the standing instruction) and waits for a reply
+file beside it. Its first run, `short-story` on `three-brothers`
+(`examples/runs/three-brothers/`), took the project from its seed through the premise,
+outline, ledger, theory audit, draft, and showrunner step. Each reply was written from
+its prompt alone. The run stopped at step 13, as §11.9 requires: the story is set in
+DH ch.35, and the abridged package has no rows for it, so the drafter marked six gaps
+and the showrunner routed the canon ones to an extraction run. It found D124, D125, and
+D126. It also found that most step conditions in the workflows' notes are mechanical
+(the project has an order, a ledger row cites a theory, an audit raised entries), while
+E1's "the story stays at one cutoff" is judgment; and that a few Reads phrases with no
+path ("the canon ahead", "the host's reach candidates", "the cited theories' claims")
+each need a host resolver. The loop is informative; nothing in the spec depends on it.
+
+**D126. An overlay can add reads to the chain's steps.** An overlay inserts steps, but
+its condition can also give a chain step more to read. In an established world the
+drafter is told to read the divergences that touch its cast, but step 10's `Reads`
+named no ledger. A run took a draft to the prompt with no ledger in it. An overlay now
+MAY list an `## Added reads` table (`Step`, `Reads`), which the orchestrator appends to
+that step's `Reads` in every chain that has it. The established-world overlay adds the
+ledger, the ruler, and the plot architecture to step 2 (the architect) and the ledger to
+step 10 (the drafter). The checker holds the file's table to §13.4's and requires each
+step it names to be a chain step. → §11.7, §13.4
+
+**D125. A step reads its own target from the project's own bible.** In project
+context, `bible/` reads come from the composed bible, with a `Layer` column on every
+row. A step that writes a project's `bible/` file and read it from there would copy the
+other layers' rows, and the `Layer` column, into the project's file. A step now reads
+its own target from the project's `bible/`, as it stands, and the composed file as well,
+as a separate input, only where it needs the other layers' rows. → §11.6
+
 **D124. A short story shares the novel's step numbers.** Overlays position their steps
 by step number, and those numbers were the novel's: the established-world overlay's
 chapter review (E3, E4) and the frames check (T1) come "after 13". A short story

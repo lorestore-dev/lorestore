@@ -18,7 +18,8 @@ spec, not an implementation.
 - `workflows/`: the reference workflow files (informative, §1.2). Each mirrors its §13
   table, and the checker holds them to it: change §13 first, then the file.
 - `DECISIONS.md`: decisions D1 onwards, newest first. Add an entry for every rule change.
-- `tools/check.py`: the conformance checker.
+- `tools/check.py`: the conformance checker. `tools/loop.py`: the tool-less loop (§11.1);
+  `examples/runs/` holds a recorded run of it, which the checker does not read.
 
 ## Working rules
 

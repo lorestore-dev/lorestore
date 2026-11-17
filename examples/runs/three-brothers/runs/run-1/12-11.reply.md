@@ -1,0 +1,30 @@
+# Showrunner log
+
+## 2026-11-17T12:00Z — chapter-01 drafted; six `needs bible` markers, step 13 blocked
+
+- Next by the notes: step 13 (continuity-editor), then E3. Neither may run yet: every
+  `needs bible` marker in chapter-01 must be resolved before its continuity-editor step
+  (§11.9).
+- Markers routed:
+  1. **King's Cross canon** (four markers: what Harry finds on waking, the substance of
+     the conversation, Dumbledore's hunt for the Hallows, and the choice to go on). These
+     are canon facts of DH ch.35, and the stack has no rows for that chapter. A project
+     step can't supply them. The world comes from the stack, and only package context
+     writes canon (§3.3). Surfaced to the author: extend the `harry-potter` package
+     with DH ch.35 by an extraction run (§13.6). Then raise the layer's pin and re-run
+     E0.
+  2. **Dumbledore's sheet** (one marker). A canon character sheet is the merger's, in
+     package context (§3.3). It goes with the same extraction run: `albus-dumbledore`,
+     with his status and condition up to DH:36.
+  3. **The voice contract** (one marker). `bible/style.md` is the line-editor's, and in
+     this chain it first runs at step 14, after drafting. The draft's choice (close
+     third person, past tense, on Harry) stands until then. The line-editor records it
+     or changes it at step 14, and the marker goes when the draft is next re-run.
+- Scheduled, once the package carries DH ch.35:
+  1. `compose` (E0) → `derived/bible/…`: rebuild against the new pin.
+  2. drafter (step 10) → `manuscript/chapter-01.md`: re-draft the marked passages from
+     the new rows, keeping the frame, the ledger's D1, and the two theory-conflict
+     decisions.
+  3. Then step 13, E3, E4, and on through the chain.
+- Surfaced to the author: the extraction above, and the pin it needs. Nothing else is
+  pending; there are no decide or author items.
